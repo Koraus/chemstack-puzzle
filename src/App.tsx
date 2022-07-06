@@ -190,27 +190,27 @@ export function App() {
         setState(s1);
     }
 
-    const poorRight = () => {
+    const pourRight = () => {
         let s1 = state;
         s1 = (update(s1, {
             tubes: {
                 0: { $splice: [[s1.tubes[0].length - 1]] },
                 1: { $push: [s1.tubes[0][s1.tubes[0].length - 1]] },
             },
-            actions: { $push: [`action: poorRight`] },
+            actions: { $push: [`action: pourRight`] },
         }));
         s1 = react(s1);
         setState(s1);
     }
 
-    const poorLeft = () => {
+    const pourLeft = () => {
         let s1 = state;
         s1 = (update(s1, {
             tubes: {
                 0: { $push: [s1.tubes[1][s1.tubes[1].length - 1]] },
                 1: { $splice: [[s1.tubes[1].length - 1]] },
             },
-            actions: { $push: [`action: poorLeft`] },
+            actions: { $push: [`action: pourLeft`] },
         }));
         s1 = react(s1);
         setState(s1);
@@ -247,12 +247,12 @@ export function App() {
                     <br />
                     <button
                         disabled={isWin || state.tubes[0].length === 0}
-                        onClick={poorRight}
-                    >Poor right &gt;</button>
+                        onClick={pourRight}
+                    >Pour right &gt;</button>
                     <button
                         disabled={isWin || state.tubes[1].length === 0}
-                        onClick={poorLeft}
-                    >&lt; Poor left</button>
+                        onClick={pourLeft}
+                    >&lt; Pour left</button>
                 </>}
                 <br />
                 <button
