@@ -8,7 +8,7 @@
 	<title>chemstack-puzzle</title>
 </head>
 
-<body>
+<body style="margin: 0; width: 100vw; height: 100vh;">
 	<script type="module">
 		import { render, h } from "preact";
 		import { RecoilRoot } from 'recoil';
@@ -20,7 +20,8 @@
 		// const Component = (await import("./src/" + name))[name];
 		
 		render(
-			h(RecoilRoot, {}, h(Component, {})),
+			h(RecoilRoot, {}, 
+				h(Component, {})),
 			document.body);
 	</script>
 </body>
