@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import update from "immutability-helper";
 import { atom, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
 import { actionsAtom } from "./actionsAtom";
@@ -48,26 +49,34 @@ export function Ingredient({ id }: { id: SubstanceId }) {
     }}>{id}</div>;
 }
 
-export function TubeSlot({ ingrId }: { ingrId?: SubstanceId }) {
+export function IngredientSlot({ ingrId }: { ingrId?: SubstanceId }) {
     return ingrId !== undefined
         ? <Ingredient id={ingrId} />
         : <div style={{
             fontFamily: "Courier",
             padding: "4px 5px 2px",
             border: "1px solid",
+            color: "lightgrey",
         }}>-</div>
 }
 
-export function Tube({ content }: { content: SubstanceId[] }) {
+export function Tube({
+    content, style,
+}: {
+    content: SubstanceId[],
+    style?: preact.JSX.CSSProperties,
+}) {
     return <div style={{
         padding: "5px",
         border: "1px solid",
         display: "flex",
-        width: "fit-content",
+        flexDirection: "column",
+        height: "fit-content",
+        ...style,
     }}>
-        <TubeSlot ingrId={content[0]} />
-        <TubeSlot ingrId={content[1]} />
-        <TubeSlot ingrId={content[2]} />
+        <IngredientSlot ingrId={content[2]} />
+        <IngredientSlot ingrId={content[1]} />
+        <IngredientSlot ingrId={content[0]} />
     </div>
 }
 
@@ -132,50 +141,88 @@ export function CraftingTable() {
     const isWin = tubes[0].length === target.length
         && tubes[0].every((_, i) => tubes[0][i] === target[i]);
 
+    const ButtonPlaceholder = () => <button disabled style={{ visibility: "hidden" }}>.</button>;
+
     return <div style={{
         backgroundColor: "hsl(120, 100%, 98%)",
         border: "1px solid",
         padding: "10px",
+        display: "flex",
+        flexDirection: "column",
     }}>
         <div style={{
-            backgroundColor: isWin ? "hsl(120, 100%, 90%)" : "hsl(0, 100%, 90%)",
             display: "flex",
-            flexDirection: "row-reverse",
-        }}><Tube content={target} /></div>
-        <div>
-            <button
-                disabled={isWin}
-                onClick={addTube}
-            >+<br />Tube</button>
-            {ingredientSources.map(id => <button
-                disabled={isWin}
-                onClick={() => addIngredient(id)}
-            >+<Ingredient id={id} /></button>)}
+            flexDirection: "row",
+            justifyContent: "center",
+        }}>
+            <div>
+                <button
+                    disabled={isWin}
+                    onClick={addTube}
+                >+<br />Tube</button>
+                {ingredientSources.map(id => <button
+                    disabled={isWin}
+                    onClick={() => addIngredient(id)}
+                ><Ingredient id={id} />\/</button>)}
+            </div>
         </div>
 
 
-        <div>
-            {tubes.map((t, i) => <div style={{
+        <div style={{
+            display: "flex",
+            flexDirection: "row",
+        }}>
+            <div style={{
                 display: "flex",
-                flexDirection: "row-reverse",
+                flexDirection: "row",
+                justifyContent: "right",
+                flex: 1,
             }}>
-                <Tube content={t} />
-                {(i === 0) && (tubes.length > 1) && <button
-                    disabled={isWin || tubes[0].length === 0}
-                    onClick={pourRight}
-                >\/</button>}
-                {(i === 1) && (tubes.length > 1) && <button
-                    disabled={isWin || tubes[1].length === 0}
-                    onClick={pourLeft}
-                >/\</button>}
-                {(i === 0) && <button
-                    disabled={isWin || tubes.length <= 1}
-                    onClick={trashTube}
-                >X</button>}
-            </div>)}
-            <br />
+                <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                }}>
+                    <ButtonPlaceholder />
+                    <Tube style={{
+                        backgroundColor: isWin ? "hsl(120, 100%, 90%)" : "hsl(0, 100%, 90%)",
+                    }} content={target} />
+                </div>
+            </div>
+
+            <div style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "left",
+                flex: 3,
+            }}>
+                {tubes.map((t, i) => <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                }}>
+                    {i !== 0 && i !== 1 &&
+                        <ButtonPlaceholder />}
+                    {i === 0 && tubes.length === 1 &&
+                        <ButtonPlaceholder />}
+                    {(i === 0) && (tubes.length > 1) && <button
+                        disabled={isWin || tubes[0].length === 0}
+                        onClick={pourRight}
+                    >&gt;</button>}
+                    {(i === 1) && (tubes.length > 1) && <button
+                        disabled={isWin || tubes[1].length === 0}
+                        onClick={pourLeft}
+                    >&lt;</button>}
+
+                    <Tube content={t} />
+
+                    {(i === 0) && <button
+                        disabled={isWin || tubes.length <= 1}
+                        onClick={trashTube}
+                    >X</button>}
+                </div>)}
+            </div>
+
 
         </div>
 
-    </div>;
+    </div >;
 }
