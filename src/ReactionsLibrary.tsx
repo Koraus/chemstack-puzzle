@@ -1,15 +1,20 @@
 import { useRecoilValue } from 'recoil';
 import { tubesAtom, IngredientSlot } from "./CraftingTable";
-import { reactions } from "./staticConfig";
+import * as flex from './utils/flex';
+import { levelState } from './LevelConfigEditor';
+type CSSProperties = import("preact").JSX.CSSProperties;
 
 
-export function ReactionsLibrary() {
+export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     const tube = useRecoilValue(tubesAtom)[0];
     const currentSubstance = tube[tube.length - 1];
+    const { reactions } = useRecoilValue(levelState);
+
     return <div style={{
-        display: "flex",
+        ...flex.row,
         flexDirection: "row",
         justifyContent: "center",
+        ...style,
     }}>
         {reactions.map(r => {
             const isApplicable = currentSubstance === r.reagents[0];

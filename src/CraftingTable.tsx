@@ -1,15 +1,16 @@
 import { css } from "@emotion/css";
 import update from "immutability-helper";
 import { atom, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
-import { actionsAtom } from "./actionsAtom";
-import { SubstanceId, target, ingredientSources, substances, reactions } from "./staticConfig";
+import { actionsAtom } from "./ActionLog";
+import { levelState, Reaction, SubstanceId } from "./LevelConfigEditor";
+import * as flex from "./utils/flex";
 
 export const tubesAtom = atom({
     key: "tubes",
     default: [[]] as SubstanceId[][],
 })
 
-const reactTube = (tube: SubstanceId[], i: number) => {
+const reactTube = (reactions: Reaction[], tube: SubstanceId[], i: number) => {
     const log = [] as string[];
     if (tube.length < 1) { return { tube, log }; }
 
@@ -29,8 +30,8 @@ const reactTube = (tube: SubstanceId[], i: number) => {
     return { tube, log };
 }
 
-export const react = (tubes: SubstanceId[][]) => {
-    const xxx = tubes.map(reactTube);
+export const react = (reactions: Reaction[], tubes: SubstanceId[][]) => {
+    const xxx = tubes.map((tube, i) => reactTube(reactions, tube, i));
     for (let i = 0; i < xxx.length; i++) {
         tubes = update(tubes, { [i]: { $set: xxx[i].tube } });
     }
@@ -39,6 +40,7 @@ export const react = (tubes: SubstanceId[][]) => {
 }
 
 export function Ingredient({ id }: { id: SubstanceId }) {
+    const { substances } = useRecoilValue(levelState);
     const hue = id / substances.length * 360;
     return <div style={{
         fontFamily: "Courier",
@@ -81,63 +83,80 @@ export function Tube({
 }
 
 export function CraftingTable() {
+    const tubes = useRecoilValue(tubesAtom);
+    const { target, ingredients, reactions } = useRecoilValue(levelState);
+
     const addIngredient = useRecoilTransaction_UNSTABLE(({ get, set }) => (id: SubstanceId) => {
-        set(tubesAtom, tubes => update(tubes, { 0: { $push: [id] } }));
-        set(actionsAtom, actions => update(actions, { $push: [`action: added ${id}`] }));
-
-        const { tubes, log } = react(get(tubesAtom));
-
-        set(tubesAtom, tubes);
-        set(actionsAtom, actions => update(actions, { $push: log }));
+        let _tubes = tubes;
+        _tubes = update(_tubes, { 0: { $push: [id] } });
+        
+        const { tubes: __tubes, log } = react(reactions, _tubes);
+        
+        set(tubesAtom, __tubes);
+        set(actionsAtom, actions => update(actions, { $push: [
+            `action: added ${id}`, 
+            ...log,
+        ]}));
     });
 
     const addTube = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        set(tubesAtom, tubes => update(tubes, { $splice: [[0, 0, []]] }));
-        set(actionsAtom, actions => update(actions, { $push: [`action: added tube`] }));
-
-        const { tubes, log } = react(get(tubesAtom));
-
-        set(tubesAtom, tubes);
-        set(actionsAtom, actions => update(actions, { $push: log }));
+        let _tubes = tubes;
+        _tubes = update(tubes, { $splice: [[0, 0, []]] });
+        
+        const { tubes: __tubes, log } = react(reactions, _tubes);
+        
+        set(tubesAtom, __tubes);
+        set(actionsAtom, actions => update(actions, { $push: [
+            `action: added tube`, 
+            ...log,
+        ]}));
     });
 
     const trashTube = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        set(tubesAtom, tubes => update(tubes, { $splice: [[0, 1]] }));
-        set(actionsAtom, actions => update(actions, { $push: [`action: trashed tube`] }));
-
-        const { tubes, log } = react(get(tubesAtom));
-
-        set(tubesAtom, tubes);
-        set(actionsAtom, actions => update(actions, { $push: log }));
+        let _tubes = tubes;
+        _tubes = update(tubes, { $splice: [[0, 1]] });
+        
+        const { tubes: __tubes, log } = react(reactions, _tubes);
+        
+        set(tubesAtom, __tubes);
+        set(actionsAtom, actions => update(actions, { $push: [
+            `action: trashed tube`, 
+            ...log,
+        ]}));
     });
 
     const pourRight = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        set(tubesAtom, tubes => update(tubes, {
+        let _tubes = tubes;
+        _tubes = update(tubes, {
             0: { $splice: [[tubes[0].length - 1]] },
             1: { $push: [tubes[0][tubes[0].length - 1]] },
-        }));
-        set(actionsAtom, actions => update(actions, { $push: [`action: pourRight`] }));
-
-        const { tubes, log } = react(get(tubesAtom));
-
-        set(tubesAtom, tubes);
-        set(actionsAtom, actions => update(actions, { $push: log }));
+        });
+        
+        const { tubes: __tubes, log } = react(reactions, _tubes);
+        
+        set(tubesAtom, __tubes);
+        set(actionsAtom, actions => update(actions, { $push: [
+            `action: pourRight`, 
+            ...log,
+        ]}));
     });
 
     const pourLeft = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        set(tubesAtom, tubes => update(tubes, {
+        let _tubes = tubes;
+        _tubes = update(tubes, {
             0: { $push: [tubes[1][tubes[1].length - 1]] },
             1: { $splice: [[tubes[1].length - 1]] },
-        }));
-        set(actionsAtom, actions => update(actions, { $push: [`action: pourRight`] }));
-
-        const { tubes, log } = react(get(tubesAtom));
-
-        set(tubesAtom, tubes);
-        set(actionsAtom, actions => update(actions, { $push: log }));
+        });
+        
+        const { tubes: __tubes, log } = react(reactions, _tubes);
+        
+        set(tubesAtom, __tubes);
+        set(actionsAtom, actions => update(actions, { $push: [
+            `action: pourLeft`, 
+            ...log,
+        ]}));
     });
 
-    const tubes = useRecoilValue(tubesAtom);
     const isWin = tubes[0].length === target.length
         && tubes[0].every((_, i) => tubes[0][i] === target[i]);
 
@@ -147,12 +166,10 @@ export function CraftingTable() {
         backgroundColor: "hsl(120, 100%, 98%)",
         border: "1px solid",
         padding: "10px",
-        display: "flex",
-        flexDirection: "column",
+        ...flex.column,
     }}>
         <div style={{
-            display: "flex",
-            flexDirection: "row",
+            ...flex.row,
             justifyContent: "center",
         }}>
             <div>
@@ -160,7 +177,7 @@ export function CraftingTable() {
                     disabled={isWin}
                     onClick={addTube}
                 >+<br />Tube</button>
-                {ingredientSources.map(id => <button
+                {ingredients.map(id => <button
                     disabled={isWin}
                     onClick={() => addIngredient(id)}
                 ><Ingredient id={id} />\/</button>)}
@@ -168,20 +185,13 @@ export function CraftingTable() {
         </div>
 
 
-        <div style={{
-            display: "flex",
-            flexDirection: "row",
-        }}>
+        <div style={{...flex.row}}>
             <div style={{
-                display: "flex",
-                flexDirection: "row",
+                ...flex.row,
                 justifyContent: "right",
                 flex: 1,
             }}>
-                <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                }}>
+                <div style={{ ...flex.column }}>
                     <ButtonPlaceholder />
                     <Tube style={{
                         backgroundColor: isWin ? "hsl(120, 100%, 90%)" : "hsl(0, 100%, 90%)",
@@ -190,15 +200,11 @@ export function CraftingTable() {
             </div>
 
             <div style={{
-                display: "flex",
-                flexDirection: "row",
+                ...flex.row,
                 justifyContent: "left",
                 flex: 3,
             }}>
-                {tubes.map((t, i) => <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                }}>
+                {tubes.map((t, i) => <div style={{...flex.column}}>
                     {i !== 0 && i !== 1 &&
                         <ButtonPlaceholder />}
                     {i === 0 && tubes.length === 1 &&

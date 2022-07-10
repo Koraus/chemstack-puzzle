@@ -2,12 +2,14 @@ import { SHA256 } from "crypto-js";
 
 export function createRand(seed: string) {
     let arr = SHA256(seed).words;
-    let i = 0;
-    return () => {
-        if (i === arr.length - 1) {
-            i = 0;
-            arr = SHA256(arr[i].toString()).words;
-        }
-        return (arr[i++] >>> 0) / (2 ** 32);
+    const randUInt32 = () => {
+        if (arr.length === 1) { arr = SHA256(arr.shift()!.toString()).words; }
+        return (arr.shift()! >>> 0);
     };
+    const rand = Object.assign(() => randUInt32() / (~0 >>> 0), {
+        uint32: randUInt32,
+        rangeInt(maxExcl: number) { return Math.floor(rand() * maxExcl); },
+        el<T>(arr: T[]) { return arr[rand.rangeInt(arr.length)]; },
+    })
+    return rand;
 }
