@@ -3,7 +3,10 @@ import update from "immutability-helper";
 import { atom, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
 import { actionsAtom } from "./ActionLog";
 import { levelState, Reaction, SubstanceId } from "./LevelConfigEditor";
+import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
+import * as _ from "lodash";
+import { Tube } from "./Tube";
 
 export const tubesAtom = atom({
     key: "tubes",
@@ -39,48 +42,6 @@ export const react = (reactions: Reaction[], tubes: SubstanceId[][]) => {
     return { tubes, log: xxx.flatMap(x => x.log) };
 }
 
-export function Ingredient({ id }: { id: SubstanceId }) {
-    const { substances } = useRecoilValue(levelState);
-    const hue = id / substances.length * 360;
-    return <div style={{
-        fontFamily: "Courier",
-        padding: "4px 5px 2px",
-        border: "1px solid",
-        backgroundColor: `hsl(${hue}, 100%, 80%)`,
-        color: `hsl(${hue}, 100%, 30%)`,
-    }}>{id}</div>;
-}
-
-export function IngredientSlot({ ingrId }: { ingrId?: SubstanceId }) {
-    return ingrId !== undefined
-        ? <Ingredient id={ingrId} />
-        : <div style={{
-            fontFamily: "Courier",
-            padding: "4px 5px 2px",
-            border: "1px solid",
-            color: "lightgrey",
-        }}>-</div>
-}
-
-export function Tube({
-    content, style,
-}: {
-    content: SubstanceId[],
-    style?: preact.JSX.CSSProperties,
-}) {
-    return <div style={{
-        padding: "5px",
-        border: "1px solid",
-        display: "flex",
-        flexDirection: "column",
-        height: "fit-content",
-        ...style,
-    }}>
-        <IngredientSlot ingrId={content[2]} />
-        <IngredientSlot ingrId={content[1]} />
-        <IngredientSlot ingrId={content[0]} />
-    </div>
-}
 
 export function CraftingTable() {
     const tubes = useRecoilValue(tubesAtom);
@@ -89,72 +50,82 @@ export function CraftingTable() {
     const addIngredient = useRecoilTransaction_UNSTABLE(({ get, set }) => (id: SubstanceId) => {
         let _tubes = tubes;
         _tubes = update(_tubes, { 0: { $push: [id] } });
-        
+
         const { tubes: __tubes, log } = react(reactions, _tubes);
-        
+
         set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, { $push: [
-            `action: added ${id}`, 
-            ...log,
-        ]}));
+        set(actionsAtom, actions => update(actions, {
+            $push: [
+                `action: added ${id}`,
+                ...log,
+            ]
+        }));
     });
 
     const addTube = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
         let _tubes = tubes;
         _tubes = update(tubes, { $splice: [[0, 0, []]] });
-        
+
         const { tubes: __tubes, log } = react(reactions, _tubes);
-        
+
         set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, { $push: [
-            `action: added tube`, 
-            ...log,
-        ]}));
+        set(actionsAtom, actions => update(actions, {
+            $push: [
+                `action: added tube`,
+                ...log,
+            ]
+        }));
     });
 
     const trashTube = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
         let _tubes = tubes;
         _tubes = update(tubes, { $splice: [[0, 1]] });
-        
+
         const { tubes: __tubes, log } = react(reactions, _tubes);
-        
+
         set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, { $push: [
-            `action: trashed tube`, 
-            ...log,
-        ]}));
+        set(actionsAtom, actions => update(actions, {
+            $push: [
+                `action: trashed tube`,
+                ...log,
+            ]
+        }));
     });
 
-    const pourRight = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
+    const pourFromActive = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
         let _tubes = tubes;
         _tubes = update(tubes, {
             0: { $splice: [[tubes[0].length - 1]] },
             1: { $push: [tubes[0][tubes[0].length - 1]] },
         });
-        
+
         const { tubes: __tubes, log } = react(reactions, _tubes);
-        
+
         set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, { $push: [
-            `action: pourRight`, 
-            ...log,
-        ]}));
+        set(actionsAtom, actions => update(actions, {
+            $push: [
+                `action: pourFromActive`,
+                ...log,
+            ]
+        }));
     });
 
-    const pourLeft = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
+    const pourIntoActive = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
         let _tubes = tubes;
         _tubes = update(tubes, {
             0: { $push: [tubes[1][tubes[1].length - 1]] },
             1: { $splice: [[tubes[1].length - 1]] },
         });
-        
+
         const { tubes: __tubes, log } = react(reactions, _tubes);
-        
+
         set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, { $push: [
-            `action: pourLeft`, 
-            ...log,
-        ]}));
+        set(actionsAtom, actions => update(actions, {
+            $push: [
+                `action: pourIntoActive`,
+                ...log,
+            ]
+        }));
     });
 
     const isWin = tubes[0].length === target.length
@@ -163,72 +134,154 @@ export function CraftingTable() {
     const ButtonPlaceholder = () => <button disabled style={{ visibility: "hidden" }}>.</button>;
 
     return <div style={{
-        backgroundColor: "hsl(120, 100%, 98%)",
-        border: "1px solid",
+        backgroundColor: "#f4fff559",
         padding: "10px",
-        ...flex.column,
+        ...flex.col,
     }}>
         <div style={{
             ...flex.row,
             justifyContent: "center",
         }}>
             <div>
-                <button
+                {ingredients.map(sid => <button
+                    style={{
+                        backgroundColor: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        margin: "5px",
+                        padding: "5px",
+                    }}
                     disabled={isWin}
-                    onClick={addTube}
-                >+<br />Tube</button>
-                {ingredients.map(id => <button
-                    disabled={isWin}
-                    onClick={() => addIngredient(id)}
-                ><Ingredient id={id} />\/</button>)}
+                    onClick={() => addIngredient(sid)}
+                ><div style={{
+                    backgroundColor: substanceColors[sid],
+                    color: "#ffffffff",
+                    borderRadius: "2px",
+                    width: "24px",
+                    height: "30px",
+                    fontSize: "19px",
+                    fontFamily: "Bahnschrift",
+                    lineHeight: "32px",
+                }}>{sid}</div><div style={{
+                    fontFamily: "Bahnschrift",
+                    fontSize: "19px",
+                    lineHeight: "22px",
+                    height: "18px",
+                }}>+</div></button>)}
             </div>
         </div>
 
 
-        <div style={{...flex.row}}>
+        <div style={{ ...flex.row }}>
+
+            <div style={{
+                ...flex.rowRev,
+                justifyContent: "right",
+                flex: 7,
+            }}>
+                {tubes.slice(1).map((t, i) => <div style={{ ...flex.col }}>
+                    <ButtonPlaceholder />
+                    <Tube tube={t} />
+                </div>)}
+            </div>
+
+
+            <div style={{
+                flex: 2,
+            }}>
+                <button
+                    style={{
+                        ...flex.row,
+                        backgroundColor: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        margin: "5px",
+                        padding: "5px",
+                    }}
+                    disabled={isWin || !tubes[1] || tubes[0].length === 0}
+                    onClick={pourFromActive}
+                >&lt;</button>
+                <button
+                    style={{
+                        ...flex.row,
+                        backgroundColor: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        margin: "5px",
+                        padding: "5px",
+                    }}
+                    disabled={isWin || !tubes[1] || tubes[1].length === 0}
+                    onClick={pourIntoActive}
+                >&gt;</button>
+            </div>
+
             <div style={{
                 ...flex.row,
-                justifyContent: "right",
-                flex: 1,
+            }}><Tube tube={tubes[0]} isActive={true} w={24} /></div>
+
+            <div style={{
+                flex: 2,
             }}>
-                <div style={{ ...flex.column }}>
-                    <ButtonPlaceholder />
-                    <Tube style={{
-                        backgroundColor: isWin ? "hsl(120, 100%, 90%)" : "hsl(0, 100%, 90%)",
-                    }} content={target} />
-                </div>
+                <button
+                    style={{
+                        ...flex.row,
+                        backgroundColor: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        margin: "5px",
+                        padding: "5px",
+                    }}
+                    disabled={isWin || tubes.length <= 1}
+                    onClick={trashTube}
+                ><div style={{
+                    fontFamily: "Bahnschrift",
+                    fontSize: "19px",
+                    lineHeight: "22px",
+                    height: "18px",
+                    color: "red",
+                }}>x</div><div style={{
+                    width: "10px",
+                    height: "26px",
+                    backgroundColor: "#dddddd",
+                    borderRadius: "0px 0px 999px 999px",
+                }}></div></button>
+                <button
+                    style={{
+                        ...flex.row,
+                        backgroundColor: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        margin: "5px",
+                        padding: "5px",
+                    }}
+                    disabled={isWin}
+                    onClick={addTube}
+                ><div style={{
+                    fontFamily: "Bahnschrift",
+                    fontSize: "19px",
+                    lineHeight: "22px",
+                    height: "18px",
+                }}>+</div><div style={{
+                    width: "10px",
+                    height: "26px",
+                    backgroundColor: "#dddddd",
+                    borderRadius: "0px 0px 999px 999px",
+                }}></div></button>
             </div>
 
             <div style={{
                 ...flex.row,
                 justifyContent: "left",
-                flex: 3,
+                flex: 7,
             }}>
-                {tubes.map((t, i) => <div style={{...flex.column}}>
-                    {i !== 0 && i !== 1 &&
-                        <ButtonPlaceholder />}
-                    {i === 0 && tubes.length === 1 &&
-                        <ButtonPlaceholder />}
-                    {(i === 0) && (tubes.length > 1) && <button
-                        disabled={isWin || tubes[0].length === 0}
-                        onClick={pourRight}
-                    >&gt;</button>}
-                    {(i === 1) && (tubes.length > 1) && <button
-                        disabled={isWin || tubes[1].length === 0}
-                        onClick={pourLeft}
-                    >&lt;</button>}
-
-                    <Tube content={t} />
-
-                    {(i === 0) && <button
-                        disabled={isWin || tubes.length <= 1}
-                        onClick={trashTube}
-                    >X</button>}
-                </div>)}
+                <div style={{ ...flex.col }}>
+                    <ButtonPlaceholder />
+                    <Tube tube={target} isTarget={true} />
+                </div>
             </div>
 
-
         </div>
-
-    </div >;
+        <div style={{ height: "50px" }}></div>
+    </div>;
 }
+

@@ -8,12 +8,12 @@ type CSSProperties = import("preact").JSX.CSSProperties;
 
 export type SubstanceId = number;
 export type Reaction = {
-    reagents: 
-        [SubstanceId, SubstanceId],
-    products: 
-        [SubstanceId] 
-        | [SubstanceId, SubstanceId] 
-        | [SubstanceId, SubstanceId, SubstanceId],
+    reagents:
+    [SubstanceId, SubstanceId],
+    products:
+    [SubstanceId]
+    | [SubstanceId, SubstanceId]
+    | [SubstanceId, SubstanceId, SubstanceId],
 }
 
 export function generateReactions({ seed, substanceCount, reactionCount }: {
@@ -98,43 +98,59 @@ export const levelConfigState = atom({
 
 export const levelState = selector({
     key: "level",
-    get: ({get}) => {
+    get: ({ get }) => {
         const config = get(levelConfigState);
         const reactions = generateReactions(config);
         return ({
             ...config,
             reactions,
-            ...generateLevel({...config, reactions})
+            ...generateLevel({ ...config, reactions })
         });
     },
 })
 
 export function LevelConfigEditor({ style }: { style?: CSSProperties }) {
     const [levelConfig, setLevelConfig] = useRecoilState(levelConfigState);
-    return <div style={style}>
-        <h3>Level config:</h3>
-        <label>Seed: <input
-            value={levelConfig.seed}
-            onChange={ev => setLevelConfig(update(levelConfig, {
-                seed: { $set: (ev.target as HTMLInputElement).value },
-            }))} /></label><br />
-        <label>Substance Count: <input
-            type="number"
-            value={levelConfig.substanceCount}
-            onChange={ev => setLevelConfig(update(levelConfig, {
-                substanceCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
-            }))} /></label><br />
-        <label>Ingredient Count: <input
-            type="number"
-            value={levelConfig.ingredientCount}
-            onChange={ev => setLevelConfig(update(levelConfig, {
-                ingredientCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
-            }))} /></label><br />
-        <label>Reaction Count: <input
-            type="number"
-            value={levelConfig.reactionCount}
-            onChange={ev => setLevelConfig(update(levelConfig, {
-                reactionCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
-            }))} /></label><br />
+    return <div style={{
+        marginTop: "20px",
+        backgroundColor: "#ffffff20",
+        color: "white",
+        fontFamily: "Bahnschrift",
+        ...style,
+    }}>
+        <h3 style={{
+            margin: "0px",
+            backgroundColor: "#ffffff50",
+            paddingLeft: "20px",
+        }}>&#x2022; Level config</h3>
+        <div style={{
+            paddingLeft: "20px",
+            paddingRight: "20px",
+            paddingBottom: "20px",
+        }}>
+            <label>Seed: <input
+                value={levelConfig.seed}
+                onChange={ev => setLevelConfig(update(levelConfig, {
+                    seed: { $set: (ev.target as HTMLInputElement).value },
+                }))} /></label><br />
+            <label>Substance Count: <input
+                type="number"
+                value={levelConfig.substanceCount}
+                onChange={ev => setLevelConfig(update(levelConfig, {
+                    substanceCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
+                }))} /></label><br />
+            <label>Ingredient Count: <input
+                type="number"
+                value={levelConfig.ingredientCount}
+                onChange={ev => setLevelConfig(update(levelConfig, {
+                    ingredientCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
+                }))} /></label><br />
+            <label>Reaction Count: <input
+                type="number"
+                value={levelConfig.reactionCount}
+                onChange={ev => setLevelConfig(update(levelConfig, {
+                    reactionCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
+                }))} /></label><br />
+        </div>
     </div>;
 }

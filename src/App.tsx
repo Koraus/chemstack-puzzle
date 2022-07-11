@@ -12,19 +12,16 @@ const _css = css`
     & {
         min-width: 100%;
         min-height: 100%;
-        background-color: hsl(0, 0%, 95%);
+        background: linear-gradient(#344763, #081f41);
     }
     &.isWin {
         background-color: hsl(120, 100%, 90%);
     }
     &>* {
-        width: 400px;
         margin: auto;
     }
     &>*>* {
-        padding: 10px;
         flex: 1;
-        border: 1px solid lightgray;
     }
     & button { 
         font-size: 100%
@@ -40,17 +37,40 @@ export function App() {
         && tubes[0].every((_, i) => tubes[0][i] === target[i]);
 
     return <div className={cx(_css, { isWin })}>
-        <div style={{ ...flex.column }}>
+        <div style={{ ...flex.col }}>
+            <div style={{
+                ...flex.row,
+                margin: "10px 30px 0 30px",
+                textAlign: "center",
+                fontFamily: "Bahnschrift",
+            }}>
+                <div style={{
+                    color: "#f7f7f750",
+                    fontSize: "30px",
+                    lineHeight: "28px",
+                }}>&#9776;</div>
+                <div style={{
+                    flexGrow: "1", 
+                    color: "#f7f7f7ff",
+                    fontSize: "24px",
+                }}>LEVEL 01</div>
+                <div style={{
+                    color: "#f7f7f750",
+                    fontSize: "30px",
+                    lineHeight: "28px",
+                }}>&#10227;</div>
+            </div>
 
             <ReactionsLibrary />
             <CraftingTable />
+            
+            {isWin && <button>Next Level &gt;</button>}
 
             <div style={{ ...flex.row }}>
-                <ActionLog style={{ flex: 2 }} />
-                <Statistics style={{ flex: 1 }} />
+                <ActionLog style={{ flex: 3 }} />
+                <Statistics style={{ flex: 2 }} />
             </div>
 
-            {isWin && <button>Next Level &gt;</button>}
 
             <LevelConfigEditor />
 
