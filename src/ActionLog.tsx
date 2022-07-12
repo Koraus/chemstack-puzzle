@@ -3,19 +3,18 @@ import { useState } from "preact/hooks";
 type CSSProperties = import("preact").JSX.CSSProperties;
 import { atom } from "recoil";
 
-export const actionsAtom = atom({
+export const actionsState = atom({
     key: "actions",
     default: [] as string[],
 })
 
 
 export function ActionLog({ style }: { style?: CSSProperties }) {
-    const actions = useRecoilValue(actionsAtom);
+    const actions = useRecoilValue(actionsState);
     return <div style={{
         marginTop: "20px",
         backgroundColor: "#ffffff20",
         color: "white",
-        fontFamily: "Bahnschrift",
         ...style,
     }}>
         <h3 style={{

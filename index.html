@@ -5,10 +5,14 @@
 	<meta charset="UTF-8" />
 	<link rel="icon" type="image/svg+xml" href="src/favicon.svg" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link href="http://fonts.cdnfonts.com/css/bahnschrift" rel="stylesheet">
 	<title>chemstack-puzzle</title>
 </head>
-
-<body style="margin: 0; width: 100vw; height: 100vh;">
+<body style="
+	margin: 0; 
+	background-color: #081f41;
+	touch-action: manipulation;
+">
 	<script type="module">
 		import { render, h } from "preact";
 		import { RecoilRoot } from 'recoil';
@@ -18,12 +22,11 @@
 
 		// const name = document.location.pathname.substring(1) || "App";
 		// const Component = (await import("./src/" + name))[name];
-		
+
 		render(
-			h(RecoilRoot, {}, 
+			h(RecoilRoot, {},
 				h(Component, {})),
 			document.body);
 	</script>
 </body>
-
 </html>

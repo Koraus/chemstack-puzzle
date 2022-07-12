@@ -2,6 +2,7 @@
   "name": "chemstack-puzzle",
   "scripts": {
     "start": "vite",
+    "host": "vite --host",
     "build": "vite build"
   },
   "devDependencies": {

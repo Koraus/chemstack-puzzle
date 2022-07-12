@@ -1,14 +1,14 @@
 import { css } from "@emotion/css";
 import update from "immutability-helper";
 import { atom, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
-import { actionsAtom } from "./ActionLog";
-import { levelState, Reaction, SubstanceId } from "./LevelConfigEditor";
+import { actionsState } from "./ActionLog";
+import { levelState, Reaction, SubstanceId } from "./LevelEditor";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 import * as _ from "lodash";
 import { Tube } from "./Tube";
 
-export const tubesAtom = atom({
+export const tubesState = atom({
     key: "tubes",
     default: [[]] as SubstanceId[][],
 })
@@ -44,7 +44,7 @@ export const react = (reactions: Reaction[], tubes: SubstanceId[][]) => {
 
 
 export function CraftingTable() {
-    const tubes = useRecoilValue(tubesAtom);
+    const tubes = useRecoilValue(tubesState);
     const { target, ingredients, reactions } = useRecoilValue(levelState);
 
     const addIngredient = useRecoilTransaction_UNSTABLE(({ get, set }) => (id: SubstanceId) => {
@@ -53,8 +53,8 @@ export function CraftingTable() {
 
         const { tubes: __tubes, log } = react(reactions, _tubes);
 
-        set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, {
+        set(tubesState, __tubes);
+        set(actionsState, actions => update(actions, {
             $push: [
                 `action: added ${id}`,
                 ...log,
@@ -68,8 +68,8 @@ export function CraftingTable() {
 
         const { tubes: __tubes, log } = react(reactions, _tubes);
 
-        set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, {
+        set(tubesState, __tubes);
+        set(actionsState, actions => update(actions, {
             $push: [
                 `action: added tube`,
                 ...log,
@@ -83,8 +83,8 @@ export function CraftingTable() {
 
         const { tubes: __tubes, log } = react(reactions, _tubes);
 
-        set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, {
+        set(tubesState, __tubes);
+        set(actionsState, actions => update(actions, {
             $push: [
                 `action: trashed tube`,
                 ...log,
@@ -101,8 +101,8 @@ export function CraftingTable() {
 
         const { tubes: __tubes, log } = react(reactions, _tubes);
 
-        set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, {
+        set(tubesState, __tubes);
+        set(actionsState, actions => update(actions, {
             $push: [
                 `action: pourFromActive`,
                 ...log,
@@ -119,8 +119,8 @@ export function CraftingTable() {
 
         const { tubes: __tubes, log } = react(reactions, _tubes);
 
-        set(tubesAtom, __tubes);
-        set(actionsAtom, actions => update(actions, {
+        set(tubesState, __tubes);
+        set(actionsState, actions => update(actions, {
             $push: [
                 `action: pourIntoActive`,
                 ...log,
@@ -144,13 +144,6 @@ export function CraftingTable() {
         }}>
             <div>
                 {ingredients.map(sid => <button
-                    style={{
-                        backgroundColor: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        margin: "5px",
-                        padding: "5px",
-                    }}
                     disabled={isWin}
                     onClick={() => addIngredient(sid)}
                 ><div style={{
@@ -192,11 +185,6 @@ export function CraftingTable() {
                 <button
                     style={{
                         ...flex.row,
-                        backgroundColor: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        margin: "5px",
-                        padding: "5px",
                     }}
                     disabled={isWin || !tubes[1] || tubes[0].length === 0}
                     onClick={pourFromActive}
@@ -204,11 +192,6 @@ export function CraftingTable() {
                 <button
                     style={{
                         ...flex.row,
-                        backgroundColor: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        margin: "5px",
-                        padding: "5px",
                     }}
                     disabled={isWin || !tubes[1] || tubes[1].length === 0}
                     onClick={pourIntoActive}
@@ -225,16 +208,10 @@ export function CraftingTable() {
                 <button
                     style={{
                         ...flex.row,
-                        backgroundColor: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        margin: "5px",
-                        padding: "5px",
                     }}
                     disabled={isWin || tubes.length <= 1}
                     onClick={trashTube}
                 ><div style={{
-                    fontFamily: "Bahnschrift",
                     fontSize: "19px",
                     lineHeight: "22px",
                     height: "18px",
@@ -248,16 +225,10 @@ export function CraftingTable() {
                 <button
                     style={{
                         ...flex.row,
-                        backgroundColor: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        margin: "5px",
-                        padding: "5px",
                     }}
                     disabled={isWin}
                     onClick={addTube}
                 ><div style={{
-                    fontFamily: "Bahnschrift",
                     fontSize: "19px",
                     lineHeight: "22px",
                     height: "18px",

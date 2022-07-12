@@ -5,7 +5,7 @@ import preact from "@preact/preset-vite";
 export default defineConfig({
     plugins: [
         preact({ devtoolsInProd: true }),
-        viteSingleFile()
+        viteSingleFile(),
     ],
     server: {
         port: 3685,

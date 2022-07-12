@@ -1,4 +1,4 @@
-import { SubstanceId } from "./LevelConfigEditor";
+import { SubstanceId } from "./LevelEditor";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 

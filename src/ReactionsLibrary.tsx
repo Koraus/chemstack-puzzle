@@ -1,12 +1,12 @@
 import { useRecoilValue } from 'recoil';
-import { tubesAtom } from "./CraftingTable";
+import { tubesState } from "./CraftingTable";
 import * as flex from './utils/flex';
-import { levelState } from './LevelConfigEditor';
+import { levelState } from './LevelEditor';
 import { substanceColors } from './substanceColors';
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
-    const tube = useRecoilValue(tubesAtom)[0];
+    const tube = useRecoilValue(tubesState)[0];
     const currentSubstance = tube[tube.length - 1];
     const { reactions } = useRecoilValue(levelState);
 
@@ -24,7 +24,6 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
             width: "18px",
             height: "18px",
             fontSize: "14px",
-            fontFamily: "Bahnschrift",
             lineHeight: "20px",
         }}>{sid ?? <>&nbsp;</>}</div>
     }
@@ -47,7 +46,6 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                 <div style={{
                     color: "#ffffff30",
                     fontSize: "18px",
-                    fontFamily: "Bahnschrift",
                     height: "20px",
                     lineHeight: "32px",
                 }}>

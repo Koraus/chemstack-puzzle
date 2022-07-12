@@ -1,6 +1,6 @@
 import { useRecoilValue } from 'recoil';
-import { actionsAtom } from './ActionLog';
-import { levelState, SubstanceId } from "./LevelConfigEditor";
+import { actionsState } from './ActionLog';
+import { levelState, SubstanceId } from "./LevelEditor";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export function Ingredient({ id }: { id: SubstanceId }) {
@@ -17,12 +17,11 @@ export function Ingredient({ id }: { id: SubstanceId }) {
 
 
 export function Statistics({ style }: { style?: CSSProperties }) {
-    const actions = useRecoilValue(actionsAtom);
+    const actions = useRecoilValue(actionsState);
     return <div style={{
         marginTop: "20px",
         backgroundColor: "#ffffff20",
         color: "white",
-        fontFamily: "Bahnschrift",
         ...style,
     }}>
         <h3 style={{
