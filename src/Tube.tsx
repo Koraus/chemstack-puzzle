@@ -1,13 +1,14 @@
 import { SubstanceId } from "./LevelEditor";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
+type CSSProperties = import("preact").JSX.CSSProperties;
 
 
 export function Tube({
-    tube, style, isTarget = false, w = 16, isActive = false,
+    tube, style, isTarget = false, w = 24, isActive = false,
 }: {
     tube: SubstanceId[];
-    style?: preact.JSX.CSSProperties;
+    style?: CSSProperties;
     isTarget?: boolean;
     isActive?: boolean;
     w?: number;

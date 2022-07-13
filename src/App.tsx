@@ -7,19 +7,19 @@ import { ActionLog, actionsState } from "./ActionLog";
 import { Statistics } from "./Statistics";
 import * as flex from "./utils/flex";
 import { LevelEditor, LevelList, levelPresets, levelPresetState, levelState } from "./LevelEditor";
-import { useState } from "preact/hooks";
+import { useState, StateUpdater } from "preact/hooks";
+type CSSProperties = import("preact").JSX.CSSProperties;
 
 const _css = css`
     & {
-        max-width: 500px;
+        max-width: 414px;
         background: linear-gradient(#344763, #081f41);
         margin: auto;
-    }
-    & * {
         font-family: 'Bahnschrift', sans-serif;
     }
     & button {
         font-size: 100%;
+        font-family: 'Bahnschrift', sans-serif;
 
         background-color: #ffffffff;
         border: none;
@@ -32,11 +32,16 @@ const _css = css`
     }
 `;
 
-export function App() {
-    const tubes = useRecoilValue(tubesState);
-    const [levelPreset] = useRecoilState(levelPresetState);
+function Header({ 
+    style,
+    showMenuState: [showMenu, setShowMenu],
+}: { 
+    style?: CSSProperties,
+    showMenuState: [boolean, StateUpdater<boolean>],
+}) {
+    const tube = useRecoilValue(tubesState)[0];
     const { target } = useRecoilValue(levelState);
-    const [showMenu, setShowMenu] = useState(false);
+    const isWin = target.every((sid, i) => tube[i] === sid);
 
     const reset = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
         set(tubesState, [[]]);
@@ -48,72 +53,73 @@ export function App() {
         set(actionsState, []);
     });
 
-    const isWin =
-        tubes[0].length === target.length
-        && tubes[0].every((_, i) => tubes[0][i] === target[i]);
+    const [levelPreset] = useRecoilState(levelPresetState);
+    let currentLevelIndex = levelPresets
+        .findIndex(lp => lp.name === levelPreset.name);
+    if (currentLevelIndex < 0) {
+        currentLevelIndex = 0;
+    }
+    const nextLevelIndex = (currentLevelIndex + 1) % levelPresets.length;
+    const setNextLevel = () => setLevelPreset(levelPresets[nextLevelIndex]);
 
-    return <div className={cx(_css, { isWin })}>
+    return <div
+        className={css`
+            display: flex;
+            flex-direction: row;
+            margin: 20px 34px 0 34px;
+            & > :nth-child(1), & > :nth-last-child(1) {
+                display: block;
+                flex: 1;
+                color: #f7f7f750;
+                font-size: 32px;
+                text-decoration: none;
+            }
+            & > :nth-child(2), & > :nth-last-child(2) {
+                flex-grow: 999;
+            }
+            & > :nth-child(2) button, & > :nth-last-child(2) button {
+                width: 30px;
+                padding: 0px;
+                visibility: hidden;
+            }
+            & > :nth-child(3) {
+                flex-shrink: 0;
+                color: #f7f7f7ff;
+                font-size: 25px;
+                text-transform: uppercase;
+            }
+        `}
+        style={style}
+    >
+        <a
+            class="material-symbols-rounded"
+            href="#"
+            onClick={() => setShowMenu(!showMenu)}
+        >menu</a>
+
+        <div><button>&gt;</button></div>
+        <div>{useRecoilValue(levelState).name}</div>
+        <div><button
+            style={{
+                visibility: isWin ? "visible" : undefined,
+            }}
+            onClick={setNextLevel}
+        >&gt;</button></div>
+        <a
+            class="material-symbols-rounded"
+            href="#"
+            onClick={() => reset()}
+        >refresh</a>
+    </div>
+}
+
+export function App() {
+    const [showMenu, setShowMenu] = useState(false);
+
+    return <div className={cx(_css)}>
         <div style={{ ...flex.col }}>
-            <div style={{
-                ...flex.row,
-                margin: "10px 30px 0 30px",
-                textAlign: "center",
-            }}>
-                <a
-                    style={{
-                        display: "block",
-                        color: "#f7f7f750",
-                        fontSize: "30px",
-                        lineHeight: "28px",
-                        textDecoration: "none",
-                    }}
-                    href="#"
-                    onClick={() => setShowMenu(!showMenu)}
-                >&#9776;</a>
+            <Header showMenuState={[showMenu, setShowMenu]} />
 
-                <div style={{
-                    flex: 1,
-                    color: "#f7f7f7ff",
-                    fontSize: "24px",
-                    textTransform: "uppercase",
-                }}>
-                    <button
-                        style={{
-                            width: "30px",
-                            padding: "0px",
-                            visibility: "hidden",
-                        }}
-                    >&gt;</button>
-                    {useRecoilValue(levelState).name}
-                    <button
-                        style={{
-                            width: "30px",
-                            padding: "0px",
-                            visibility: isWin ? "visible" : "hidden",
-                        }}
-                        onClick={() => {
-                            let currentLevelIndex = levelPresets
-                                .findIndex(lp => lp.name === levelPreset.name);
-                            if (currentLevelIndex < 0) {
-                                currentLevelIndex = 0;
-                            }
-                            const nextLevelIndex = (currentLevelIndex + 1) % levelPresets.length;
-                            setLevelPreset(levelPresets[nextLevelIndex]);
-                        }}
-                    >&gt;</button>
-                </div>
-                <a
-                    style={{
-                        display: "block",
-                        color: "#f7f7f750",
-                        fontSize: "30px",
-                        lineHeight: "28px",
-                        textDecoration: "none",
-                    }}
-                    href="#"
-                    onClick={() => reset()}
-                >&#10227;</a>
-            </div>
             {showMenu &&
                 <div style={{
                     ...flex.row,
@@ -130,14 +136,10 @@ export function App() {
             <ReactionsLibrary />
             <CraftingTable />
 
-
             <div style={{ ...flex.row }}>
                 <ActionLog style={{ flex: 3 }} />
                 <Statistics style={{ flex: 2 }} />
             </div>
-
-
-
         </div>
     </div>
 }

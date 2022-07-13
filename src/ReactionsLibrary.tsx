@@ -10,11 +10,6 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     const currentSubstance = tube[tube.length - 1];
     const { reactions } = useRecoilValue(levelState);
 
-    function Attention({isApplicable}: {isApplicable: boolean}) {
-        return <div style={{ color: "#ffffffff" }}>
-            {isApplicable ? <> 	&#x2022;</> : <>&nbsp;</>}
-        </div>;
-    }
     function IngredientSlot({ sid }: { sid?: number }) {
         return <div style={{
             backgroundColor: sid === undefined ? "#ffffff08" : substanceColors[sid],
@@ -31,29 +26,42 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     return <div style={{
         ...flex.row,
         justifyContent: "center",
+        padding: "24px 0px 20px",
         ...style,
     }}>
         {reactions.map(r => {
             const isApplicable = currentSubstance === r.reagents[0];
             return <div style={{
-                ...flex.col,
-                textAlign: "center",
+                position: "relative",
             }}>
-                <Attention isApplicable={isApplicable} />
-                <IngredientSlot sid={r.products[2]} />
-                <IngredientSlot sid={r.products[1]} />
-                <IngredientSlot sid={r.products[0]} />
                 <div style={{
-                    color: "#ffffff30",
-                    fontSize: "18px",
-                    height: "20px",
-                    lineHeight: "32px",
+                    ...flex.col,
+                    textAlign: "center",
                 }}>
-                    &#8963;
+                    <IngredientSlot sid={r.products[2]} />
+                    <IngredientSlot sid={r.products[1]} />
+                    <IngredientSlot sid={r.products[0]} />
+                    <div
+                        class="material-symbols-rounded"
+                        style={{
+                            color: isApplicable ? "white" : "#ffffff30",
+                            fontSize: "19px",
+                            height: "18px",
+                        }}
+                    >keyboard_arrow_up</div>
+                    <IngredientSlot sid={r.reagents[1]} />
+                    <IngredientSlot sid={r.reagents[0]} />
                 </div>
-                <IngredientSlot sid={r.reagents[1]} />
-                <IngredientSlot sid={r.reagents[0]} />
-                <Attention isApplicable={isApplicable} />
+                {isApplicable && <div style={{
+                    zIndex: 1,
+                    position: "absolute",
+                    top: "1px",
+                    left: "1px",
+                    bottom: "1px",
+                    right: "1px",
+                    border: "2px solid white",
+                    borderRadius: "3px",
+                }}></div>}
             </div>;
         })}
     </div>;
