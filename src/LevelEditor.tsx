@@ -4,9 +4,9 @@ import { apipe } from "./utils/apipe";
 import { createRand } from "./utils/createRand";
 import * as it from "./utils/it";
 import { atom, selector } from "recoil";
-import { substanceColors } from './substanceColors';
 import { tubesState } from './CraftingTable';
 import { actionsState } from './ActionLog';
+import { generateReactions } from './generateReactions';
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export type SubstanceId = number;
@@ -17,40 +17,6 @@ export type Reaction = {
     [SubstanceId]
     | [SubstanceId, SubstanceId]
     | [SubstanceId, SubstanceId, SubstanceId],
-}
-
-export function generateReactions({ seed, substanceCount, reactionCount }: {
-    seed: string;
-    substanceCount: number;
-    reactionCount: number;
-}) {
-    const rand = createRand(seed + "reactions");
-    const randomReaction = () => ({
-        reagents: [
-            rand.rangeInt(substanceCount),
-            rand.rangeInt(substanceCount),
-        ],
-        products: [
-            rand.rangeInt(substanceCount),
-            ...(rand() < 0.5) ? [] : [
-                rand.rangeInt(substanceCount),
-                ...(rand() < 0.5) ? [] : [
-                    rand.rangeInt(substanceCount),
-                ],
-            ]
-        ],
-    } as Reaction);
-
-    const arr = [randomReaction()];
-    while (arr.length < reactionCount) {
-        const reaction = randomReaction();
-        if (arr.some(r1 => (r1.reagents[0] === reaction.reagents[0])
-            && (r1.reagents[1] === reaction.reagents[1]))) {
-            continue;
-        }
-        arr.push(reaction);
-    }
-    return arr;
 }
 
 export function generateLevel({
@@ -96,47 +62,44 @@ export function generateLevel({
 export const levelPresets = [{
     substanceCount: 3,
     ingredientCount: 3,
-    reactionCount: 5,
+    targets: [0],
+}, {
+    substanceCount: 4,
+    ingredientCount: 3,
     targets: [0],
 }, {
     substanceCount: 5,
     ingredientCount: 3,
-    reactionCount: 10,
     targets: [0],
 }, {
     substanceCount: 5,
     ingredientCount: 3,
-    reactionCount: 10,
     targets: [1],
 }, {
     substanceCount: 5,
     ingredientCount: 3,
-    reactionCount: 10,
     targets: [2],
 }, {
     substanceCount: 5,
     ingredientCount: 3,
-    reactionCount: 10,
     targets: [3],
 }, {
     substanceCount: 5,
     ingredientCount: 3,
-    reactionCount: 10,
     targets: [4],
 }, {
     substanceCount: 5,
     ingredientCount: 3,
-    reactionCount: 10,
     targets: [5],
 }, {
     substanceCount: 5,
     ingredientCount: 3,
-    reactionCount: 10,
     targets: [6],
-}].map((lp, i) => ({
-    ...lp,
+}].map((levelPrePreset, i) => ({
+    ...levelPrePreset,
     seed: "4242",
     name: `Level ${(i + 1).toString().padStart(2, '0')}`,
+    substanceMaxCount: 10,
 }));
 
 export const levelPresetState = atom({
@@ -148,11 +111,15 @@ export const levelState = selector({
     key: "level",
     get: ({ get }) => {
         const config = get(levelPresetState);
-        const reactions = generateReactions(config);
+        const reactions =
+            generateReactions(config)
+                .sort((r1, r2) => r1.reagents[0] - r2.reagents[0])
+                .filter(r => [...r.reagents, ...r.products]
+                    .every(sid => sid < config.substanceCount));
         return ({
             ...config,
             reactions,
-            ...generateLevel({ ...config, reactions })
+            ...generateLevel({ ...config, reactions }),
         });
     },
 });
@@ -226,9 +193,9 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
             paddingRight: "20px",
         }}>
 
-            <label>Preset: <input 
-                disabled 
-                value={levelPreset.name} 
+            <label>Preset: <input
+                disabled
+                value={levelPreset.name}
                 style={{
                     width: "100px",
                     fontSize: "16px",
@@ -257,7 +224,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                 }}
                 value={levelPreset.substanceCount}
                 min={1}
-                max={substanceColors.length}
+                max={levelPreset.substanceMaxCount}
                 onChange={ev => setLevelPreset(update(levelPreset, {
                     name: { $set: "custom level" },
                     substanceCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
@@ -277,11 +244,11 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                     name: { $set: "custom level" },
                     ingredientCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
                 }))} /></label><br />
-
+{/* 
             <label>
-                Reactions: 
+                Reactions:
                 <button
-                    style={{ 
+                    style={{
                         width: "30px",
                         fontSize: "16px",
                         padding: "0px 5px",
@@ -289,24 +256,24 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                     onClick={() => setLevelPreset(update(levelPreset, {
                         name: { $set: "custom level" },
                         reactionCount: { $set: levelPreset.reactionCount - 1 },
-                    }))}    
+                    }))}
                 >-</button>
                 <input
-                type="number"
-                style={{
-                    textAlign: "right",
-                    width: "20px",
-                    fontSize: "16px",
-                    padding: "0px 5px",
-                }}
-                value={levelPreset.reactionCount}
-                min={0}
-                onChange={ev => setLevelPreset(update(levelPreset, {
-                    name: { $set: "custom level" },
-                    reactionCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
-                }))} />
+                    type="number"
+                    style={{
+                        textAlign: "right",
+                        width: "20px",
+                        fontSize: "16px",
+                        padding: "0px 5px",
+                    }}
+                    value={levelPreset.reactionCount}
+                    min={0}
+                    onChange={ev => setLevelPreset(update(levelPreset, {
+                        name: { $set: "custom level" },
+                        reactionCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
+                    }))} />
                 <button
-                    style={{ 
+                    style={{
                         width: "30px",
                         fontSize: "16px",
                         padding: "0px 5px",
@@ -314,9 +281,9 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                     onClick={() => setLevelPreset(update(levelPreset, {
                         name: { $set: "custom level" },
                         reactionCount: { $set: levelPreset.reactionCount + 1 },
-                    }))}    
+                    }))}
                 >+</button>
-            </label><br />
+            </label><br /> */}
         </div>
     </div>;
 }

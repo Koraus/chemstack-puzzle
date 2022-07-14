@@ -48,16 +48,18 @@ export function* inf() { for (let i = 0; true; i++) { yield i; } }
 
 export const reiterable = <T>(s: Iterable<T> | T[]) => {
     let _s = Array.isArray(s) ? s : undefined;
-    if (!_s) {
-        _s = [];
-        return function* () {
-            for (const x of s) {
-                yield x;
-                _s!.push(x);
-            }
-        };
+    return () => {
+        if (!_s) {
+            _s = [];
+            return (function* () {
+                for (const x of s) {
+                    yield x;
+                    _s!.push(x);
+                }
+            })();
+        }
+        return _s!;
     }
-    return () => _s!;
 }
 
 export const concat = <T>(...sources: Iterable<T>[]) => apply(sources, flat());

@@ -133,8 +133,6 @@ export function CraftingTable() {
     const isWin = tubes[0].length === target.length
         && tubes[0].every((_, i) => tubes[0][i] === target[i]);
 
-    const ButtonPlaceholder = () => <button disabled style={{ visibility: "hidden" }}>.</button>;
-
     function IngredientButton({ sid, rev = false }: {
         sid: SubstanceId,
         rev?: boolean
@@ -269,51 +267,6 @@ export function CraftingTable() {
                 }}></div></button>
             </div>
         </div>
-    </div>
-
-    return <div style={{
-        backgroundColor: "#f4fff559",
-        padding: "10px",
-        ...flex.col,
-    }}>
-
-
-
-        <div style={{ ...flex.row }}>
-
-            <div style={{
-                ...flex.rowRev,
-                justifyContent: "right",
-                flex: 7,
-            }}>
-                {tubes.slice(1).map((t, i) => <div style={{ ...flex.col }}>
-                    <ButtonPlaceholder />
-                    <Tube tube={t} />
-                </div>)}
-            </div>
-
-
-            <div style={{
-                flex: 2,
-            }}>
-
-            </div>
-
-
-
-            <div style={{
-                ...flex.row,
-                justifyContent: "left",
-                flex: 7,
-            }}>
-                <div style={{ ...flex.col }}>
-                    <ButtonPlaceholder />
-                    <Tube tube={target} isTarget={true} />
-                </div>
-            </div>
-
-        </div>
-        <div style={{ height: "50px" }}></div>
     </div>;
 }
 

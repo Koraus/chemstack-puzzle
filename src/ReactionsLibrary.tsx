@@ -26,43 +26,49 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     return <div style={{
         ...flex.row,
         justifyContent: "center",
-        padding: "24px 0px 20px",
+        padding: "0px 3px",
         ...style,
+    }}><div style={{
+        ...flex.row,
+        padding: "24px 0px 20px",
+        overflowX: "scroll",
+        userSelect: "none",
     }}>
-        {reactions.map(r => {
-            const isApplicable = currentSubstance === r.reagents[0];
-            return <div style={{
-                position: "relative",
-            }}>
-                <div style={{
-                    ...flex.col,
-                    textAlign: "center",
-                }}>
-                    <IngredientSlot sid={r.products[2]} />
-                    <IngredientSlot sid={r.products[1]} />
-                    <IngredientSlot sid={r.products[0]} />
-                    <div
-                        class="material-symbols-rounded"
-                        style={{
-                            color: isApplicable ? "white" : "#ffffff30",
-                            fontSize: "19px",
-                            height: "18px",
-                        }}
-                    >keyboard_arrow_up</div>
-                    <IngredientSlot sid={r.reagents[1]} />
-                    <IngredientSlot sid={r.reagents[0]} />
-                </div>
-                {isApplicable && <div style={{
-                    zIndex: 1,
-                    position: "absolute",
-                    top: "1px",
-                    left: "1px",
-                    bottom: "1px",
-                    right: "1px",
-                    border: "2px solid white",
-                    borderRadius: "3px",
-                }}></div>}
-            </div>;
-        })}
-    </div>;
+            {reactions
+                .map(r => {
+                    const isApplicable = currentSubstance === r.reagents[0];
+                    return <div style={{
+                        position: "relative",
+                    }}>
+                        <div style={{
+                            ...flex.col,
+                            textAlign: "center",
+                        }}>
+                            <IngredientSlot sid={r.products[2]} />
+                            <IngredientSlot sid={r.products[1]} />
+                            <IngredientSlot sid={r.products[0]} />
+                            <div
+                                class="material-symbols-rounded"
+                                style={{
+                                    color: isApplicable ? "white" : "#ffffff30",
+                                    fontSize: "19px",
+                                    height: "18px",
+                                }}
+                            >keyboard_arrow_up</div>
+                            <IngredientSlot sid={r.reagents[1]} />
+                            <IngredientSlot sid={r.reagents[0]} />
+                        </div>
+                        {isApplicable && <div style={{
+                            zIndex: 1,
+                            position: "absolute",
+                            top: "1px",
+                            left: "1px",
+                            bottom: "1px",
+                            right: "1px",
+                            border: "2px solid white",
+                            borderRadius: "3px",
+                        }}></div>}
+                    </div>;
+                })}
+        </div></div>;
 }
