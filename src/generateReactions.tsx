@@ -85,7 +85,7 @@ export function generateReactions({ seed, substanceMaxCount }: {
     const substances = apipe(it.inf(), it.take(substanceMaxCount), it.toArray());
 
     const reactions = apipe(
-        it.zip(substances, substances),
+        it.cross(substances, substances),
         it.map(generateReaction),
         it.filter(
             ({ reagents: r, products: p }) => (r[0] !== p[0]) && (r[1] !== p[1])),

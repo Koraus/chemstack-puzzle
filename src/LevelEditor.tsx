@@ -7,6 +7,7 @@ import { atom, selector } from "recoil";
 import { tubesState } from './CraftingTable';
 import { actionsState } from './ActionLog';
 import { generateReactions } from './generateReactions';
+import { useEffect } from "preact/hooks";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export type SubstanceId = number;
@@ -124,9 +125,46 @@ export const levelState = selector({
     },
 });
 
+export const gameProgressState = atom({
+    key: "gameProgress",
+    default: {} as Record<string, boolean>,
+    effects: [({ node, setSelf, onSet }) => {
+        const key = node.key;
+        const savedValue = localStorage.getItem(key)
+        if (savedValue != null) {
+            setSelf(JSON.parse(savedValue));
+        }
+
+        onSet((newValue, _, isReset) => {
+            isReset
+                ? localStorage.removeItem(key)
+                : localStorage.setItem(key, JSON.stringify(newValue));
+        });
+    }],
+});
+
+export function LoadHighestLevelEffect() {
+    const gameProgress = useRecoilValue(gameProgressState);
+    const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPresets[0]) => {
+        set(levelPresetState, lp)
+        set(tubesState, [[]]);
+        set(actionsState, []);
+    });
+
+    useEffect(() => {
+        const highestProgressedIndex = Object.keys(gameProgress)
+            .map(name => levelPresets.findIndex(x => x.name === name))
+            .sort((a, b) => b - a)[0] ?? -1;
+        setLevelPreset(levelPresets[highestProgressedIndex + 1]);
+    }, []);
+
+    return <></>;
+}
+
 export function LevelList({ style }: { style?: CSSProperties }) {
-    const levelPreset = useRecoilValue(levelPresetState);
-    const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
+    const gameProgress = useRecoilValue(gameProgressState);
+    const currentLevelPreset = useRecoilValue(levelPresetState);
+    const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof currentLevelPreset) => {
         set(levelPresetState, lp)
         set(tubesState, [[]]);
         set(actionsState, []);
@@ -137,37 +175,34 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         height: "140px",
         backgroundColor: "#ffffff20",
         ...style,
-    }}>
-        {levelPresets.map((s, i) =>
-            i <= 1
-                ? <a
-                    href="#"
-                    style={{
-                        padding: "3px",
-                        display: "block",
-                        color: "white",
-                        textDecoration: "none",
-                        backgroundColor: s.name === levelPreset.name
-                            ? "#ffffff50"
-                            : "transparent",
-                        textTransform: "uppercase",
-                    }}
-                    onClick={() => setLevelPreset(s)}
-                >{s.name}</a>
-                : <span
-                    style={{
-                        padding: "3px",
-                        display: "block",
-                        color: "grey",
-                        textDecoration: "none",
-                        backgroundColor: s.name === levelPreset.name
-                            ? "#ffffff50"
-                            : "transparent",
-                        textTransform: "uppercase",
-                    }}
-                >{s.name}</span>
-        )}
-    </div>
+    }}>{levelPresets.map(levelPreset => {
+        const levelPresetIndex = levelPresets.findIndex(x => x.name === levelPreset.name);
+        const isCurrent = levelPreset.name === currentLevelPreset.name;
+        const isOpen =
+            levelPresetIndex === 0
+            || (levelPresetIndex > 0 && (levelPresets[levelPresetIndex - 1].name in gameProgress));
+        return <a
+            style={{
+                padding: "3px",
+                display: "block",
+                textDecoration: "none",
+                textTransform: "uppercase",
+                color: "grey",
+
+                ...(isOpen && {
+                    color: "white"
+                }),
+
+                ...(isCurrent && {
+                    backgroundColor: "#ffffff50",
+                }),
+            }}
+            {...(isOpen && {
+                href: "#",
+                onClick: () => setLevelPreset(levelPreset)
+            })}
+        >{levelPreset.name}</a>
+    })}</div>
 };
 
 export function LevelEditor({ style }: { style?: CSSProperties }) {
@@ -244,7 +279,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                     name: { $set: "custom level" },
                     ingredientCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
                 }))} /></label><br />
-{/* 
+            {/* 
             <label>
                 Reactions:
                 <button

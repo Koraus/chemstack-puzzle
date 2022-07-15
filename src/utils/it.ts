@@ -65,11 +65,11 @@ export const reiterable = <T>(s: Iterable<T> | T[]) => {
 export const concat = <T>(...sources: Iterable<T>[]) => apply(sources, flat());
 
 
-export function* zip<T, U>(s1: Iterable<T>, s2: Iterable<U>) {
+export function* cross<T, U>(s1: Iterable<T>, s2: Iterable<U>) {
     const _s2 = reiterable(s2);
     for (const x1 of s1) for (const x2 of _s2()) yield [x1, x2] as [T, U];
 }
-export function* zip3<T, U, R>(s1: Iterable<T>, s2: Iterable<U>, s3: Iterable<R>) {
+export function* cross3<T, U, R>(s1: Iterable<T>, s2: Iterable<U>, s3: Iterable<R>) {
     const _s2 = reiterable(s2);
     const _s3 = reiterable(s3);
     for (const x1 of s1) for (const x2 of _s2()) for (const x3 of _s3()) yield [x1, x2, x3] as [T, U, R];

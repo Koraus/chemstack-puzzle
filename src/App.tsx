@@ -1,12 +1,12 @@
 import * as _ from "lodash";
 import { useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
 import { css, cx } from "@emotion/css";
-import { CraftingTable, tubesState } from "./CraftingTable";
+import { CraftingTable, GameProgressEffect, isWinState, tubesState } from "./CraftingTable";
 import { ReactionsLibrary } from "./ReactionsLibrary";
 import { ActionLog, actionsState } from "./ActionLog";
 import { Statistics } from "./Statistics";
 import * as flex from "./utils/flex";
-import { LevelEditor, LevelList, levelPresets, levelPresetState, levelState } from "./LevelEditor";
+import { LevelEditor, LevelList, levelPresets, levelPresetState, levelState, LoadHighestLevelEffect } from "./LevelEditor";
 import { useState, StateUpdater } from "preact/hooks";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
@@ -39,10 +39,6 @@ function Header({
     style?: CSSProperties,
     showMenuState: [boolean, StateUpdater<boolean>],
 }) {
-    const tube = useRecoilValue(tubesState)[0];
-    const { target } = useRecoilValue(levelState);
-    const isWin = target.every((sid, i) => tube[i] === sid);
-
     const reset = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
         set(tubesState, [[]]);
         set(actionsState, []);
@@ -101,7 +97,7 @@ function Header({
         <div>{useRecoilValue(levelState).name}</div>
         <div><button
             style={{
-                visibility: isWin ? "visible" : undefined,
+                visibility: useRecoilValue(isWinState) ? "visible" : undefined,
             }}
             onClick={setNextLevel}
         >&gt;</button></div>
@@ -141,6 +137,8 @@ export function App() {
                 <Statistics style={{ flex: 2 }} />
             </div>
         </div>
+        <LoadHighestLevelEffect />
+        <GameProgressEffect />
     </div>
 }
 

@@ -1,12 +1,14 @@
 import { css } from "@emotion/css";
 import update from "immutability-helper";
-import { atom, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
+import { atom, selector, useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
 import { actionsState } from "./ActionLog";
-import { levelState, Reaction, SubstanceId } from "./LevelEditor";
+import { gameProgressState, levelState, Reaction, SubstanceId } from "./LevelEditor";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 import * as _ from "lodash";
 import { Tube } from "./Tube";
+import { useEffect } from "preact/hooks";
+import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 
@@ -14,6 +16,29 @@ export const tubesState = atom({
     key: "tubes",
     default: [[]] as SubstanceId[][],
 })
+
+export const isWinState = selector({
+    key: "isWin",
+    get: ({ get }) => {
+        const tube = get(tubesState)[0];
+        const { target } = get(levelState);
+        return target.every((sid, i) => tube[i] === sid);
+    }
+});
+
+export function GameProgressEffect() {
+    const isWin = useRecoilValue(isWinState);
+    const level = useRecoilValue(levelState);
+    const updGameProgress = useUpdRecoilState(gameProgressState);
+    useEffect(() => {
+        if (!isWin) { return; }
+        updGameProgress({
+            [level.name]: { $set: true },
+        });
+    }, [isWin, level, updGameProgress]);
+    return <></>;
+}
+
 
 const reactTube = (reactions: Reaction[], tube: SubstanceId[], i: number) => {
     const log = [] as string[];
