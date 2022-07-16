@@ -1,14 +1,119 @@
-import { useRecoilValue } from 'recoil';
+import { selector, useRecoilValue } from 'recoil';
 import { tubesState } from "./CraftingTable";
 import * as flex from './utils/flex';
-import { levelState } from './LevelEditor';
+import { levelPresetRecoil } from './LevelEditor';
 import { substanceColors } from './substanceColors';
+import { Reaction, SubstanceId } from './crafting';
+import { createRand } from './utils/createRand';
+import { apipe } from './utils/apipe';
+import * as it from "./utils/it";
 type CSSProperties = import("preact").JSX.CSSProperties;
+
+export function generateReactionsLibrary({ seed, substanceMaxCount }: {
+    seed: string;
+    substanceMaxCount: number;
+}) {
+    const f1p = <T,>(all: T[], sub: T[]) =>
+        all
+            .filter(x => sub.indexOf(x) < 0)
+            .map(r => [...sub, r]);
+
+    function* f3(xs: number[]) {
+        const n = xs.length;
+        for (let x0 = 0; x0 < n; x0++) {
+            for (let x1 = x0 + 1; x1 < n; x1++) {
+                for (let x2 = x1 + 1; x2 < n; x2++) {
+                    yield [xs[x0], xs[x1], xs[x2]];
+                }
+            }
+        }
+    }
+
+    function remapSids(reactions: Reaction[], sidRevMap: SubstanceId[]) {
+        const sidMap = sidRevMap.map(() => 0);
+        for (let i = 0; i < sidMap.length; i++) {
+            sidMap[sidRevMap[i]] = i;
+        }
+
+        return reactions.map(r => ({
+            reagents: r.reagents.map(sid => sidMap[sid]),
+            products: r.products.map(sid => sidMap[sid]),
+        } as Reaction));
+    }
+
+    function generateReaction([reagent1, reagent2]: [SubstanceId, SubstanceId]) {
+        const uniqueReagentsId = reagent1 * substanceMaxCount + reagent2;
+        const rand = createRand(seed + uniqueReagentsId);
+        return {
+            reagents: [reagent1, reagent2],
+            products: rand() < 0.3
+                ? [reagent1, reagent2]
+                : [
+                    rand.rangeInt(substanceMaxCount),
+                    ...(rand() < 0.2) ? [] : [
+                        rand.rangeInt(substanceMaxCount),
+                        ...(rand() < 0.8) ? [] : [
+                            rand.rangeInt(substanceMaxCount),
+                        ],
+                    ]
+                ]
+        } as Reaction;
+    }
+
+    function subreactions(subsids: number[]) {
+        return reactions.filter((r) =>
+            [...r.products, ...r.reagents].every((sid) => subsids.indexOf(sid) >= 0)
+        );
+    }
+
+    function selectMostReactiveCore(sids: Iterable<SubstanceId[]>) {
+        return apipe(sids,
+            it.map(subset => ({ subset, len: subreactions(subset).length })),
+            it.toArray(),
+        ).sort((a, b) => b.len - a.len)[0].subset;
+    }
+
+    const substances = apipe(it.inf(), it.take(substanceMaxCount), it.toArray());
+
+    const reactions = apipe(
+        it.cross(substances, substances),
+        it.map(generateReaction),
+        it.filter(({ reagents, products }) => {
+            const isReactionIntoSelf =
+                reagents.length === products.length
+                && reagents[0] === products[0]
+                && reagents[1] === products[1];
+            return !isReactionIntoSelf;
+        }),
+        it.toArray()
+    );
+
+    // find 3 sids with the biggest mutual reaction count
+    let sidRevMap = selectMostReactiveCore(f3(substances));
+
+    // grow those 3 to max
+    while (sidRevMap.length < substances.length) {
+        sidRevMap = selectMostReactiveCore(f1p(substances, sidRevMap));
+    }
+
+    return remapSids(reactions, sidRevMap);
+}
+
+export const reactionsLibraryRecoil = selector({
+    key: "reactionsLibrary",
+    get: ({ get }) => {
+        const levelPreset = get(levelPresetRecoil);
+        return generateReactionsLibrary(levelPreset)
+            .sort((r1, r2) => r1.reagents[0] - r2.reagents[0])
+            .filter(r => [...r.reagents, ...r.products]
+                .every(sid => sid < levelPreset.substanceCount));
+    }
+})
 
 export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     const tube = useRecoilValue(tubesState)[0];
     const currentSubstance = tube[tube.length - 1];
-    const { reactions } = useRecoilValue(levelState);
+    const reactions = useRecoilValue(reactionsLibraryRecoil);
 
     function IngredientSlot({ sid }: { sid?: number }) {
         return <div style={{

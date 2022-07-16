@@ -6,7 +6,9 @@ export function createRand(seed: string) {
         if (arr.length === 1) { arr = SHA256(arr.shift()!.toString()).words; }
         return (arr.shift()! >>> 0);
     };
-    const rand = Object.assign(() => randUInt32() / (~0 >>> 0), {
+    const rand = Object.assign(() => {
+        return randUInt32() / (~0 >>> 0);
+    }, {
         uint32: randUInt32,
         rangeInt(maxExcl: number) { return Math.floor(rand() * maxExcl); },
         el<T>(arr: T[]) { return arr[rand.rangeInt(arr.length)]; },

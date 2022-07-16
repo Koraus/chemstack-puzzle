@@ -1,4 +1,4 @@
-import { SubstanceId } from "./LevelEditor";
+import { SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 type CSSProperties = import("preact").JSX.CSSProperties;

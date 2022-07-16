@@ -1,16 +1,21 @@
 import { useRecoilValue } from 'recoil';
 import { useState } from "preact/hooks";
 type CSSProperties = import("preact").JSX.CSSProperties;
-import { atom } from "recoil";
-
-export const actionsState = atom({
-    key: "actions",
-    default: [] as string[],
-})
-
+import { craftingActionsRecoil } from './CraftingTable';
 
 export function ActionLog({ style }: { style?: CSSProperties }) {
-    const actions = useRecoilValue(actionsState);
+    const actions = useRecoilValue(craftingActionsRecoil)
+        .map(a => {
+            switch (a.action) {
+                case 'addIngredient': return `+ ${a.ingredientId}`;
+                case 'addTube': return "+ tube";
+                case 'trashTube': return "x tube";
+                case 'pourFromMainIntoSecondary': return 'pour <-';
+                case 'pourFromSecondaryIntoMain': return 'pour ->';
+            }
+            return JSON.stringify(a);
+        }).reverse();
+    const [isOpen, setIsOpen] = useState(false);
     return <div style={{
         marginTop: "20px",
         backgroundColor: "#ffffff20",
@@ -27,14 +32,11 @@ export function ActionLog({ style }: { style?: CSSProperties }) {
             paddingRight: "20px",
             paddingBottom: "20px",
         }}>
-            {[...actions].reverse().slice(0, 5).map(a => <>{a}<br /></>)}
-            {(actions.length > 5) && <>{(() => {
-                const [x, sx] = useState(false);
-                return <>
-                    {x && [...actions].reverse().slice(5).map(a => <>{a}<br /></>)}
-                    <button onClick={() => sx(!x)}>{x ? "/\\" : `... (${actions.length - 5})`}</button><br />
-                </>;
-            })()}</>}
+            {[...actions].slice(0, 5).map(a => <>{a}<br /></>)}
+            {(actions.length > 5) && <>{(() => <>
+                {isOpen && [...actions].slice(5).map(a => <>{a}<br /></>)}
+                <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? "/\\" : `... (+${actions.length - 5})`}</button><br />
+            </>)()}</>}
         </div>
     </div>;
 }

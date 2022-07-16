@@ -1,162 +1,64 @@
 import { css } from "@emotion/css";
 import update from "immutability-helper";
-import { atom, selector, useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
-import { actionsState } from "./ActionLog";
-import { gameProgressState, levelState, Reaction, SubstanceId } from "./LevelEditor";
+import { atom, selector, useRecoilValue } from 'recoil';
+import { Reaction, SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 import * as _ from "lodash";
 import { Tube } from "./Tube";
-import { useEffect } from "preact/hooks";
+import { CraftingAction, craftingReduce } from './crafting';
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
+import { reactionsLibraryRecoil } from "./ReactionsLibrary";
+import { CraftingTargets, craftingTargetsRecoil } from "./CraftingTargets";
+import { isWinRecoil } from "./Win";
+import { levelPresetRecoil } from "./LevelEditor";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
+export const craftingActionsRecoil = atom({
+    key: "craftingActions",
+    default: [] as CraftingAction[],
+});
 
-export const tubesState = atom({
-    key: "tubes",
-    default: [[]] as SubstanceId[][],
-})
-
-export const isWinState = selector({
-    key: "isWin",
+export const appliedCraftingActionsRecoil = selector({
+    key: "appliedCraftingActions",
     get: ({ get }) => {
-        const tube = get(tubesState)[0];
-        const { target } = get(levelState);
-        return target.every((sid, i) => tube[i] === sid);
+        const actions = get(craftingActionsRecoil);
+        const reactions = get(reactionsLibraryRecoil);
+        let state: ReturnType<typeof craftingReduce> | undefined;
+        for (let i = 0; i < actions.length; i++) {
+            const action = actions[i];
+            state = craftingReduce(
+                { reactions }, 
+                action, 
+                state?.stateAfterCleanups 
+                    ?? { tubes: [[]] });
+        }
+        return state ?? {
+            stateAfterCleanups: {
+                tubes: [[] as SubstanceId[]],
+            }
+        };
     }
 });
 
-export function GameProgressEffect() {
-    const isWin = useRecoilValue(isWinState);
-    const level = useRecoilValue(levelState);
-    const updGameProgress = useUpdRecoilState(gameProgressState);
-    useEffect(() => {
-        if (!isWin) { return; }
-        updGameProgress({
-            [level.name]: { $set: true },
-        });
-    }, [isWin, level, updGameProgress]);
-    return <></>;
-}
-
-
-const reactTube = (reactions: Reaction[], tube: SubstanceId[], i: number) => {
-    const log = [] as string[];
-    if (tube.length < 1) { return { tube, log }; }
-
-    const ra = reactions.find(ra =>
-        ra.reagents[1] === tube[tube.length - 1]
-        && ra.reagents[0] === tube[tube.length - 2]);
-    if (ra) {
-        tube = update(tube, { $splice: [[tube.length - 2, 2, ...ra.products]] });
-        log.push(`- reaction: tube #${i} ${JSON.stringify(ra)}`);
+export const tubesState = selector({
+    key: "tubes",
+    get: ({ get }) => {
+        const { stateAfterCleanups } = get(appliedCraftingActionsRecoil);
+        return stateAfterCleanups.tubes;
     }
-
-    if (tube.length > 3) {
-        tube = update(tube, { $splice: [[3]] });
-        log.push(`- clean up: tube #${i} ${JSON.stringify(tube.slice(3))}`);
-    }
-
-    return { tube, log };
-}
-
-export const react = (reactions: Reaction[], tubes: SubstanceId[][]) => {
-    const xxx = tubes.map((tube, i) => reactTube(reactions, tube, i));
-    for (let i = 0; i < xxx.length; i++) {
-        tubes = update(tubes, { [i]: { $set: xxx[i].tube } });
-    }
-
-    return { tubes, log: xxx.flatMap(x => x.log) };
-}
+})
 
 
 export function CraftingTable() {
+    const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
+    const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
+
     const tubes = useRecoilValue(tubesState);
-    const { target, ingredients, reactions } = useRecoilValue(levelState);
+    const { ingredientCount } = useRecoilValue(levelPresetRecoil);
+    const ingredients = Array.from({length: ingredientCount}, (_, i) => i);
 
-    const addIngredient = useRecoilTransaction_UNSTABLE(({ get, set }) => (id: SubstanceId) => {
-        let _tubes = tubes;
-        _tubes = update(_tubes, { 0: { $push: [id] } });
-
-        const { tubes: __tubes, log } = react(reactions, _tubes);
-
-        set(tubesState, __tubes);
-        set(actionsState, actions => update(actions, {
-            $push: [
-                `action: added ${id}`,
-                ...log,
-            ]
-        }));
-    });
-
-    const addTube = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        let _tubes = tubes;
-        _tubes = update(tubes, { $splice: [[0, 0, []]] });
-
-        const { tubes: __tubes, log } = react(reactions, _tubes);
-
-        set(tubesState, __tubes);
-        set(actionsState, actions => update(actions, {
-            $push: [
-                `action: added tube`,
-                ...log,
-            ]
-        }));
-    });
-
-    const trashTube = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        let _tubes = tubes;
-        _tubes = update(tubes, { $splice: [[0, 1]] });
-
-        const { tubes: __tubes, log } = react(reactions, _tubes);
-
-        set(tubesState, __tubes);
-        set(actionsState, actions => update(actions, {
-            $push: [
-                `action: trashed tube`,
-                ...log,
-            ]
-        }));
-    });
-
-    const pourFromActive = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        let _tubes = tubes;
-        _tubes = update(tubes, {
-            0: { $splice: [[tubes[0].length - 1]] },
-            1: { $push: [tubes[0][tubes[0].length - 1]] },
-        });
-
-        const { tubes: __tubes, log } = react(reactions, _tubes);
-
-        set(tubesState, __tubes);
-        set(actionsState, actions => update(actions, {
-            $push: [
-                `action: pourFromActive`,
-                ...log,
-            ]
-        }));
-    });
-
-    const pourIntoActive = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        let _tubes = tubes;
-        _tubes = update(tubes, {
-            0: { $push: [tubes[1][tubes[1].length - 1]] },
-            1: { $splice: [[tubes[1].length - 1]] },
-        });
-
-        const { tubes: __tubes, log } = react(reactions, _tubes);
-
-        set(tubesState, __tubes);
-        set(actionsState, actions => update(actions, {
-            $push: [
-                `action: pourIntoActive`,
-                ...log,
-            ]
-        }));
-    });
-
-    const isWin = tubes[0].length === target.length
-        && tubes[0].every((_, i) => tubes[0][i] === target[i]);
+    const isWin = useRecoilValue(isWinRecoil);
 
     function IngredientButton({ sid, rev = false }: {
         sid: SubstanceId,
@@ -164,7 +66,7 @@ export function CraftingTable() {
     }) {
         return <button
             disabled={isWin}
-            onClick={() => addIngredient(sid)}
+            onClick={() => act({ action: "addIngredient", ingredientId: sid })}
             style={{
                 transformOrigin: "50% 70%",
                 transform: `rotate(${(rev ? -1 : 1) * 15}deg)`,
@@ -209,14 +111,14 @@ export function CraftingTable() {
                             ...flex.row,
                         }}
                         disabled={isWin || !tubes[1] || tubes[0].length === 0}
-                        onClick={pourFromActive}
+                        onClick={() => act({ action: "pourFromMainIntoSecondary" })}
                     >&lt;</button>
                     <button
                         style={{
                             ...flex.row,
                         }}
                         disabled={isWin || !tubes[1] || tubes[1].length === 0}
-                        onClick={pourIntoActive}
+                        onClick={() => act({ action: "pourFromSecondaryIntoMain" })}
                     >&gt;</button>
                 </div>}
                 {tubes.slice(1).map((t, i) => <Tube tube={t} />)}
@@ -227,7 +129,7 @@ export function CraftingTable() {
                         ...flex.row,
                     }}
                     disabled={isWin}
-                    onClick={addTube}
+                    onClick={() => act({ action: "addTube" })}
                 ><div style={{
                     fontSize: "19px",
                     lineHeight: "22px",
@@ -262,14 +164,9 @@ export function CraftingTable() {
                     .filter((_, i) => (i % 2))
                     .map(sid => <IngredientButton sid={sid} rev />)}
             </div>
-            <div style={{
+            <CraftingTargets style={{
                 flexGrow: 1,
-                ...flex.row,
-            }}>
-                <div style={{ ...flex.col }}>
-                    <Tube tube={target} isTarget={true} />
-                </div>
-            </div>
+            }} />
             <div style={{
                 ...flex.row,
             }}>
@@ -278,7 +175,7 @@ export function CraftingTable() {
                         ...flex.row,
                     }}
                     disabled={isWin || tubes.length <= 1}
-                    onClick={trashTube}
+                    onClick={() => act({ action: "trashTube" })}
                 ><div style={{
                     fontSize: "19px",
                     lineHeight: "22px",

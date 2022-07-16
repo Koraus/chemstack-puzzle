@@ -4,61 +4,12 @@ import { apipe } from "./utils/apipe";
 import { createRand } from "./utils/createRand";
 import * as it from "./utils/it";
 import { atom, selector } from "recoil";
-import { tubesState } from './CraftingTable';
-import { actionsState } from './ActionLog';
-import { generateReactions } from './generateReactions';
+import { craftingActionsRecoil, tubesState } from './CraftingTable';
 import { useEffect } from "preact/hooks";
+import { Reaction } from './crafting';
+import { reactionsLibraryRecoil } from './ReactionsLibrary';
 type CSSProperties = import("preact").JSX.CSSProperties;
 
-export type SubstanceId = number;
-export type Reaction = {
-    reagents:
-    [SubstanceId, SubstanceId],
-    products:
-    [SubstanceId]
-    | [SubstanceId, SubstanceId]
-    | [SubstanceId, SubstanceId, SubstanceId],
-}
-
-export function generateLevel({
-    seed, substanceCount, ingredientCount, reactions, targets,
-}: {
-    seed: string;
-    substanceCount: number;
-    ingredientCount: number;
-    reactions: Reaction[];
-    targets: number[];
-}) {
-    const rand = createRand(seed);
-    const substances = apipe(it.inf(), it.take(substanceCount), it.toArray());
-    const ingredients = substances.slice(0, ingredientCount);
-    const target = (() => {
-        rand();
-        while (true) {
-            for (let i = 0; i < targets[0]; i++) {
-                rand();
-            }
-            const target = [
-                rand.el(substances),
-                rand.el(substances),
-                rand.el(substances),
-            ];
-            const some1 = reactions.some(ra => ra.reagents[1] === target[1]
-                && ra.reagents[0] === target[0]);
-            if (some1) { continue; }
-            const some2 = reactions.some(ra => ra.reagents[1] === target[2]
-                && ra.reagents[0] === target[1]);
-            if (some2) { continue; }
-
-            return target;
-        }
-    })();
-    return {
-        substances,
-        target,
-        ingredients,
-    };
-}
 
 export const levelPresets = [{
     substanceCount: 3,
@@ -75,7 +26,7 @@ export const levelPresets = [{
 }, {
     substanceCount: 5,
     ingredientCount: 3,
-    targets: [1],
+    targets: [1, 2],
 }, {
     substanceCount: 5,
     ingredientCount: 3,
@@ -103,26 +54,9 @@ export const levelPresets = [{
     substanceMaxCount: 10,
 }));
 
-export const levelPresetState = atom({
+export const levelPresetRecoil = atom({
     key: "levelPreset",
     default: levelPresets[0],
-});
-
-export const levelState = selector({
-    key: "level",
-    get: ({ get }) => {
-        const config = get(levelPresetState);
-        const reactions =
-            generateReactions(config)
-                .sort((r1, r2) => r1.reagents[0] - r2.reagents[0])
-                .filter(r => [...r.reagents, ...r.products]
-                    .every(sid => sid < config.substanceCount));
-        return ({
-            ...config,
-            reactions,
-            ...generateLevel({ ...config, reactions }),
-        });
-    },
 });
 
 export const gameProgressState = atom({
@@ -146,9 +80,8 @@ export const gameProgressState = atom({
 export function LoadHighestLevelEffect() {
     const gameProgress = useRecoilValue(gameProgressState);
     const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPresets[0]) => {
-        set(levelPresetState, lp)
-        set(tubesState, [[]]);
-        set(actionsState, []);
+        set(levelPresetRecoil, lp);
+        set(craftingActionsRecoil, []);
     });
 
     useEffect(() => {
@@ -163,11 +96,10 @@ export function LoadHighestLevelEffect() {
 
 export function LevelList({ style }: { style?: CSSProperties }) {
     const gameProgress = useRecoilValue(gameProgressState);
-    const currentLevelPreset = useRecoilValue(levelPresetState);
+    const currentLevelPreset = useRecoilValue(levelPresetRecoil);
     const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof currentLevelPreset) => {
-        set(levelPresetState, lp)
-        set(tubesState, [[]]);
-        set(actionsState, []);
+        set(levelPresetRecoil, lp);
+        set(craftingActionsRecoil, []);
     });
 
     return <div style={{
@@ -206,11 +138,10 @@ export function LevelList({ style }: { style?: CSSProperties }) {
 };
 
 export function LevelEditor({ style }: { style?: CSSProperties }) {
-    const levelPreset = useRecoilValue(levelPresetState);
+    const levelPreset = useRecoilValue(levelPresetRecoil);
     const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
-        set(levelPresetState, lp)
-        set(tubesState, [[]]);
-        set(actionsState, []);
+        set(levelPresetRecoil, lp);
+        set(craftingActionsRecoil, []);
     });
 
     return <div style={{

@@ -1,13 +1,15 @@
 import * as _ from "lodash";
 import { useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
 import { css, cx } from "@emotion/css";
-import { CraftingTable, GameProgressEffect, isWinState, tubesState } from "./CraftingTable";
+import { craftingActionsRecoil, CraftingTable } from "./CraftingTable";
+import { isWinRecoil, WinEffect } from "./Win";
 import { ReactionsLibrary } from "./ReactionsLibrary";
-import { ActionLog, actionsState } from "./ActionLog";
+import { ActionLog } from "./ActionLog";
 import { Statistics } from "./Statistics";
 import * as flex from "./utils/flex";
-import { LevelEditor, LevelList, levelPresets, levelPresetState, levelState, LoadHighestLevelEffect } from "./LevelEditor";
+import { LevelEditor, LevelList, levelPresets, levelPresetRecoil, LoadHighestLevelEffect } from "./LevelEditor";
 import { useState, StateUpdater } from "preact/hooks";
+import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 const _css = css`
@@ -40,16 +42,14 @@ function Header({
     showMenuState: [boolean, StateUpdater<boolean>],
 }) {
     const reset = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        set(tubesState, [[]]);
-        set(actionsState, []);
+        set(craftingActionsRecoil, []);
     });
     const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
-        set(levelPresetState, lp)
-        set(tubesState, [[]]);
-        set(actionsState, []);
+        set(levelPresetRecoil, lp)
+        set(craftingActionsRecoil, []);
     });
 
-    const [levelPreset] = useRecoilState(levelPresetState);
+    const [levelPreset] = useRecoilState(levelPresetRecoil);
     let currentLevelIndex = levelPresets
         .findIndex(lp => lp.name === levelPreset.name);
     if (currentLevelIndex < 0) {
@@ -94,10 +94,10 @@ function Header({
         >menu</a>
 
         <div><button>&gt;</button></div>
-        <div>{useRecoilValue(levelState).name}</div>
+        <div>{useRecoilValue(levelPresetRecoil).name}</div>
         <div><button
             style={{
-                visibility: useRecoilValue(isWinState) ? "visible" : undefined,
+                visibility: useRecoilValue(isWinRecoil) ? "visible" : undefined,
             }}
             onClick={setNextLevel}
         >&gt;</button></div>
@@ -137,8 +137,8 @@ export function App() {
                 <Statistics style={{ flex: 2 }} />
             </div>
         </div>
+        <WinEffect />
         <LoadHighestLevelEffect />
-        <GameProgressEffect />
     </div>
 }
 

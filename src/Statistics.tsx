@@ -1,23 +1,23 @@
 import { useRecoilValue } from 'recoil';
-import { actionsState } from './ActionLog';
-import { levelState, SubstanceId } from "./LevelEditor";
+import { craftingActionsRecoil } from './CraftingTable';
+import { levelPresetRecoil } from "./LevelEditor";
+import { SubstanceId } from "./crafting";
+import { substanceColors } from './substanceColors';
 type CSSProperties = import("preact").JSX.CSSProperties;
 
-export function Ingredient({ id }: { id: SubstanceId }) {
-    const { substances } = useRecoilValue(levelState);
-    const hue = id / substances.length * 360;
+export function Ingredient({ id: sid }: { id: SubstanceId }) {
     return <div style={{
         fontFamily: "Courier",
         padding: "4px 5px 2px",
         border: "1px solid",
-        backgroundColor: `hsl(${hue}, 100%, 80%)`,
-        color: `hsl(${hue}, 100%, 30%)`,
-    }}>{id}</div>;
+        backgroundColor: substanceColors[sid],
+        color: "#ffffffff",
+    }}>{sid}</div>;
 }
 
 
 export function Statistics({ style }: { style?: CSSProperties }) {
-    const actions = useRecoilValue(actionsState);
+    const actions = useRecoilValue(craftingActionsRecoil);
     return <div style={{
         marginTop: "20px",
         backgroundColor: "#ffffff20",
@@ -35,17 +35,19 @@ export function Statistics({ style }: { style?: CSSProperties }) {
             paddingBottom: "20px",
         }}>
             <div>
-                Action count: {actions.filter(a => a.match(/^action/)).length}
+                Action count: {actions.length}
             </div>
             <div>
                 Ingredients used:
                 {Object.entries(
                     actions
-                        .map(a => a.match(/^action: added (.*)/))
                         .reduce(
-                            (acc, m) => m
-                                ? { ...acc, [m[1]]: (acc[Number(m[1])] ?? 0) + 1 }
-                                : acc,
+                            (acc, a) => {
+                                if (a.action !== "addIngredient") { return acc; }
+                                return a
+                                    ? { ...acc, [a.ingredientId]: (acc[a.ingredientId] ?? 0) + 1 }
+                                    : acc;
+                            },
                             {} as Record<SubstanceId, number>)
                 ).map(([id, count]) => <div style={{
                     display: "flex",
@@ -53,6 +55,9 @@ export function Statistics({ style }: { style?: CSSProperties }) {
                 }}>
                     <Ingredient id={Number(id)} />{count}&nbsp;x&nbsp;
                 </div>)}
+            </div>
+            <div>
+                Max tubes in use: TBD
             </div>
         </div>
     </div>;
