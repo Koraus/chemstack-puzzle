@@ -25,6 +25,7 @@ export type CraftingAction = {
 
 export type CraftingState = {
     tubes: SubstanceId[][],
+    targets: SubstanceId[][],
 }
 
 export type AppliedCraftingAction = {
@@ -35,10 +36,13 @@ export type AppliedCraftingAction = {
     stateAfterReactions: CraftingState;
     cleanups: Record<number, SubstanceId[]>;
     stateAfterCleanups: CraftingState;
+    stateFinal: CraftingState;
 }
 
 export function craftingReduce(
-    { reactions }: { reactions: Reaction[] },
+    { reactions }: {
+        reactions: Reaction[],
+    },
     action: CraftingAction,
     stateInitial: CraftingState,
 ) {
@@ -94,6 +98,19 @@ export function craftingReduce(
         }
     });
 
+    const tubeToGiveAwayIndex = stateAfterCleanups.tubes.findIndex(tube =>
+        stateAfterCleanups.targets[0].every((sid, i) => tube[i] === sid));
+
+    const stateAfterGiveAway =
+        tubeToGiveAwayIndex >= 0
+            ? update(stateAfterCleanups, {
+                tubes: stateAfterCleanups.tubes.length > 1
+                    ? { $splice: [[tubeToGiveAwayIndex, 1]] }
+                    : { 0: { $set: [] } },
+                targets: { $splice: [[0, 1]] },
+            })
+            : stateAfterCleanups;
+
     return {
         stateInitial,
         action,
@@ -102,5 +119,8 @@ export function craftingReduce(
         stateAfterReactions,
         cleanups,
         stateAfterCleanups,
+        tubeToGiveAwayIndex,
+        stateAfterGiveAway,
+        stateFinal: stateAfterGiveAway,
     }
 }

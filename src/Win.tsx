@@ -2,15 +2,14 @@ import { selector, useRecoilValue } from 'recoil';
 import { gameProgressState, levelPresetRecoil } from "./LevelEditor";
 import { useEffect } from "preact/hooks";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
-import { tubesState } from './CraftingTable';
+import { appliedCraftingActionsRecoil, tubesState } from './CraftingTable';
 import { craftingTargetsRecoil } from './CraftingTargets';
 
 export const isWinRecoil = selector({
     key: "isWin",
     get: ({ get }) => {
-        const tube = get(tubesState)[0];
-        const target = get(craftingTargetsRecoil)[0];
-        return target.every((sid, i) => tube[i] === sid);
+        const { stateFinal } = get(appliedCraftingActionsRecoil);
+        return stateFinal.targets.length === 0;
     }
 });
 

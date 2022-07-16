@@ -24,18 +24,20 @@ export const appliedCraftingActionsRecoil = selector({
     get: ({ get }) => {
         const actions = get(craftingActionsRecoil);
         const reactions = get(reactionsLibraryRecoil);
+        const targets = get(craftingTargetsRecoil);
         let state: ReturnType<typeof craftingReduce> | undefined;
         for (let i = 0; i < actions.length; i++) {
             const action = actions[i];
             state = craftingReduce(
                 { reactions }, 
                 action, 
-                state?.stateAfterCleanups 
-                    ?? { tubes: [[]] });
+                state?.stateFinal 
+                    ?? { tubes: [[]], targets });
         }
         return state ?? {
-            stateAfterCleanups: {
+            stateFinal: {
                 tubes: [[] as SubstanceId[]],
+                targets,
             }
         };
     }
@@ -44,8 +46,8 @@ export const appliedCraftingActionsRecoil = selector({
 export const tubesState = selector({
     key: "tubes",
     get: ({ get }) => {
-        const { stateAfterCleanups } = get(appliedCraftingActionsRecoil);
-        return stateAfterCleanups.tubes;
+        const { stateFinal } = get(appliedCraftingActionsRecoil);
+        return stateFinal.tubes;
     }
 })
 

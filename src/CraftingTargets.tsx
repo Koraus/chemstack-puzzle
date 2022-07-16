@@ -1,5 +1,6 @@
 import { cx } from "@emotion/css";
 import { selector, useRecoilValue } from "recoil";
+import { appliedCraftingActionsRecoil } from "./CraftingTable";
 import { levelPresetRecoil } from "./LevelEditor";
 import { reactionsLibraryRecoil } from "./ReactionsLibrary";
 import { Tube } from "./Tube";
@@ -45,7 +46,8 @@ export function CraftingTargets({ style, className }: {
     style?: CSSProperties,
     className?: string,
 }) {
-    const targets = useRecoilValue(craftingTargetsRecoil);
+    const { stateFinal } = useRecoilValue(appliedCraftingActionsRecoil);
+    const { targets } = stateFinal;
     return <div
         className={cx(className)}
         style={{
