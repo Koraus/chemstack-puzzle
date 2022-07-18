@@ -188,14 +188,13 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                     }))} />
 
                 <button
-                    className={css`
-                        & {
-                            padding: 0;
-                            background-color: white;
-                            font-size: 0;
-                            margin-left:5px;
-                        }
-                    `}
+                    style={{
+                        padding: "0",
+                        backgroundColor: "white",
+                        fontSize: "0",
+                        marginLeft:"5px",
+                    }}
+
                     onClick={() => {
                         const newSeed = Math.round(Math.random() * 10000).toString();
                         setLevelPreset(update(levelPreset, {
@@ -203,8 +202,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                             name: { $set: "custom level" },
                         }));
                     }}
-                    style={{
-                    }}
+ 
                 > <span class="material-symbols-rounded"> casino </span></button>
             </div>
             <br />
