@@ -7,9 +7,10 @@ import { ReactionsLibrary } from "./ReactionsLibrary";
 import { ActionLog } from "./ActionLog";
 import { Statistics } from "./Statistics";
 import * as flex from "./utils/flex";
-import { LevelEditor, LevelList, levelPresets, levelPresetRecoil, LoadHighestLevelEffect } from "./LevelEditor";
+import { LevelEditor } from "./LevelEditor";
+import { LevelList, levelPresetRecoil, LoadHighestLevelEffect } from "./LevelList";
 import { useState, StateUpdater } from "preact/hooks";
-import { useUpdRecoilState } from "./utils/useUpdRecoilState";
+import { levelPresets } from "./levelPresets";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 const _css = css`

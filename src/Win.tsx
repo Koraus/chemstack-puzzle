@@ -1,5 +1,5 @@
 import { selector, useRecoilValue } from 'recoil';
-import { gameProgressState, levelPresetRecoil } from "./LevelEditor";
+import { gameProgressState, levelPresetRecoil } from "./LevelList";
 import { useEffect } from "preact/hooks";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { appliedCraftingActionsRecoil, tubesState } from './CraftingTable';

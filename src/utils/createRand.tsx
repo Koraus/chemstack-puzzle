@@ -1,4 +1,4 @@
-import { SHA256 } from "crypto-js";
+import SHA256 from "crypto-js/sha256";
 
 export function createRand(seed: string) {
     let arr = SHA256(seed).words;

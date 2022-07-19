@@ -1,7 +1,7 @@
 import { selector, useRecoilValue } from 'recoil';
 import { tubesState } from "./CraftingTable";
 import * as flex from './utils/flex';
-import { levelPresetRecoil } from './LevelEditor';
+import { levelPresetRecoil } from './LevelList';
 import { substanceColors } from './substanceColors';
 import { Reaction, SubstanceId } from './crafting';
 import { createRand } from './utils/createRand';
@@ -29,6 +29,21 @@ export function generateReactionsLibrary({ seed, substanceMaxCount }: {
         }
     }
 
+    function* f5(xs: number[]) {
+        const n = xs.length;
+        for (let x0 = 0; x0 < n; x0++) {
+            for (let x1 = x0 + 1; x1 < n; x1++) {
+                for (let x2 = x1 + 1; x2 < n; x2++) {
+                    for (let x3 = x2 + 1; x3 < n; x3++) {
+                        for (let x4 = x3 + 1; x4 < n; x4++) {
+                            yield [xs[x0], xs[x1], xs[x2], xs[x3], xs[x4]];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     function remapSids(reactions: Reaction[], sidRevMap: SubstanceId[]) {
         const sidMap = sidRevMap.map(() => 0);
         for (let i = 0; i < sidMap.length; i++) {
@@ -46,17 +61,18 @@ export function generateReactionsLibrary({ seed, substanceMaxCount }: {
         const rand = createRand(seed + uniqueReagentsId);
         return {
             reagents: [reagent1, reagent2],
-            products: rand() < 0.3
-                ? [reagent1, reagent2]
-                : [
-                    rand.rangeInt(substanceMaxCount),
-                    ...(rand() < 0.2) ? [] : [
+            products:
+                rand() < 0.5
+                    ? [reagent1, reagent2]
+                    : [
                         rand.rangeInt(substanceMaxCount),
-                        ...(rand() < 0.8) ? [] : [
+                        ...(rand() < 0.5) ? [] : [
                             rand.rangeInt(substanceMaxCount),
-                        ],
-                    ]
-                ]
+                            ...(rand() < 0.9) ? [] : [
+                                rand.rangeInt(substanceMaxCount),
+                            ],
+                        ]
+                    ],
         } as Reaction;
     }
 
@@ -88,13 +104,25 @@ export function generateReactionsLibrary({ seed, substanceMaxCount }: {
         it.toArray()
     );
 
-    // find 3 sids with the biggest mutual reaction count
-    let sidRevMap = selectMostReactiveCore(f3(substances));
+    const sidRevMap = (() => {
+        // find 5 sids with the biggest mutual reaction count
+        const sidRevMap = selectMostReactiveCore(f5(substances));
 
-    // grow those 3 to max
-    while (sidRevMap.length < substances.length) {
-        sidRevMap = selectMostReactiveCore(f1p(substances, sidRevMap));
-    }
+        // among those 5, find 3 sids with the biggest mutual reaction count
+        let sidRevMap1 = selectMostReactiveCore(f3(sidRevMap));
+
+        // grow those 3 to 5
+        while (sidRevMap1.length < sidRevMap.length) {
+            sidRevMap1 = selectMostReactiveCore(f1p(sidRevMap, sidRevMap1));
+        }
+
+        // grow those 5 to max
+        while (sidRevMap1.length < substances.length) {
+            sidRevMap1 = selectMostReactiveCore(f1p(substances, sidRevMap1));
+        }
+
+        return sidRevMap1;
+    })();
 
     return remapSids(reactions, sidRevMap);
 }

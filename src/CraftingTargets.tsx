@@ -1,7 +1,7 @@
 import { cx } from "@emotion/css";
 import { selector, useRecoilValue } from "recoil";
 import { appliedCraftingActionsRecoil } from "./CraftingTable";
-import { levelPresetRecoil } from "./LevelEditor";
+import { levelPresetRecoil } from "./LevelList";
 import { reactionsLibraryRecoil } from "./ReactionsLibrary";
 import { Tube } from "./Tube";
 import { createRand } from "./utils/createRand";

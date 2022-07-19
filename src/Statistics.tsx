@@ -1,6 +1,6 @@
 import { useRecoilValue } from 'recoil';
 import { craftingActionsRecoil } from './CraftingTable';
-import { levelPresetRecoil } from "./LevelEditor";
+import { levelPresetRecoil } from "./LevelList";
 import { SubstanceId } from "./crafting";
 import { substanceColors } from './substanceColors';
 type CSSProperties = import("preact").JSX.CSSProperties;

@@ -11,7 +11,7 @@ import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { reactionsLibraryRecoil } from "./ReactionsLibrary";
 import { CraftingTargets, craftingTargetsRecoil } from "./CraftingTargets";
 import { isWinRecoil } from "./Win";
-import { levelPresetRecoil } from "./LevelEditor";
+import { levelPresetRecoil } from "./LevelList";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const craftingActionsRecoil = atom({
