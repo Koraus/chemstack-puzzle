@@ -66,9 +66,9 @@ export function generateReactionsLibrary({ seed, substanceMaxCount }: {
                     ? [reagent1, reagent2]
                     : [
                         rand.rangeInt(substanceMaxCount),
-                        ...(rand() < 0.5) ? [] : [
+                        ...(rand() < 0.3) ? [] : [
                             rand.rangeInt(substanceMaxCount),
-                            ...(rand() < 0.9) ? [] : [
+                            ...(rand() < 0.7) ? [] : [
                                 rand.rangeInt(substanceMaxCount),
                             ],
                         ]
