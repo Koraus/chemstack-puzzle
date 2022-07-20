@@ -4,9 +4,11 @@
         "jsxImportSource": "preact",
         "strict": true,
         "target": "ESNext",
+        "module": "ESNext",
         "moduleResolution": "Node",
         "isolatedModules": true,
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
     },
-    "include": ["./src/"]
+    "files": ["./node_modules/vite/client.d.ts"],
+    "include": ["./src/"],
 }

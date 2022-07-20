@@ -2,7 +2,7 @@ import { atom, useRecoilTransaction_UNSTABLE, useRecoilValue } from "recoil";
 import { craftingActionsRecoil } from "./CraftingTable";
 import { apipe } from "./utils/apipe";
 import * as it from "./utils/it";
-import { useEffect } from "preact/hooks";
+import { useEffect, useRef } from "preact/hooks";
 import { levelPresets } from "./levelPresets";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
@@ -18,7 +18,7 @@ export const gameProgressState = atom({
         const key = node.key;
         const savedValue = localStorage.getItem(key)
         if (savedValue != null) {
-            const __DEBUG_setAllLevels = false;
+            const __DEBUG_setAllLevels = false && import.meta.env.DEV;
 
             if (__DEBUG_setAllLevels) {
                 setSelf(Object.fromEntries(apipe(levelPresets,
@@ -64,17 +64,25 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         set(craftingActionsRecoil, []);
     });
 
-    return <div style={{
-        overflowY: "scroll",
-        height: "140px",
-        backgroundColor: "#ffffff20",
-        ...style,
-    }}>{levelPresets.map(levelPreset => {
+    const scrollToRef = useRef<HTMLAnchorElement>(null);
+    useEffect(
+        () => scrollToRef.current?.scrollIntoView({ block: "center" }),
+        []);
+
+    return <div
+        style={{
+            overflowY: "scroll",
+            height: "140px",
+            backgroundColor: "#ffffff20",
+            ...style,
+        }}
+    >{levelPresets.map(levelPreset => {
         const levelPresetIndex = levelPresets.findIndex(x => x.name === levelPreset.name);
         const isCurrent = levelPreset.name === currentLevelPreset.name;
         const isOpen =
             levelPresetIndex === 0
             || (levelPresetIndex > 0 && (levelPresets[levelPresetIndex - 1].name in gameProgress));
+        const __DEBUG_allowAnyLevel = true && import.meta.env.DEV;
         return <a
             style={{
                 padding: "3px",
@@ -91,10 +99,13 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                     backgroundColor: "#ffffff50",
                 }),
             }}
-            {...(isOpen && {
+            {...((isOpen || __DEBUG_allowAnyLevel) && {
                 href: "#",
                 onClick: () => setLevelPreset(levelPreset)
             })}
+            {...isCurrent && {
+                ref: scrollToRef,
+            }}
         >{levelPreset.name}</a>
     })}</div>
 };
