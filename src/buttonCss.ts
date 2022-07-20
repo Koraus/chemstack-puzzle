@@ -11,7 +11,7 @@ export const buttonCss = css`
     margin: 5px;
     padding: 5px;
 }
-& button:disabled {
+&:disabled {
     background-color: #ffffff90;
 }
 `;
