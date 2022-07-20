@@ -2,6 +2,7 @@ import { useRecoilValue } from 'recoil';
 import { useState } from "preact/hooks";
 type CSSProperties = import("preact").JSX.CSSProperties;
 import { craftingActionsRecoil } from './CraftingTable';
+import { buttonCss } from './buttonCss';
 
 export function ActionLog({ style }: { style?: CSSProperties }) {
     const actions = useRecoilValue(craftingActionsRecoil)
@@ -35,7 +36,10 @@ export function ActionLog({ style }: { style?: CSSProperties }) {
             {[...actions].slice(0, 5).map(a => <>{a}<br /></>)}
             {(actions.length > 5) && <>{(() => <>
                 {isOpen && [...actions].slice(5).map(a => <>{a}<br /></>)}
-                <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? "/\\" : `... (+${actions.length - 5})`}</button><br />
+                <button 
+                    className={buttonCss} 
+                    onClick={() => setIsOpen(!isOpen)}
+                >{isOpen ? "/\\" : `... (+${actions.length - 5})`}</button><br />
             </>)()}</>}
         </div>
     </div>;

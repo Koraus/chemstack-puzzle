@@ -11,28 +11,17 @@ import { LevelEditor } from "./LevelEditor";
 import { LevelList, levelPresetRecoil, LoadHighestLevelEffect } from "./LevelList";
 import { useState, StateUpdater } from "preact/hooks";
 import { levelPresets } from "./levelPresets";
+import { buttonCss } from "./buttonCss";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
-const _css = css`
-    & {
-        max-width: 414px;
-        background: linear-gradient(#344763, #081f41);
-        margin: auto;
-        font-family: 'Bahnschrift', sans-serif;
-    }
-    & button {
-        font-size: 100%;
-        font-family: 'Bahnschrift', sans-serif;
 
-        background-color: #ffffffff;
-        border: none;
-        border-radius: 4px;
-        margin: 5px;
-        padding: 5px;
-    }
-    & button:disabled {
-        background-color: #ffffff90;
-    }
+const _css = css`
+& {
+    max-width: 414px;
+    background: linear-gradient(#344763, #081f41);
+    margin: auto;
+    font-family: 'Bahnschrift', sans-serif;
+}
 `;
 
 function Header({ 
@@ -94,9 +83,10 @@ function Header({
             onClick={() => setShowMenu(!showMenu)}
         >menu</a>
 
-        <div><button>&gt;</button></div>
+        <div><button className={buttonCss}>&gt;</button></div>
         <div>{useRecoilValue(levelPresetRecoil).name}</div>
         <div><button
+            className={buttonCss} 
             style={{
                 visibility: useRecoilValue(isWinRecoil) ? "visible" : undefined,
             }}

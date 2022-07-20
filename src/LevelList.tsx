@@ -4,6 +4,7 @@ import { apipe } from "./utils/apipe";
 import * as it from "./utils/it";
 import { useEffect, useRef } from "preact/hooks";
 import { levelPresets } from "./levelPresets";
+import { buttonCss } from "./buttonCss";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const levelPresetRecoil = atom({
@@ -117,6 +118,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         })} </div>
 
         <button
+            className={buttonCss}
             style={{fontSize:"16px"}}
             onClick={
                 () => {

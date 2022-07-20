@@ -2,6 +2,7 @@ import { useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
 import update from "immutability-helper";
 import { craftingActionsRecoil } from './CraftingTable';
 import { levelPresetRecoil } from './LevelList';
+import { buttonCss } from './buttonCss';
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export function LevelEditor({ style }: { style?: CSSProperties }) {
@@ -54,11 +55,12 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                     }))} />
 
                 <button
+                    className={buttonCss}
                     style={{
                         padding: "0",
                         backgroundColor: "white",
                         fontSize: "0",
-                        marginLeft:"5px",
+                        marginLeft: "5px",
                     }}
 
                     onClick={() => {
@@ -68,7 +70,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                             name: { $set: "custom level" },
                         }));
                     }}
- 
+
                 > <span class="material-symbols-rounded"> casino </span></button>
             </div>
             <br />
@@ -83,6 +85,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
             >
                 Max Substances:
                 <button
+                    className={buttonCss}
                     style={{
                         padding: "0",
                         backgroundColor: "white",
@@ -100,6 +103,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                 > <span style={{ fontSize: "24px", lineHeight: "1" }}> - </span></button>
                 {levelPreset.substanceMaxCount}
                 <button
+                    className={buttonCss}
                     style={{
                         padding: "0",
                         backgroundColor: "white",
@@ -126,6 +130,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                 }}
             >Substances:
                 <button
+                    className={buttonCss}
                     style={{
                         padding: "0",
                         backgroundColor: "white",
@@ -155,6 +160,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                         substanceCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
                     }))} />
                 <button
+                    className={buttonCss}
                     style={{
                         padding: "0",
                         backgroundColor: "white",
@@ -182,6 +188,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                 alignItems: "center",
             }}>Ingredients:
                 <button
+                    className={buttonCss}
                     style={{
                         padding: "0",
                         backgroundColor: "white",
@@ -213,6 +220,7 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                         ingredientCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
                     }))} />
                 <button
+                    className={buttonCss}
                     style={{
                         padding: "0",
                         backgroundColor: "white",
@@ -229,46 +237,6 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                 > <span style={{ fontSize: "24px", lineHeight: "1" }}> + </span></button>
             </div>
             <br />
-            {/* 
-            <label>
-                Reactions:
-                <button
-                    style={{
-                        width: "30px",
-                        fontSize: "16px",
-                        padding: "0px 5px",
-                    }}
-                    onClick={() => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        reactionCount: { $set: levelPreset.reactionCount - 1 },
-                    }))}
-                >-</button>
-                <input
-                    type="number"
-                    style={{
-                        textAlign: "right",
-                        width: "20px",
-                        fontSize: "16px",
-                        padding: "0px 5px",
-                    }}
-                    value={levelPreset.reactionCount}
-                    min={0}
-                    onChange={ev => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        reactionCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
-                    }))} />
-                <button
-                    style={{
-                        width: "30px",
-                        fontSize: "16px",
-                        padding: "0px 5px",
-                    }}
-                    onClick={() => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        reactionCount: { $set: levelPreset.reactionCount + 1 },
-                    }))}
-                >+</button>
-            </label><br /> */}
         </div>
     </div>;
 }

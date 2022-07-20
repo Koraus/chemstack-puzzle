@@ -12,6 +12,7 @@ import { reactionsLibraryRecoil } from "./ReactionsLibrary";
 import { CraftingTargets, craftingTargetsRecoil } from "./CraftingTargets";
 import { isWinRecoil } from "./Win";
 import { levelPresetRecoil } from "./LevelList";
+import { buttonCss } from "./buttonCss";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const craftingActionsRecoil = atom({
@@ -29,10 +30,10 @@ export const appliedCraftingActionsRecoil = selector({
         for (let i = 0; i < actions.length; i++) {
             const action = actions[i];
             state = craftingReduce(
-                { reactions }, 
-                action, 
-                state?.stateFinal 
-                    ?? { tubes: [[]], targets });
+                { reactions },
+                action,
+                state?.stateFinal
+                ?? { tubes: [[]], targets });
         }
         return state ?? {
             stateFinal: {
@@ -58,7 +59,7 @@ export function CraftingTable() {
 
     const tubes = useRecoilValue(tubesState);
     const { ingredientCount } = useRecoilValue(levelPresetRecoil);
-    const ingredients = Array.from({length: ingredientCount}, (_, i) => i);
+    const ingredients = Array.from({ length: ingredientCount }, (_, i) => i);
 
     const isWin = useRecoilValue(isWinRecoil);
 
@@ -67,6 +68,7 @@ export function CraftingTable() {
         rev?: boolean
     }) {
         return <button
+            className={buttonCss}
             disabled={isWin}
             onClick={() => act({ action: "addIngredient", ingredientId: sid })}
             style={{
@@ -109,6 +111,7 @@ export function CraftingTable() {
             }}>
                 {tubes.length > 1 && <div>
                     <button
+                        className={buttonCss}
                         style={{
                             ...flex.row,
                         }}
@@ -116,6 +119,7 @@ export function CraftingTable() {
                         onClick={() => act({ action: "pourFromMainIntoSecondary" })}
                     >&lt;</button>
                     <button
+                        className={buttonCss}
                         style={{
                             ...flex.row,
                         }}
@@ -127,6 +131,7 @@ export function CraftingTable() {
             </div>
             <div>
                 <button
+                    className={buttonCss}
                     style={{
                         ...flex.row,
                     }}
@@ -173,6 +178,7 @@ export function CraftingTable() {
                 ...flex.row,
             }}>
                 <button
+                    className={buttonCss}
                     style={{
                         ...flex.row,
                     }}
