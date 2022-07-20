@@ -5,6 +5,8 @@ import * as it from "./utils/it";
 import { useEffect, useRef } from "preact/hooks";
 import { levelPresets } from "./levelPresets";
 import { buttonCss } from "./buttonCss";
+import * as flex from "./utils/flex";
+import { css, cx } from "@emotion/css";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const levelPresetRecoil = atom({
@@ -76,57 +78,89 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         () => scrollToRef.current?.scrollIntoView({ block: "center" }),
         []);
 
-    return <div>
-        <div
+    function Entry({
+        levelPreset
+    }: {
+        levelPreset: typeof levelPresets[0]
+    }) {
+        const levelPresetIndex = levelPresets.findIndex(x => x.name === levelPreset.name);
+        const isCurrent = levelPreset.name === currentLevelPreset.name;
+        const isComplete = 
+            (levelPresetIndex >= 0) 
+            && (levelPresets[levelPresetIndex].name in gameProgress);
+        const isOpen =
+            levelPresetIndex === 0
+            || (levelPresetIndex > 0 && (levelPresets[levelPresetIndex - 1].name in gameProgress));
+        const __DEBUG_allowAnyLevel = true && import.meta.env.DEV;
+        return <a
             style={{
-                overflowY: "scroll",
-                height: "140px",
-                backgroundColor: "#ffffff20",
-                ...style,
+                ...flex.row,
+                padding: "3px",
+                textDecoration: "none",
+                textTransform: "uppercase",
+                color: "grey",
+
+                ...(isOpen && {
+                    color: "white"
+                }),
+
+                ...(isCurrent && {
+                    backgroundColor: "#ffffff50",
+                }),
             }}
-        > {levelPresets.map(levelPreset => {
-            const levelPresetIndex = levelPresets.findIndex(x => x.name === levelPreset.name);
-            const isCurrent = levelPreset.name === currentLevelPreset.name;
-            const isOpen =
-                levelPresetIndex === 0
-                || (levelPresetIndex > 0 && (levelPresets[levelPresetIndex - 1].name in gameProgress));
-            const __DEBUG_allowAnyLevel = true && import.meta.env.DEV;
-            return <a
+            {...((isOpen || __DEBUG_allowAnyLevel) && {
+                href: "#",
+                onClick: () => setLevelPreset(levelPreset)
+            })}
+            {...isCurrent && {
+                ref: scrollToRef,
+            }}
+        >
+            <span
                 style={{
-                    padding: "3px",
-                    display: "block",
-                    textDecoration: "none",
-                    textTransform: "uppercase",
-                    color: "grey",
-
-                    ...(isOpen && {
-                        color: "white"
-                    }),
-
-                    ...(isCurrent && {
-                        backgroundColor: "#ffffff50",
-                    }),
+                    flexGrow: 1,
+                    overflowX: "hidden",
+                    whiteSpace: "nowrap",
                 }}
-                {...((isOpen || __DEBUG_allowAnyLevel) && {
-                    href: "#",
-                    onClick: () => setLevelPreset(levelPreset)
-                })}
-                {...isCurrent && {
-                    ref: scrollToRef,
-                }}
-            >{levelPreset.name}</a>
-        })} </div>
+            >{levelPreset.name}</span>
+            {isComplete && <span
+                className={cx(
+                    "material-symbols-rounded",
+                    css`& {
+                        line-height: 20px;
+                        color: #a8d26b;
+                    }`,
+                )}
+            >done</span>}
+        </a>;
+    }
+
+    return <div
+        style={{
+            position: "relative",
+            padding: "3px 0px",
+            ...style,
+        }}
+    >
+        <div style={{
+            height: "220px",
+            overflowY: "scroll",
+        }}>{levelPresets.map(levelPreset => <Entry {...{ levelPreset }} />)}</div>
 
         <button
             className={buttonCss}
-            style={{fontSize:"16px"}}
-            onClick={
-                () => {
-                    confirm('Progress will be lost! Click "Ok" to confirm')
-                        &&
-                        resetLevel()
-                }
+            style={{
+                position: "absolute",
+                right: "0px",
+                bottom: "0px",
+                height: "30px",
+                width: "40px",
+                color: "red"
+            }}
+            onClick={() =>
+                confirm('Progress will be lost! Click "Ok" to confirm')
+                && resetLevel()
             }
-        > lvl reset </button>
+        ><span className="material-symbols-rounded">remove_done</span></button>
     </div>
 };

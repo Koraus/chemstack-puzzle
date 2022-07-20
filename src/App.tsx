@@ -52,7 +52,7 @@ function Header({
         className={css`
             display: flex;
             flex-direction: row;
-            margin: 20px 34px 0 34px;
+            margin: 14px 34px 10px 34px;
             & > :nth-child(1), & > :nth-last-child(1) {
                 display: block;
                 flex: 1;
@@ -110,9 +110,11 @@ export function App() {
             {showMenu &&
                 <div style={{
                     ...flex.row,
+                    backgroundColor: "#ffffff20",
                 }}>
                     <LevelList style={{
                         flex: 2,
+                        borderRight: "1px solid #ffffff50"
                     }} />
                     <LevelEditor style={{
                         flex: 5,

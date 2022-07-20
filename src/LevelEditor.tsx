@@ -13,7 +13,6 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
     });
 
     return <div style={{
-        backgroundColor: "#ffffff20",
         color: "white",
         ...style,
     }}>
