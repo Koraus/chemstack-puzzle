@@ -66,7 +66,7 @@ export function CraftingTable() {
 
     return <div style={{
         backgroundColor: "#f4fff559",
-        padding: "10px",
+        padding: "8px 10px",
         ...flex.col,
     }}>
 
@@ -83,9 +83,43 @@ export function CraftingTable() {
             </div>
         </div>
 
-        <div style={{ ...flex.row }}>
-            <div style={{ ...flex.rowRev, flex: 1 }}>
-                {tubes.length > 1 && <div style={{ ...flex.col }}>
+        <div style={{
+            ...flex.row,
+            marginTop: 10,
+        }}>
+            <div style={{
+                ...flex.rowRev,
+                position: "relative",
+                perspective: "120px",
+                transformStyle: "preserve-3d",
+                flex: 1,
+            }}>
+                {tubes.slice(1).map((t, i) => {
+                    if (i === 0) { return <Tube tube={t} />; }
+                    const dx = (i - 1) * 23 + 15;
+                    const dz = Math.pow((i - 1), 0.4) * 20 + 40;
+                    return <Tube
+                        style={{
+                            position: "absolute",
+                            transform: `translate3d(${-dx}px, 0, ${-dz}px)`,
+                        }}
+                        shadow={0.47}
+                        tube={t} />;
+                })}
+            </div>
+
+            <div
+                style={{
+                    ...flex.row,
+                    flexShrink: 0,
+                    margin: "-55px 0px -18px",
+                }}>
+
+                <div style={{
+                    ...flex.col,
+                    visibility: tubes.length > 1 ? undefined : "hidden",
+                    margin: "50px 10px 50px 10px"
+                }}>
                     <button
                         className={buttonCss}
                         disabled={isWin || !tubes[1] || tubes[0].length === 0}
@@ -96,16 +130,30 @@ export function CraftingTable() {
                         disabled={isWin || !tubes[1] || tubes[1].length === 0}
                         onClick={() => act({ action: "pourFromSecondaryIntoMain" })}
                     >&gt;</button>
-                </div>}
-                {tubes.slice(1).map((t, i) => <Tube tube={t} />)}
-            </div>
+                </div>
 
-            <CraftingTube
-                tube={tubes[0]}
-                style={{
-                    flexShrink: 0,
-                    margin: "-20px 10px -30px",
-                }} />
+                <CraftingTube
+                    tube={tubes[0]} />
+
+                <div style={{
+                    ...flex.col,
+                    visibility: "hidden",
+                    margin: "50px 10px 50px 10px"
+                }}>
+                    <button
+                        className={buttonCss}
+                        disabled={isWin || !tubes[1] || tubes[0].length === 0}
+                        onClick={() => act({ action: "pourFromMainIntoSecondary" })}
+                    >&lt;</button>
+                    <button
+                        className={buttonCss}
+                        disabled={isWin || !tubes[1] || tubes[1].length === 0}
+                        onClick={() => act({ action: "pourFromSecondaryIntoMain" })}
+                    >&gt;</button>
+                </div>
+
+
+            </div>
             <CraftingTargets style={{
                 flex: 1,
             }} />
@@ -132,7 +180,7 @@ export function CraftingTable() {
                     backgroundColor: "#dddddd",
                     borderRadius: "0px 0px 999px 999px",
                 }}></div></button>
-                
+
                 <button
                     className={buttonCss}
                     style={{

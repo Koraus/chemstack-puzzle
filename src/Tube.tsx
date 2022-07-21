@@ -1,62 +1,106 @@
+import { cx } from "@emotion/css";
 import { SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 type CSSProperties = import("preact").JSX.CSSProperties;
+type ComponentChildren = import("preact").ComponentChildren;
 
+function TubeSlot({
+    isBottom,
+    sid,
+}: {
+    isBottom?: boolean,
+    sid: SubstanceId;
+}) {
+    return <div style={{
+        textAlign: "center",
+        margin: `-2px 7px 7px 7px`,
+        width: `18px`,
+        height: `35px`,
+        border: "2px dashed #ffffff50",
+        borderTopLeftRadius: "3px 6px",
+        borderTopRightRadius: "3px 6px",
+        borderBottomLeftRadius: "3px 6px",
+        borderBottomRightRadius: "3px 6px",
+        fontSize: `24px`,
+        fontFamily: "Bahnschrift",
+        lineHeight: `38px`,
+
+        ...(sid === undefined ? {} : {
+            backgroundColor: substanceColors[sid],
+            color: "#ffffffff",
+            border: "2px dashed transparent",
+        }),
+
+        ...(!isBottom ? {} : {
+            borderBottomLeftRadius: "9px",
+            borderBottomRightRadius: "9px",
+        }),
+    }}>{sid}</div>;
+}
+
+export function TubeAsContainer({
+    children,
+    style,
+    className,
+    isTarget = false,
+    shadow,
+}: {
+    children: ComponentChildren,
+    style?: CSSProperties;
+    className?: string,
+    isTarget?: boolean;
+    shadow?: number;
+}) {
+    if (shadow !== undefined) {
+        shadow = isTarget ? shadow : -shadow;
+    }
+    return <div
+        className={cx(className)}
+        style={{
+            ...flex.colRev,
+
+            height: `155px`,
+            background: "#95A1AD",
+            borderBottomLeftRadius: "999px",
+            borderBottomRightRadius: "999px",
+            position: "relative",
+            overflow: "hidden",
+
+            ...(!isTarget ? {} : {
+                background: "#4E6076",
+            }),
+
+            ...style,
+        }}
+    >
+        {children}
+        {shadow !== undefined && <div style={{
+            position: "absolute",
+            top: 0,
+            left: `${-shadow * 100}%`,
+            bottom: "-5px",
+            right: `${shadow * 100}%`,
+            background: "#00000060",
+            borderBottomLeftRadius: "999px",
+            borderBottomRightRadius: "999px",
+        }}></div>}
+    </div>;
+}
 
 export function Tube({
-    tube, style, isTarget = false, w = 24, isActive = false,
+    tube,
+    ...props
 }: {
     tube: SubstanceId[];
     style?: CSSProperties;
+    className?: string,
     isTarget?: boolean;
-    isActive?: boolean;
-    w?: number;
+    shadow?: number;
 }) {
-    function Slot({ i }: { i: number; }) {
-        return <div style={{
-            textAlign: "center",
-            margin: `${-w * 0.125}px ${w * 0.25}px ${w * 0.25}px ${w * 0.25}px`,
-            width: `${w}px`,
-            height: `${w * 1.25}px`,
-            border: "2px dashed #ffffff50",
-            borderRadius: "2px",
-            fontSize: `${w * 0.8}px`,
-            fontFamily: "Bahnschrift",
-            lineHeight: `${w * 1.4}px`,
-            color: "#ffffff50",
-            backgroundColor: "#ffffff08",
-
-            ...(i >= tube.length ? {} : {
-                backgroundColor: substanceColors[tube[i]],
-                color: "#ffffffff",
-                borderColor: "transparent",
-            }),
-
-            ...(i !== 0 ? {} : {
-                borderBottomLeftRadius: "999px",
-                borderBottomRightRadius: "999px",
-            }),
-        }}>{i === tube.length ? (isActive ? "+" : undefined) : tube[i]}</div>;
-    }
-
-    return <div style={{
-        ...flex.colRev,
-
-        height: `${w * 6}px`,
-        background: "#ffffff4d",
-        borderBottomLeftRadius: "999px",
-        borderBottomRightRadius: "999px",
-        margin: "4px",
-
-        ...(!isTarget ? {} : {
-            background: "#00000040",
-        }),
-
-        ...style,
-    }}>
-        <Slot i={0} />
-        <Slot i={1} />
-        <Slot i={2} />
-    </div>;
+    return <TubeAsContainer {...props}>
+        <TubeSlot sid={tube[0]} isBottom />
+        <TubeSlot sid={tube[1]} />
+        <TubeSlot sid={tube[2]} />
+    </TubeAsContainer>;
 }

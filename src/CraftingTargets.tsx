@@ -1,11 +1,14 @@
 import { cx } from "@emotion/css";
-import { selector, useRecoilValue } from "recoil";
-import { appliedCraftingActionsRecoil } from "./CraftingTable";
+import { selector, useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from "recoil";
+import { buttonCss } from "./buttonCss";
+import { appliedCraftingActionsRecoil, craftingActionsRecoil } from "./CraftingTable";
 import { levelPresetRecoil } from "./LevelList";
 import { reactionsLibraryRecoil } from "./ReactionsLibrary";
-import { Tube } from "./Tube";
+import { Tube, TubeAsContainer } from "./Tube";
 import { createRand } from "./utils/createRand";
 import * as flex from "./utils/flex";
+import { DoubleArrow } from '@emotion-icons/material-rounded/DoubleArrow'
+import { levelPresets } from "./levelPresets";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const craftingTargetsRecoil = selector({
@@ -42,21 +45,81 @@ export const craftingTargetsRecoil = selector({
     }
 })
 
+
+function NextLevelButton({ ...props }: { disabled?: boolean }) {
+    const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
+        set(levelPresetRecoil, lp)
+        set(craftingActionsRecoil, []);
+    });
+    const [levelPreset] = useRecoilState(levelPresetRecoil);
+    let currentLevelIndex = levelPresets
+        .findIndex(lp => lp.name === levelPreset.name);
+    if (currentLevelIndex < 0) {
+        currentLevelIndex = 0;
+    }
+    const nextLevelIndex = (currentLevelIndex + 1) % levelPresets.length;
+    const setNextLevel = () => setLevelPreset(levelPresets[nextLevelIndex]);
+
+    return <button
+        className={cx(buttonCss)}
+        style={{
+            margin: `-2px 7px 7px 7px`,
+            width: `18px`,
+            height: `125px`,
+            border: "2px dashed #ffffff50",
+            borderColor: "transparent",
+            borderTopLeftRadius: "3px 6px",
+            borderTopRightRadius: "3px 6px",
+            borderBottomLeftRadius: "9px",
+            borderBottomRightRadius: "9px",
+        }}
+        onClick={setNextLevel}
+        {...props}
+    ><DoubleArrow style={{
+        margin: "0 -10px 0 -12px",
+    }} />
+    </button>
+}
+
 export function CraftingTargets({ style, className }: {
     style?: CSSProperties,
     className?: string,
 }) {
     const { stateFinal } = useRecoilValue(appliedCraftingActionsRecoil);
     const { targets } = stateFinal;
+
+    function TubeAt({ i }: { i: number }) {
+        const target = targets[i];
+        const dx = (i - 1) * 23 + 15;
+        const dz = Math.pow((i - 1), 0.4) * 20 + 40;
+        const depthProps =
+            i > 0
+                ? {
+                    style: {
+                        position: "absolute",
+                        transform: `translate3d(${dx}px, 0, ${-dz}px)`,
+                    },
+                    shadow: 0.47
+                }
+                : {};
+        return target
+            ? <Tube {...depthProps} tube={target} isTarget />
+            : <TubeAsContainer {...depthProps} isTarget>
+                <NextLevelButton disabled={i > 0} />
+            </TubeAsContainer>
+    }
+
     return <div
         className={cx(className)}
         style={{
             ...flex.row,
             ...style,
+            position: "relative",
+            perspective: "120px",
+            transformStyle: "preserve-3d",
         }}
     >
-        <div style={{ ...flex.row }}>
-            {targets.map(target => <Tube tube={target} isTarget={true} />)}
-        </div>
+        {targets.map((_, i) => <TubeAt i={i} />)}
+        <TubeAt i={targets.length} />
     </div>;
 }

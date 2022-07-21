@@ -6,6 +6,7 @@
     "build": "vite build"
   },
   "devDependencies": {
+    "@emotion-icons/material-rounded": "^3.14.0",
     "@emotion/css": "^11.9.0",
     "@preact/preset-vite": "^2.2.0",
     "@types/crypto-js": "^4.1.1",

@@ -6,6 +6,7 @@ export const buttonCss = css`
     font-family: 'Bahnschrift', sans-serif;
 
     background-color: #ffffffff;
+    color: #283C5A;
     border: none;
     border-radius: 4px;
     margin: 5px;
