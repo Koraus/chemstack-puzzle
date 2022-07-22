@@ -139,8 +139,9 @@ export const reactionsLibraryRecoil = selector({
 })
 
 export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
-    const tube = useRecoilValue(tubesState)[0];
-    const currentSubstance = tube[tube.length - 1];
+    const tubes = useRecoilValue(tubesState);
+    const mainTube = tubes[0];
+    const currentSubstance = mainTube[mainTube.length - 1];
     const reactions = useRecoilValue(reactionsLibraryRecoil);
 
     function IngredientSlot({ sid }: { sid?: number }) {
@@ -156,6 +157,61 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
         }}>{sid ?? <>&nbsp;</>}</div>
     }
 
+    function Reaction({ reaction }: { reaction: Reaction }) {
+        const isApplicable = currentSubstance === reaction.reagents[0];
+        const isPending = tubes.some((tube) =>
+            reaction.reagents[1] === tube[tube.length - 1]
+            && reaction.reagents[0] === tube[tube.length - 2]
+        );
+
+        return <div style={{
+            position: "relative",
+        }}>
+            <div style={{
+                ...flex.col,
+                textAlign: "center",
+            }}>
+                <IngredientSlot sid={reaction.products[2]} />
+                <IngredientSlot sid={reaction.products[1]} />
+                <IngredientSlot sid={reaction.products[0]} />
+                <div
+                    class="material-symbols-rounded"
+                    style={{
+                        color:
+                            isPending
+                                ? "yellow"
+                                : isApplicable ? "white" : "#ffffff30",
+                        fontSize: "19px",
+                        height: "18px",
+                    }}
+                >keyboard_arrow_up</div>
+                <IngredientSlot sid={reaction.reagents[1]} />
+                <IngredientSlot sid={reaction.reagents[0]} />
+            </div>
+            {isApplicable && <div style={{
+                zIndex: 1,
+                position: "absolute",
+                top: "1px",
+                left: "1px",
+                bottom: "1px",
+                right: "1px",
+                border: "2px solid white",
+                borderRadius: "3px",
+            }}></div>}
+            {isPending && <div
+                style={{
+                    zIndex: 1,
+                    position: "absolute",
+                    top: "1px",
+                    left: "1px",
+                    bottom: "1px",
+                    right: "1px",
+                    border: "2px solid yellow",
+                    borderRadius: "3px",
+                }}> </div>}
+        </div>;
+    }
+
     return <div style={{
         ...flex.row,
         justifyContent: "center",
@@ -167,41 +223,6 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
         overflowX: "scroll",
         userSelect: "none",
     }}>
-            {reactions
-                .map(r => {
-                    const isApplicable = currentSubstance === r.reagents[0];
-                    return <div style={{
-                        position: "relative",
-                    }}>
-                        <div style={{
-                            ...flex.col,
-                            textAlign: "center",
-                        }}>
-                            <IngredientSlot sid={r.products[2]} />
-                            <IngredientSlot sid={r.products[1]} />
-                            <IngredientSlot sid={r.products[0]} />
-                            <div
-                                class="material-symbols-rounded"
-                                style={{
-                                    color: isApplicable ? "white" : "#ffffff30",
-                                    fontSize: "19px",
-                                    height: "18px",
-                                }}
-                            >keyboard_arrow_up</div>
-                            <IngredientSlot sid={r.reagents[1]} />
-                            <IngredientSlot sid={r.reagents[0]} />
-                        </div>
-                        {isApplicable && <div style={{
-                            zIndex: 1,
-                            position: "absolute",
-                            top: "1px",
-                            left: "1px",
-                            bottom: "1px",
-                            right: "1px",
-                            border: "2px solid white",
-                            borderRadius: "3px",
-                        }}></div>}
-                    </div>;
-                })}
+            {reactions.map(r => <Reaction reaction={r} />)}
         </div></div>;
 }
