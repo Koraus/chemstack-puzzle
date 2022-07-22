@@ -1,4 +1,4 @@
-import { cx } from "@emotion/css";
+import { css, cx } from "@emotion/css";
 import { selector, useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from "recoil";
 import { buttonCss } from "./buttonCss";
 import { appliedCraftingActionsRecoil, craftingActionsRecoil } from "./CraftingTable";
@@ -7,8 +7,10 @@ import { reactionsLibraryRecoil } from "./ReactionsLibrary";
 import { Tube, TubeAsContainer } from "./Tube";
 import { createRand } from "./utils/createRand";
 import * as flex from "./utils/flex";
-import { DoubleArrow } from '@emotion-icons/material-rounded/DoubleArrow'
+import { DoubleArrow } from '@emotion-icons/material-rounded/DoubleArrow';
 import { levelPresets } from "./levelPresets";
+import { isWinRecoil } from "./Win";
+import { TouchAppAnimation } from "./TouchAppAnimation";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const craftingTargetsRecoil = selector({
@@ -43,7 +45,12 @@ export const craftingTargetsRecoil = selector({
             throw "craftingTargets tryCount limit exceeded";
         });
     }
-})
+});
+
+export const craftingTargetsLeftRecoil =  selector({
+    key: "craftingTargetsLeft",
+    get: ({ get }) => get(appliedCraftingActionsRecoil).stateFinal.targets,
+});
 
 
 function NextLevelButton({ ...props }: { disabled?: boolean }) {
@@ -85,8 +92,11 @@ export function CraftingTargets({ style, className }: {
     style?: CSSProperties,
     className?: string,
 }) {
-    const { stateFinal } = useRecoilValue(appliedCraftingActionsRecoil);
-    const { targets } = stateFinal;
+    const targets = useRecoilValue(craftingTargetsLeftRecoil);
+    
+    const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
+    const isWin = useRecoilValue(isWinRecoil);
+    const hintWin = isFirstLevel && isWin;
 
     function TubeAt({ i }: { i: number }) {
         const target = targets[i];
@@ -99,7 +109,16 @@ export function CraftingTargets({ style, className }: {
                         position: "absolute",
                         transform: `translate3d(${dx}px, 0, ${-dz}px)`,
                     },
-                    shadow: 0.47
+                    shadow: <div style={{
+                        position: "absolute",
+                        top: 0,
+                        left: "-47%",
+                        right: "47%",
+                        bottom: "-5px",
+                        background: "#00000060",
+                        borderBottomLeftRadius: "999px",
+                        borderBottomRightRadius: "999px",
+                    }}></div>
                 }
                 : {};
         return target
@@ -116,10 +135,15 @@ export function CraftingTargets({ style, className }: {
             ...style,
             position: "relative",
             perspective: "120px",
+            perspectiveOrigin: "center 120px",
             transformStyle: "preserve-3d",
         }}
     >
         {targets.map((_, i) => <TubeAt i={i} />)}
         <TubeAt i={targets.length} />
+        {(hintWin) && <TouchAppAnimation className={css`& {
+            position: absolute;
+            transform: translate(20px, 120px);
+        }`} />}
     </div>;
 }

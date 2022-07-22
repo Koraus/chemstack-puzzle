@@ -7,13 +7,17 @@ import { Tube } from "./Tube";
 import { CraftingAction, craftingReduce } from './crafting';
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { reactionsLibraryRecoil } from "./ReactionsLibrary";
-import { CraftingTargets, craftingTargetsRecoil } from "./CraftingTargets";
+import { CraftingTargets, craftingTargetsLeftRecoil, craftingTargetsRecoil } from "./CraftingTargets";
 import { isWinRecoil } from "./Win";
 import { levelPresetRecoil } from "./LevelList";
 import { buttonCss } from "./buttonCss";
 import { CraftingIngredientButton } from "./CraftingIngredientButton";
 import { CraftingTube } from "./CraftingTube";
-export type CSSProperties = import("preact").JSX.CSSProperties;
+import { levelPresets } from "./levelPresets";
+import { TouchAppAnimation } from "./TouchAppAnimation";
+import { css, cx } from "@emotion/css";
+import { JSX } from "preact";
+import { Refresh } from '@emotion-icons/material-rounded/Refresh';
 
 export const craftingActionsRecoil = atom({
     key: "craftingActions",
@@ -46,42 +50,77 @@ export const appliedCraftingActionsRecoil = selector({
 
 export const tubesState = selector({
     key: "tubes",
-    get: ({ get }) => {
-        const { stateFinal } = get(appliedCraftingActionsRecoil);
-        return stateFinal.tubes;
-    }
+    get: ({ get }) => get(appliedCraftingActionsRecoil).stateFinal.tubes,
 })
 
+function CraftingIngredientPanel({
+    style, className,
+}: {
+    style?: JSX.CSSProperties;
+    className?: string;
+}) {
+    const tubes = useRecoilValue(tubesState);
+    const { ingredientCount } = useRecoilValue(levelPresetRecoil);
+    const ingredients = Array.from({ length: ingredientCount }, (_, i) => i);
+    const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
+    const targets = useRecoilValue(craftingTargetsLeftRecoil);
 
+    const hintSid =
+        isFirstLevel
+        && targets.length > 0
+        && tubes[0].every((_, i) => tubes[0][i] === targets[0][i])
+        && targets[0][tubes[0].length];
+
+    const touchAppAnimationCss = css`& {
+        position: absolute;
+        left: 32px;
+        bottom: 10px;
+    }`;
+
+    return <div
+        className={cx(className)}
+        style={{ ...style }}
+    >
+        <div style={{ ...flex.row, flex: 1 }}>
+            {ingredients
+                .filter((_, i) => !(i > 2))
+                .map(sid => <div style={{ position: "relative", }}>
+                    <CraftingIngredientButton sid={sid} />
+                    {(hintSid === sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
+                </div>)}
+        </div>
+        <div style={{ ...flex.rowRev, flex: 1 }}>
+            {ingredients
+                .filter((_, i) => (i > 2))
+                .map(sid => <div style={{ position: "relative", }}>
+                    <CraftingIngredientButton sid={sid} mirrored />
+                    {(hintSid === sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
+                </div>)}
+        </div>
+    </div>
+}
 
 export function CraftingTable() {
+    const craftingActions = useRecoilValue(craftingActionsRecoil);
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
     const tubes = useRecoilValue(tubesState);
-    const { ingredientCount } = useRecoilValue(levelPresetRecoil);
-    const ingredients = Array.from({ length: ingredientCount }, (_, i) => i);
-
+    const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
+    const targets = useRecoilValue(craftingTargetsLeftRecoil);
     const isWin = useRecoilValue(isWinRecoil);
+
+    const hintReset =
+        isFirstLevel
+        && targets.length > 0
+        && !tubes[0].every((_, i) => tubes[0][i] === targets[0][i]);
 
     return <div style={{
         backgroundColor: "#f4fff559",
         padding: "8px 10px",
         ...flex.col,
     }}>
-
-        <div style={{ ...flex.row }}>
-            <div style={{ ...flex.row, flex: 1 }}>
-                {ingredients
-                    .filter((_, i) => !(i > 2))
-                    .map(sid => <CraftingIngredientButton sid={sid} />)}
-            </div>
-            <div style={{ ...flex.rowRev, flex: 1 }}>
-                {ingredients
-                    .filter((_, i) => (i > 2))
-                    .map(sid => <CraftingIngredientButton sid={sid} mirrored />)}
-            </div>
-        </div>
+        <CraftingIngredientPanel style={{ ...flex.row }} />
 
         <div style={{
             ...flex.row,
@@ -91,6 +130,7 @@ export function CraftingTable() {
                 ...flex.rowRev,
                 position: "relative",
                 perspective: "120px",
+                perspectiveOrigin: "center 120px",
                 transformStyle: "preserve-3d",
                 flex: 1,
             }}>
@@ -103,7 +143,16 @@ export function CraftingTable() {
                             position: "absolute",
                             transform: `translate3d(${-dx}px, 0, ${-dz}px)`,
                         }}
-                        shadow={0.47}
+                        shadow={<div style={{
+                            position: "absolute",
+                            top: 0,
+                            left: "47%",
+                            right: "-47%",
+                            bottom: "-5px",
+                            background: "#00000040",
+                            borderBottomLeftRadius: "999px",
+                            borderBottomRightRadius: "999px",
+                        }}></div>}
                         tube={t} />;
                 })}
             </div>
@@ -159,9 +208,32 @@ export function CraftingTable() {
             }} />
         </div>
 
-        <div>
+        <div style={{ ...flex.row, flex: 1 }}>
 
-            <div style={{ ...flex.row, flex: 1 }}>
+            <div style={{ flex: 3 }}>
+            </div>
+            <div style={{
+                flex: 5,
+                ...flex.row,
+                justifyContent: "space-between",
+            }}>
+                <button
+                    className={buttonCss}
+                    style={{
+                        ...flex.row,
+                    }}
+                    disabled={isWin}
+                    onClick={() => act({ action: "addTube" })}
+                ><div style={{
+                    fontSize: "19px",
+                    lineHeight: "22px",
+                    height: "18px",
+                }}>+</div><div style={{
+                    width: "10px",
+                    height: "26px",
+                    backgroundColor: "#dddddd",
+                    borderRadius: "0px 0px 999px 999px",
+                }}></div></button>
                 <button
                     className={buttonCss}
                     style={{
@@ -180,24 +252,25 @@ export function CraftingTable() {
                     backgroundColor: "#dddddd",
                     borderRadius: "0px 0px 999px 999px",
                 }}></div></button>
-
+            </div>
+            <div style={{ ...flex.rowRev, flex: 3 }}>
                 <button
                     className={buttonCss}
                     style={{
                         ...flex.row,
+                        width: 33,
+                        color: "#ff7070",
+                        position: "relative",
                     }}
-                    disabled={isWin}
-                    onClick={() => act({ action: "addTube" })}
-                ><div style={{
-                    fontSize: "19px",
-                    lineHeight: "22px",
-                    height: "18px",
-                }}>+</div><div style={{
-                    width: "10px",
-                    height: "26px",
-                    backgroundColor: "#dddddd",
-                    borderRadius: "0px 0px 999px 999px",
-                }}></div></button>
+                    disabled={isWin || craftingActions.length === 0}
+                    onClick={() => updCraftingActions({ $set: [] })}
+                >
+                    <Refresh style={{ margin: -4 }} />
+                    {(hintReset) && <TouchAppAnimation className={css`& {
+                        position: absolute;
+                        transform: translate(20px, 33px);
+                    }`} />}
+                </button>
             </div>
 
         </div>

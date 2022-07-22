@@ -2,8 +2,7 @@ import { cx } from "@emotion/css";
 import { SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
-type CSSProperties = import("preact").JSX.CSSProperties;
-type ComponentChildren = import("preact").ComponentChildren;
+import { JSX, ComponentChildren } from "preact";
 
 function TubeSlot({
     isBottom,
@@ -23,7 +22,6 @@ function TubeSlot({
         borderBottomLeftRadius: "3px 6px",
         borderBottomRightRadius: "3px 6px",
         fontSize: `24px`,
-        fontFamily: "Bahnschrift",
         lineHeight: `38px`,
 
         ...(sid === undefined ? {} : {
@@ -47,14 +45,11 @@ export function TubeAsContainer({
     shadow,
 }: {
     children: ComponentChildren,
-    style?: CSSProperties;
-    className?: string,
+    style?: JSX.CSSProperties;
+    className?: string;
     isTarget?: boolean;
-    shadow?: number;
+    shadow?: ComponentChildren;
 }) {
-    if (shadow !== undefined) {
-        shadow = isTarget ? shadow : -shadow;
-    }
     return <div
         className={cx(className)}
         style={{
@@ -75,16 +70,7 @@ export function TubeAsContainer({
         }}
     >
         {children}
-        {shadow !== undefined && <div style={{
-            position: "absolute",
-            top: 0,
-            left: `${-shadow * 100}%`,
-            bottom: "-5px",
-            right: `${shadow * 100}%`,
-            background: "#00000060",
-            borderBottomLeftRadius: "999px",
-            borderBottomRightRadius: "999px",
-        }}></div>}
+        {shadow}
     </div>;
 }
 
@@ -93,10 +79,10 @@ export function Tube({
     ...props
 }: {
     tube: SubstanceId[];
-    style?: CSSProperties;
+    style?: JSX.CSSProperties;
     className?: string,
     isTarget?: boolean;
-    shadow?: number;
+    shadow?: ComponentChildren;
 }) {
     return <TubeAsContainer {...props}>
         <TubeSlot sid={tube[0]} isBottom />
