@@ -159,24 +159,10 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
 
     function Reaction({ reaction }: { reaction: Reaction }) {
         const isApplicable = currentSubstance === reaction.reagents[0];
-
-        const isPending = (() => {
-            for (let i = 0; i < tubes.length; i++) {
-                const tube = tubes[i];
-                const r = reaction;
-
-                if (tube.length > 2) {
-                    return r.reagents[1] === tube[tube.length - 1]
-                    && r.reagents[0] === tube[tube.length - 2]
-                }
-                if (tube.length > 1) {
-                    return r.reagents[1] === tube[tube.length - 1]
-                    && r.reagents[0] === tube[tube.length - 2]
-                }
-            }
-        })();
-
-
+        const isPending = tubes.some((tube) =>
+            reaction.reagents[1] === tube[tube.length - 1]
+            && reaction.reagents[0] === tube[tube.length - 2]
+        );
 
         return <div style={{
             position: "relative",
@@ -191,7 +177,10 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                 <div
                     class="material-symbols-rounded"
                     style={{
-                        color: isPending ? "yellow" : "#ffffff30" || isApplicable ? "white" : "#ffffff30",
+                        color:
+                            isPending
+                                ? "yellow"
+                                : isApplicable ? "white" : "#ffffff30",
                         fontSize: "19px",
                         height: "18px",
                     }}
@@ -219,21 +208,21 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                     right: "1px",
                     border: "2px solid yellow",
                     borderRadius: "3px",
-                }}> </div> }
-            </div>;
+                }}> </div>}
+        </div>;
     }
 
-            return <div style={{
-                ...flex.row,
-                justifyContent: "center",
-                padding: "0px 3px",
-                ...style,
-            }}><div style={{
-                ...flex.row,
-                padding: "24px 0px 20px",
-                overflowX: "scroll",
-                userSelect: "none",
-            }}>
-                    {reactions.map(r => <Reaction reaction={r} />)}
-                </div></div>;
+    return <div style={{
+        ...flex.row,
+        justifyContent: "center",
+        padding: "0px 3px",
+        ...style,
+    }}><div style={{
+        ...flex.row,
+        padding: "24px 0px 20px",
+        overflowX: "scroll",
+        userSelect: "none",
+    }}>
+            {reactions.map(r => <Reaction reaction={r} />)}
+        </div></div>;
 }
