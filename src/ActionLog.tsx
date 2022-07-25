@@ -25,10 +25,10 @@ export function ActionLog({ style }: { style?: CSSProperties }) {
     }}>
         <h3 style={{
             margin: "0px",
-            backgroundColor: "#ffffff50",
+            // backgroundColor: "#f7f7f750",
             paddingLeft: "20px",
-        }}>&#x2022; Action log:</h3>
-        <div style={{
+        }}>Action count: {actions.length}</h3>
+        {/* <div style={{
             paddingLeft: "20px",
             paddingRight: "20px",
             paddingBottom: "20px",
@@ -41,6 +41,6 @@ export function ActionLog({ style }: { style?: CSSProperties }) {
                     onClick={() => setIsOpen(!isOpen)}
                 >{isOpen ? "/\\" : `... (+${actions.length - 5})`}</button><br />
             </>)()}</>}
-        </div>
+        </div> */}
     </div>;
 }

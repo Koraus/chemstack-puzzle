@@ -1,13 +1,24 @@
-import { SubstanceId } from "./crafting";
+import { CraftingAction, SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
-import { CSSProperties } from "./CraftingTable";
-import { css } from "@emotion/css";
+import { JSX } from "preact";
+import { css, cx } from "@emotion/css";
+import { buttonCss } from "./buttonCss";
+import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
+import { useRecoilValue } from "recoil";
+import { craftingActionsRecoil, tubesState } from "./CraftingTable";
+import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 
-export function CraftingTube({ tube, style }: {
-    tube: SubstanceId[];
-    style?: CSSProperties;
+export function CraftingTube({ style }: {
+    style?: JSX.CSSProperties;
 }) {
+    const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
+    const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
+
+    const tubes = useRecoilValue(tubesState);
+    const tube = tubes[0];
+    const isSecondaryAvailable = tubes.length > 1;
+    
     function Wave({ isFirst, ...props }: { isFirst: boolean, className?: string }) {
         return <svg
             id="Layer_2"
@@ -28,6 +39,7 @@ export function CraftingTube({ tube, style }: {
 
     function Slot({ i }: { i: number; }) {
         const isNext = i === tube.length;
+        const isTopContent = i === tube.length - 1;
         const hasContent = i < tube.length;
         const isFirst = i === 0;
 
@@ -54,27 +66,42 @@ export function CraftingTube({ tube, style }: {
                 borderBottomLeftRadius: "15px",
                 borderBottomRightRadius: "15px",
             }),
-        }}>{isNext
-            ? <>
-                <Wave
-                    {...{ isFirst }}
-                    className={css`
-                    & {
-                        position: absolute;
-                        bottom: 0px;
-                        left: 0px;
-                        transform: scale(1.15);
-                    }
-                    & .cls-1 {
-                        fill: transparent;
-                        stroke: #C0C7CF;
-                        stroke-width: 5px;
-                    }
-                `}
-                />+
-            </>
-            : tube[i]
-            }</div>;
+        }}>
+            {isNext
+                ? <>
+                    <Wave
+                        {...{ isFirst }}
+                        className={css`
+                        & {
+                            position: absolute;
+                            bottom: 0px;
+                            left: 0px;
+                            transform: scale(1.15);
+                        }
+                        & .cls-1 {
+                            fill: transparent;
+                            stroke: #C0C7CF;
+                            stroke-width: 5px;
+                        }
+                    `}
+                    />+
+                </>
+                : tube[i]
+            }
+            {isTopContent && isSecondaryAvailable && <button
+                className={cx(buttonCss)}
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    position: "absolute",
+                    left: "-24px",
+                    top: ["-10px", "3px", "16px"][i],
+                    width: "23px",
+                    height: "40px",
+                }}
+                onClick={() => act({ action: "pourFromMainIntoSecondary" })}
+            ><ArrowLeft style={{ margin: -20 }} /></button>}
+        </div>;
     }
 
     return <div style={{
@@ -83,7 +110,7 @@ export function CraftingTube({ tube, style }: {
         height: "220px",
         background: "#ffffff4d",
         borderRadius: "0px 0px 999px 999px",
-        border: "6px solid white",
+        border: "6px solid #ffffff90",
         borderTopColor: "#ffffff30",
         ...style,
     }}>

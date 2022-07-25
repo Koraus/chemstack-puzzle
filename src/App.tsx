@@ -10,6 +10,8 @@ import { LevelEditor } from "./LevelEditor";
 import { LevelList, LoadHighestLevelEffect } from "./LevelList";
 import { useState } from "preact/hooks";
 import { Header } from "./Header";
+import { Github } from '@emotion-icons/bootstrap/Github';
+import { OpenInNew } from '@emotion-icons/material-rounded/OpenInNew';
 
 
 const _css = css`
@@ -53,8 +55,43 @@ export function App() {
             <CraftingTable />
 
             <div style={{ ...flex.row }}>
-                <ActionLog style={{ flex: 3 }} />
-                <Statistics style={{ flex: 2 }} />
+                <ActionLog style={{ flex: 1 }} />
+                {/* <Statistics style={{ flex: 1 }} /> */}
+            </div>
+
+            <div style={{
+                ...flex.row,
+                justifyContent: "center",
+                padding: "8px 14px",
+                marginTop: 20,
+                backgroundColor: "#ffffff20",
+            }}>
+                <a 
+                    style={{
+                        flex: 1,
+                        color: "white",
+                        fontSize: "24px",
+                        textAlign: "left",
+                    }}
+                    target="_blank"
+                    href="https://www.gkzr.me"
+                >
+                    <OpenInNew style={{height: 20, marginRight: 5}} />
+                    GKZR</a>
+                <a 
+                    style={{
+                        flex: 1,
+                        display: "block",
+                        fontSize: "18px",
+                        lineHeight: "28px",
+                        color: "white",
+                        textAlign: "right",
+                    }}
+                    target="_blank"
+                    href="https://github.com/ndry/chemstack-puzzle"
+                >
+                    chemstack-puzzle
+                    <Github style={{height: 20, marginLeft: 5 }} /></a>
             </div>
         </div>
         <WinEffect />

@@ -28,7 +28,7 @@ export function Statistics({ style }: { style?: CSSProperties }) {
             margin: "0px",
             backgroundColor: "#ffffff50",
             paddingLeft: "20px",
-        }}>&#x2022; Statistics:</h3>
+        }}>Statistics</h3>
         <div style={{
             paddingLeft: "20px",
             paddingRight: "20px",

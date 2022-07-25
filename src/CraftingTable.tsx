@@ -18,6 +18,8 @@ import { TouchAppAnimation } from "./TouchAppAnimation";
 import { css, cx } from "@emotion/css";
 import { JSX } from "preact";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
+import { Add } from '@emotion-icons/material-rounded/Add';
+import { Close } from '@emotion-icons/material-rounded/Close';
 
 export const craftingActionsRecoil = atom({
     key: "craftingActions",
@@ -135,7 +137,7 @@ export function CraftingTable() {
                 flex: 1,
             }}>
                 {tubes.slice(1).map((t, i) => {
-                    if (i === 0) { return <Tube tube={t} />; }
+                    if (i === 0) { return <Tube isPourable tube={t} />; }
                     const dx = (i - 1) * 23 + 15;
                     const dz = Math.pow((i - 1), 0.4) * 20 + 40;
                     return <Tube
@@ -153,59 +155,12 @@ export function CraftingTable() {
                             borderBottomLeftRadius: "999px",
                             borderBottomRightRadius: "999px",
                         }}></div>}
-                        tube={t} />;
+                        tube={t}
+                    />;
                 })}
             </div>
-
-            <div
-                style={{
-                    ...flex.row,
-                    flexShrink: 0,
-                    margin: "-55px 0px -18px",
-                }}>
-
-                <div style={{
-                    ...flex.col,
-                    visibility: tubes.length > 1 ? undefined : "hidden",
-                    margin: "50px 10px 50px 10px"
-                }}>
-                    <button
-                        className={buttonCss}
-                        disabled={isWin || !tubes[1] || tubes[0].length === 0}
-                        onClick={() => act({ action: "pourFromMainIntoSecondary" })}
-                    >&lt;</button>
-                    <button
-                        className={buttonCss}
-                        disabled={isWin || !tubes[1] || tubes[1].length === 0}
-                        onClick={() => act({ action: "pourFromSecondaryIntoMain" })}
-                    >&gt;</button>
-                </div>
-
-                <CraftingTube
-                    tube={tubes[0]} />
-
-                <div style={{
-                    ...flex.col,
-                    visibility: "hidden",
-                    margin: "50px 10px 50px 10px"
-                }}>
-                    <button
-                        className={buttonCss}
-                        disabled={isWin || !tubes[1] || tubes[0].length === 0}
-                        onClick={() => act({ action: "pourFromMainIntoSecondary" })}
-                    >&lt;</button>
-                    <button
-                        className={buttonCss}
-                        disabled={isWin || !tubes[1] || tubes[1].length === 0}
-                        onClick={() => act({ action: "pourFromSecondaryIntoMain" })}
-                    >&gt;</button>
-                </div>
-
-
-            </div>
-            <CraftingTargets style={{
-                flex: 1,
-            }} />
+            <CraftingTube style={{ margin: "-55px 40px -18px" }} />
+            <CraftingTargets style={{ flex: 1 }} />
         </div>
 
         <div style={{ ...flex.row, flex: 1 }}>
@@ -221,37 +176,47 @@ export function CraftingTable() {
                     className={buttonCss}
                     style={{
                         ...flex.row,
+                        alignItems: "center",
                     }}
-                    disabled={isWin}
+                    disabled={isWin || tubes.length > 6}
                     onClick={() => act({ action: "addTube" })}
-                ><div style={{
-                    fontSize: "19px",
-                    lineHeight: "22px",
-                    height: "18px",
-                }}>+</div><div style={{
-                    width: "10px",
-                    height: "26px",
-                    backgroundColor: "#dddddd",
-                    borderRadius: "0px 0px 999px 999px",
-                }}></div></button>
+                >
+                    <Add style={{
+                        height: "30px",
+                        margin: "0 0 0 -6px",
+                        zIndex: 1,
+                    }} />
+                    <div style={{
+                        margin: "0 0 0 -11px",
+                        width: "10px",
+                        height: "26px",
+                        backgroundColor: "#cccccc",
+                        borderRadius: "0px 0px 999px 999px",
+                    }}></div>
+                </button>
                 <button
                     className={buttonCss}
                     style={{
                         ...flex.row,
+                        alignItems: "center",
                     }}
                     disabled={isWin || tubes.length <= 1}
                     onClick={() => act({ action: "trashTube" })}
-                ><div style={{
-                    fontSize: "19px",
-                    lineHeight: "22px",
-                    height: "18px",
-                    color: "red",
-                }}>x</div><div style={{
-                    width: "10px",
-                    height: "26px",
-                    backgroundColor: "#dddddd",
-                    borderRadius: "0px 0px 999px 999px",
-                }}></div></button>
+                >
+                    <Close style={{
+                        height: "30px",
+                        margin: "0 0 0 -6px",
+                        zIndex: 1,
+                        color: "#ff7070",
+                    }} />
+                    <div style={{
+                        margin: "0 0 0 -11px",
+                        width: "10px",
+                        height: "26px",
+                        backgroundColor: "#cccccc",
+                        borderRadius: "0px 0px 999px 999px",
+                    }}></div>
+                </button>
             </div>
             <div style={{ ...flex.rowRev, flex: 3 }}>
                 <button
