@@ -3,7 +3,37 @@ import update from "immutability-helper";
 import { craftingActionsRecoil } from './CraftingTable';
 import { levelPresetRecoil } from './LevelList';
 import { buttonCss } from './buttonCss';
+import { cx, css } from '@emotion/css';
+import { Add } from '@emotion-icons/material-rounded/Add';
+import { Remove } from '@emotion-icons/material-rounded/Remove';
+import * as flex from "./utils/flex";
 type CSSProperties = import("preact").JSX.CSSProperties;
+
+function NumberInput({ value, onValueChange }: {
+    value: number,
+    onValueChange: (value: number) => void,
+}) {
+    const buttonCss1 = css`& {
+        width: 24px;
+        line-height: 0;
+    }`;
+    return <div style={{
+        display: "flex",
+        alignItems: "center"
+    }}>
+        <button
+            className={cx(buttonCss, buttonCss1)}
+            onClick={() => onValueChange(value - 1)}
+        ><Remove style={{ margin: -6 }} /></button>
+        <span style={{
+            margin: "0px 5px",
+        }}>{value}</span>
+        <button
+            className={cx(buttonCss, buttonCss1)}
+            onClick={() => onValueChange(value + 1)}
+        ><Add style={{ margin: -6 }} /></button>
+    </div>
+}
 
 export function LevelEditor({ style }: { style?: CSSProperties }) {
     const levelPreset = useRecoilValue(levelPresetRecoil);
@@ -36,206 +66,112 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                 }}
             /></label><br />
 
-            <div
-                style={{
-                    display: "inline-flex",
-                    marginBottom: "4px",
-                    marginTop: "4px",
-                    alignItems: "center"
-                }}
-            > Seed: <input
-                    style={{
-                        marginLeft: "5px",
-                    }}
-                    value={levelPreset.seed}
-                    onChange={ev => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        seed: { $set: (ev.target as HTMLInputElement).value },
-                    }))} />
-
-                <button
-                    className={buttonCss}
-                    style={{
-                        padding: "0",
-                        backgroundColor: "white",
-                        fontSize: "0",
-                        marginLeft: "5px",
-                    }}
-
-                    onClick={() => {
-                        const newSeed = Math.round(Math.random() * 10000).toString();
-                        setLevelPreset(update(levelPreset, {
-                            seed: { $set: newSeed },
-                            name: { $set: "custom level" },
-                        }));
-                    }}
-
-                > <span class="material-symbols-rounded"> casino </span></button>
-            </div>
-            <br />
-
-            <div
-                style={{
-                    display: "inline-flex",
-                    marginBottom: "4px",
-                    marginTop: "4px",
-                    alignItems: "center",
-                }}
-            >
-                Max Substances:
-                <button
-                    className={buttonCss}
-                    style={{
-                        padding: "0",
-                        backgroundColor: "white",
-                        fontSize: "0",
-                        marginRight: "5px",
-                        border: "none",
-                        minWidth: "24px",
-                        maxHeight: "24px",
-                        marginLeft: "5px"
-                    }}
-                    onClick={() => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        substanceMaxCount: { $set: levelPreset.substanceMaxCount - 1 },
-                    }))}
-                > <span style={{ fontSize: "24px", lineHeight: "1" }}> - </span></button>
-                {levelPreset.substanceMaxCount}
-                <button
-                    className={buttonCss}
-                    style={{
-                        padding: "0",
-                        backgroundColor: "white",
-                        fontSize: "0",
-                        marginLeft: "5px",
-                        border: "none",
-                        minWidth: "24px",
-                        maxHeight: "24px",
-                    }}
-                    onClick={() => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        substanceMaxCount: { $set: levelPreset.substanceMaxCount + 1 },
-                    }))}
-                > <span style={{ fontSize: "24px", lineHeight: "1" }}> + </span></button>
-            </div>
-            <br />
-
-            <div
-                style={{
-                    display: "inline-flex",
-                    marginBottom: "4px",
-                    marginTop: "4px",
-                    alignItems: "center",
-                }}
-            >Substances:
-                <button
-                    className={buttonCss}
-                    style={{
-                        padding: "0",
-                        backgroundColor: "white",
-                        fontSize: "0",
-                        marginRight: "5px",
-                        border: "none",
-                        minWidth: "24px",
-                        maxHeight: "24px",
-                        marginLeft: "5px"
-                    }}
-                    onClick={() => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        substanceCount: { $set: levelPreset.substanceCount - 1 },
-                    }))}
-                > <span style={{ fontSize: "24px", lineHeight: "1" }}> - </span></button>
-                <input
-                    style={{
-                        width: "50px",
-                        fontSize: "16px",
-                        padding: "0px 5px",
-                    }}
-                    value={levelPreset.substanceCount}
-                    min={1}
-                    max={levelPreset.substanceMaxCount}
-                    onChange={ev => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        substanceCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
-                    }))} />
-                <button
-                    className={buttonCss}
-                    style={{
-                        padding: "0",
-                        backgroundColor: "white",
-                        fontSize: "0",
-                        marginLeft: "5px",
-                        border: "none",
-                        minWidth: "24px",
-                        maxHeight: "24px",
-                    }}
-                    onClick={() => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        substanceCount: { $set: levelPreset.substanceCount + 1 },
-                    }))}
-                > <span style={{ fontSize: "24px", lineHeight: "1" }}> + </span></button>
-            </div>
-            <br />
-
-
-
-
             <div style={{
-                display: "inline-flex",
-                marginBottom: "4px",
-                marginTop: "4px",
-                alignItems: "center",
-            }}>Ingredients:
-                <button
-                    className={buttonCss}
-                    style={{
-                        padding: "0",
-                        backgroundColor: "white",
-                        fontSize: "0",
-                        marginRight: "5px",
-                        border: "none",
-                        minWidth: "24px",
-                        maxHeight: "24px",
-                        marginLeft: "5px"
-                    }}
-                    onClick={() => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        ingredientCount: { $set: levelPreset.ingredientCount - 1 },
-                    }))}
-                > <span style={{ fontSize: "24px", lineHeight: "1" }}> - </span></button>
-                <input
-                    style={{
-                        width: "50px",
-                        fontSize: "16px",
-                        padding: "0px 5px",
+                display: "flex",
+                justifyContent: 'space-around',
+                marginTop: "10px",
 
-                    }}
+            }}>
+                <div style={
+                    {
+                        marginBottom: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        flexDirection: "column",
+                    }}>
 
-                    value={levelPreset.ingredientCount}
-                    min={1}
-                    max={levelPreset.substanceCount}
-                    onChange={ev => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        ingredientCount: { $set: (ev.target as HTMLInputElement).valueAsNumber },
-                    }))} />
-                <button
-                    className={buttonCss}
-                    style={{
-                        padding: "0",
-                        backgroundColor: "white",
-                        fontSize: "0",
-                        marginLeft: "5px",
-                        border: "none",
-                        minWidth: "24px",
-                        maxHeight: "24px",
-                    }}
-                    onClick={() => setLevelPreset(update(levelPreset, {
-                        name: { $set: "custom level" },
-                        ingredientCount: { $set: levelPreset.ingredientCount + 1 },
-                    }))}
-                > <span style={{ fontSize: "24px", lineHeight: "1" }}> + </span></button>
+                    <div style={
+                        {
+                            marginBottom: "4px",
+                            display: "flex",
+                            alignItems: "center",
+                            flexDirection: "column",
+                        }
+                    } >
+                        Seed
+                        <div style={{
+                            display: "flex",
+                            alignItems: "center",
+
+                        }}>
+                            <button
+                                className={buttonCss}
+                                style={{
+                                    padding: "0",
+                                    backgroundColor: "white",
+                                    fontSize: "0",
+                                    marginLeft: "5px",
+                                }}
+
+                                onClick={() => {
+                                    const newSeed = Math.round(Math.random() * 10000).toString();
+                                    setLevelPreset(update(levelPreset, {
+                                        seed: { $set: newSeed },
+                                        name: { $set: "custom level" },
+                                    }));
+                                }}
+
+                            > <span class="material-symbols-rounded"> casino </span></button>
+                            <input
+                                style={{
+
+                                    width: "50px",
+                                }}
+                                value={levelPreset.seed}
+                                onChange={ev => setLevelPreset(update(levelPreset, {
+                                    name: { $set: "custom level" },
+                                    seed: { $set: (ev.target as HTMLInputElement).value },
+                                }))} />
+                        </div>
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            marginBottom: "4px",
+                            alignItems: "center",
+                            flexDirection: "column",
+                        }}
+                    >Substances
+                        <NumberInput
+                            value={levelPreset.substanceCount}
+                            onValueChange={v => setLevelPreset(update(levelPreset, {
+                                name: { $set: "custom level" },
+                                substanceCount: { $set: v },
+                            }))}
+                        />
+                    </div>
+
+                </div>
+                <div style={{ ...flex.col }}>
+                    <div style={{ ...flex.col, alignItems: "center" }}>
+                        Max Substances
+                        <NumberInput
+                            value={levelPreset.substanceMaxCount}
+                            onValueChange={v => setLevelPreset(update(levelPreset, {
+                                name: { $set: "custom level" },
+                                substanceMaxCount: { $set: v },
+                            }))}
+                        />
+                    </div>
+
+
+
+                    <div style={{
+                        display: "inline-flex",
+                        marginBottom: "4px",
+                        alignItems: "center",
+                        flexDirection: "column",
+                    }}>Ingredients
+                        <NumberInput
+                            value={levelPreset.ingredientCount}
+                            onValueChange={v => setLevelPreset(update(levelPreset, {
+                                name: { $set: "custom level" },
+                                ingredientCount: { $set: v },
+                            }))}
+                        />
+                    </div>
+                </div>
             </div>
-            <br />
         </div>
     </div>;
 }
