@@ -86,7 +86,7 @@ export function craftingReduce(
         }
     });
 
-    const cleanups = stateAfterAction.tubes
+    const cleanups = stateAfterReactions.tubes
         .map((tube, i) => [i, tube.splice(3)] as const)
         .filter((x) => x[1].length > 0);
 
