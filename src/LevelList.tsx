@@ -8,10 +8,14 @@ import { buttonCss } from "./buttonCss";
 import * as flex from "./utils/flex";
 import { css, cx } from "@emotion/css";
 type CSSProperties = import("preact").JSX.CSSProperties;
+import * as amplitude from "@amplitude/analytics-browser";
 
 export const levelPresetRecoil = atom({
     key: "levelPreset",
     default: levelPresets[0],
+    effects: [({ node, onSet }) => {
+        onSet((newValue) => amplitude.track(`${node.key}.onSet`, newValue));
+    }]
 });
 
 export const gameProgressState = atom({
@@ -143,7 +147,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         }}
     >
         <div style={{
-            height: "220px",
+            height: "140px",
             overflowY: "scroll",
         }}>{levelPresets.map(levelPreset => <Entry {...{ levelPreset }} />)}</div>
 

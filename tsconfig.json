@@ -9,6 +9,9 @@
         "isolatedModules": true,
         "allowSyntheticDefaultImports": true,
     },
-    "files": ["./node_modules/vite/client.d.ts"],
+    "files": [
+        "./node_modules/vite/client.d.ts", 
+        "./node_modules/vite-plugin-info/client.d.ts"
+    ],
     "include": ["./src/"],
 }

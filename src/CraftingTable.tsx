@@ -230,7 +230,10 @@ export function CraftingTable() {
                     disabled={isWin || craftingActions.length === 0}
                     onClick={() => updCraftingActions({ $set: [] })}
                 >
-                    <Refresh style={{ margin: -4 }} />
+                    <Refresh style={{ 
+                        height: "100%",
+                        margin: "0px -4px",
+                    }} />
                     {(hintReset) && <TouchAppAnimation className={css`& {
                         position: absolute;
                         transform: translate(20px, 33px);

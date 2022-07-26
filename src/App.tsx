@@ -1,3 +1,5 @@
+import "./initAnalytics";
+
 import * as _ from "lodash";
 import { css, cx } from "@emotion/css";
 import { CraftingTable } from "./CraftingTable";
@@ -8,11 +10,12 @@ import { Statistics } from "./Statistics";
 import * as flex from "./utils/flex";
 import { LevelEditor } from "./LevelEditor";
 import { LevelList, LoadHighestLevelEffect } from "./LevelList";
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import { Header } from "./Header";
 import { Github } from '@emotion-icons/bootstrap/Github';
 import { OpenInNew } from '@emotion-icons/material-rounded/OpenInNew';
-
+import { buttonCss } from "./buttonCss";
+import { AboutTeam } from "./AboutTeam";
 
 const _css = css`
 & {
@@ -25,6 +28,7 @@ const _css = css`
 
 export function App() {
     const [showMenu, setShowMenu] = useState(false);
+    const [showTeam, setShowTeam] = useState(false);
 
     return <div className={cx(_css)}>
         <div style={{ ...flex.col }}>
@@ -45,16 +49,22 @@ export function App() {
                         flex: 2,
                         borderRight: "1px solid #ffffff50"
                     }} />
-                    <LevelEditor style={{
+                    {/* <LevelEditor style={{
                         flex: 5,
+                    }} /> */}
+                    <AboutTeam style={{
+                        flex: 3,
                     }} />
                 </div>
             }
-            
+
             <ReactionsLibrary />
             <CraftingTable />
 
-            <div style={{ ...flex.row }}>
+            <div style={{
+                ...flex.row,
+                marginBottom: 20,
+            }}>
                 <ActionLog style={{ flex: 1 }} />
                 {/* <Statistics style={{ flex: 1 }} /> */}
             </div>
@@ -62,11 +72,11 @@ export function App() {
             <div style={{
                 ...flex.row,
                 justifyContent: "center",
+                alignItems: "center",
                 padding: "8px 14px",
-                marginTop: 20,
                 backgroundColor: "#ffffff20",
             }}>
-                <a 
+                <a
                     style={{
                         flex: 1,
                         color: "white",
@@ -76,13 +86,14 @@ export function App() {
                     target="_blank"
                     href="https://www.gkzr.me"
                 >
-                    <OpenInNew style={{height: 20, marginRight: 5}} />
-                    GKZR</a>
-                <a 
+                    <OpenInNew style={{ height: 20, marginRight: 5 }} />
+                    GKZR
+                </a>
+                <a
                     style={{
                         flex: 1,
                         display: "block",
-                        fontSize: "18px",
+                        fontSize: "16px",
                         lineHeight: "28px",
                         color: "white",
                         textAlign: "right",
@@ -91,11 +102,11 @@ export function App() {
                     href="https://github.com/ndry/chemstack-puzzle"
                 >
                     chemstack-puzzle
-                    <Github style={{height: 20, marginLeft: 5 }} /></a>
+                    <Github style={{ height: 20, marginLeft: 5 }} />
+                </a>
             </div>
         </div>
         <WinEffect />
         <LoadHighestLevelEffect />
     </div>
 }
-

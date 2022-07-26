@@ -100,7 +100,7 @@ export function CraftingTube({ style }: {
                     height: "40px",
                 }}
                 onClick={() => act({ action: "pourFromMainIntoSecondary" })}
-            ><ArrowLeft style={{ margin: -20 }} /></button>}
+            ><ArrowLeft style={{ height: 80, margin: -20 }} /></button>}
         </div>;
     }
 

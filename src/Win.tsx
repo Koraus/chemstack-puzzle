@@ -3,7 +3,7 @@ import { gameProgressState, levelPresetRecoil } from "./LevelList";
 import { useEffect } from "preact/hooks";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { appliedCraftingActionsRecoil, tubesState } from './CraftingTable';
-import { craftingTargetsRecoil } from './CraftingTargets';
+import * as amplitude from "@amplitude/analytics-browser";
 
 export const isWinRecoil = selector({
     key: "isWin",
@@ -19,6 +19,7 @@ export function WinEffect() {
     const updGameProgress = useUpdRecoilState(gameProgressState);
     useEffect(() => {
         if (!isWin) { return; }
+        amplitude.track("isWin", level);
         updGameProgress({
             [level.name]: { $set: true },
         });
