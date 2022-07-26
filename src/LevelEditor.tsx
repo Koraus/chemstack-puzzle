@@ -82,7 +82,6 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
 
                     <div style={
                         {
-                            marginBottom: "4px",
                             display: "flex",
                             alignItems: "center",
                             flexDirection: "column",
@@ -98,7 +97,6 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                                 className={buttonCss}
                                 style={{
                                     padding: "0",
-                                    backgroundColor: "white",
                                     fontSize: "0",
                                     marginLeft: "5px",
                                 }}
