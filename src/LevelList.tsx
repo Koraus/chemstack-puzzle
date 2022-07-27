@@ -9,6 +9,9 @@ import * as flex from "./utils/flex";
 import { css, cx } from "@emotion/css";
 type CSSProperties = import("preact").JSX.CSSProperties;
 import * as amplitude from "@amplitude/analytics-browser";
+import { Done } from '@emotion-icons/material-rounded/Done';
+import { RemoveDone } from '@emotion-icons/material-rounded/RemoveDone';
+
 
 export const levelPresetRecoil = atom({
     key: "levelPreset",
@@ -89,8 +92,8 @@ export function LevelList({ style }: { style?: CSSProperties }) {
     }) {
         const levelPresetIndex = levelPresets.findIndex(x => x.name === levelPreset.name);
         const isCurrent = levelPreset.name === currentLevelPreset.name;
-        const isComplete = 
-            (levelPresetIndex >= 0) 
+        const isComplete =
+            (levelPresetIndex >= 0)
             && (levelPresets[levelPresetIndex].name in gameProgress);
         const isOpen =
             levelPresetIndex === 0
@@ -127,15 +130,15 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                     whiteSpace: "nowrap",
                 }}
             >{levelPreset.name}</span>
-            {isComplete && <span
-                className={cx(
-                    "material-symbols-rounded",
-                    css`& {
-                        line-height: 20px;
-                        color: #a8d26b;
-                    }`,
-                )}
-            >done</span>}
+            {isComplete &&
+ 
+                <Done className={css` & {     
+                    color: #a8d26b;
+                    height: 19px;
+                    } `}
+                ></Done>
+            }
+
         </a>;
     }
 
@@ -165,6 +168,8 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                 confirm('Progress will be lost! Click "Ok" to confirm')
                 && resetLevel()
             }
-        ><span className="material-symbols-rounded">remove_done</span></button>
+        >
+            <RemoveDone style={{height: "24px"}}/>
+            </button>
     </div>
 };
