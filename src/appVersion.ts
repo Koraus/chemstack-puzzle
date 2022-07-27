@@ -1,4 +1,7 @@
 import buildTime from '~build/time';
 import { abbreviatedSha as buildGitRevSha } from '~build/info';
-export const appVersion = `0.1a.${+buildTime}.${buildGitRevSha}+${import.meta.env.MODE}`;
+
+const biuldVersion = buildTime.toISOString().replaceAll(/[^0-9ZT]/g, "");
+export const appVersion = `0.2a.${biuldVersion}.${buildGitRevSha}`
+    + (import.meta.env.PROD ? "" : ("+" + import.meta.env.MODE));
 console.log("appVersion", appVersion);
