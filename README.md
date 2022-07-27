@@ -1,8 +1,9 @@
 # chemstack-puzzle
 
-## Demo
+![An icon on top of game screen](./cover.jpg "Cover")
 
-https://ndry.github.io/chemstack-puzzle/dist/
+## Play and comment [ChemStack Puzzle](https://ndry.itch.io/chemstack-puzzle) on itch.io
+## Play [development build](https://ndry.github.io/chemstack-puzzle/dist/) on GitHub Pages
 
 ## Build
 
@@ -10,8 +11,8 @@ https://ndry.github.io/chemstack-puzzle/dist/
 
 `npm run build`
 
-Find `./dist/index.html` - a single-file build result, 
-does not need web-server to run, 
+Find built app in `./dist/` folder,
+this does not need web-server to run, 
 can just be opened in any browser as local file
 
 ## Run dev locally
