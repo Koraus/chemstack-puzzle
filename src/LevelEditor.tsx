@@ -7,6 +7,10 @@ import { cx, css } from '@emotion/css';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Remove } from '@emotion-icons/material-rounded/Remove';
 import * as flex from "./utils/flex";
+import { Dice } from '@emotion-icons/ionicons-outline/Dice';
+
+
+
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 function NumberInput({ value, onValueChange }: {
@@ -99,6 +103,8 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                                     padding: "0",
                                     fontSize: "0",
                                     marginLeft: "5px",
+                                    width: "26px",
+                                    height: "26px"
                                 }}
 
                                 onClick={() => {
@@ -109,7 +115,8 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                                     }));
                                 }}
 
-                            > <span class="material-symbols-rounded"> casino </span></button>
+                            >   <Dice style={{color:"#283C5A", width:"80%"}}> </Dice>
+                                 </button>
                             <input
                                 style={{
 
