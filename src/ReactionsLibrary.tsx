@@ -7,6 +7,7 @@ import { Reaction, SubstanceId } from './crafting';
 import { createRand } from './utils/createRand';
 import { apipe } from './utils/apipe';
 import * as it from "./utils/it";
+import { KeyboardArrowUp } from '@emotion-icons/material-rounded/KeyboardArrowUp';
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export function generateReactionsLibrary({ seed, substanceMaxCount }: {
@@ -174,8 +175,7 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                 <IngredientSlot sid={reaction.products[2]} />
                 <IngredientSlot sid={reaction.products[1]} />
                 <IngredientSlot sid={reaction.products[0]} />
-                <div
-                    class="material-symbols-rounded"
+                <KeyboardArrowUp
                     style={{
                         color:
                             isPending
@@ -184,7 +184,7 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                         fontSize: "19px",
                         height: "18px",
                     }}
-                >keyboard_arrow_up</div>
+                />
                 <IngredientSlot sid={reaction.reagents[1]} />
                 <IngredientSlot sid={reaction.reagents[0]} />
             </div>
