@@ -7,6 +7,9 @@ import { StateUpdater } from "preact/hooks";
 import { levelPresets } from "./levelPresets";
 import { buttonCss } from "./buttonCss";
 import { JSX } from "preact";
+import { Menu } from '@emotion-icons/material-rounded/Menu';
+import { Refresh } from '@emotion-icons/material-rounded/Refresh';
+
 
 export function Header({
     style, showMenuState: [showMenu, setShowMenu], className
@@ -61,10 +64,12 @@ export function Header({
         style={style}
     >
         <a
-            class="material-symbols-rounded"
+            style={{ fontSize: "0"}}
             href="#"
             onClick={() => setShowMenu(!showMenu)}
-        >menu</a>
+        > <Menu style={{ height: "32px" }} />
+        </a>
+
 
         <div><button className={buttonCss}>&gt;</button></div>
         <div>{useRecoilValue(levelPresetRecoil).name}</div>
@@ -75,10 +80,12 @@ export function Header({
             }}
             onClick={setNextLevel}
         >&gt;</button></div>
+
         <a
-            class="material-symbols-rounded"
+            style={{ fontSize: "0"}}
             href="#"
             onClick={() => reset()}
-        >refresh</a>
+        > <Refresh style={{ height: "32px" }} />
+        </a>
     </div>;
 }
