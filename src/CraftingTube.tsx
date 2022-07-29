@@ -2,15 +2,13 @@ import { CraftingAction, SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 import { JSX } from "preact";
-import { useMemo } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { css, cx, keyframes } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
 import { useRecoilValue } from "recoil";
 import { appliedCraftingActionsRecoil, craftingActionsRecoil, tubesState } from "./CraftingTable";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
-import { useRxSubscribe } from "./utils/useRxSubscribe";
-import * as rx from "rxjs";
 
 function Wave({ isFirst, ...props }: { isFirst: boolean, className?: string }) {
     return <svg
@@ -109,9 +107,12 @@ export function CraftingTube({ style }: {
     style?: JSX.CSSProperties;
 }) {
     const appliedCraftingActions = useRecoilValue(appliedCraftingActionsRecoil);
-    const time = useRxSubscribe(() => rx.animationFrames(), [])?.timestamp ?? performance.now();
 
-    return useMemo(() => <div style={{
+    const [time, setTime] = useState<number>();
+    useEffect(() => setTime(performance.now()));
+    if (time === undefined) { return null; }
+
+    return <div style={{
         ...flex.colRev,
 
         height: "220px",
@@ -149,5 +150,5 @@ export function CraftingTube({ style }: {
         <Slot i={0} />
         <Slot i={1} />
         <Slot i={2} />
-    </div>, [appliedCraftingActions, style]); // does not depend on time
+    </div>;
 }
