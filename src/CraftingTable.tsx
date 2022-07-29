@@ -41,11 +41,14 @@ export const appliedCraftingActionsRecoil = selector({
                 state?.stateFinal
                 ?? { tubes: [[]], targets });
         }
-        return state ?? {
-            stateFinal: {
-                tubes: [[] as SubstanceId[]],
-                targets,
-            }
+        return {
+            ...(state ?? {
+                stateFinal: {
+                    tubes: [[] as SubstanceId[]],
+                    targets,
+                }
+            }),
+            duration: 500,
         };
     }
 });
@@ -179,7 +182,7 @@ export function CraftingTable() {
                         alignItems: "center",
                     }}
                     disabled={isWin || tubes.length > 6}
-                    onClick={() => act({ action: "addTube" })}
+                    onClick={() => act({ action: "addTube", time: performance.now() })}
                 >
                     <Add style={{
                         height: "30px",
@@ -201,7 +204,7 @@ export function CraftingTable() {
                         alignItems: "center",
                     }}
                     disabled={isWin || tubes.length <= 1}
-                    onClick={() => act({ action: "trashTube" })}
+                    onClick={() => act({ action: "trashTube", time: performance.now() })}
                 >
                     <Close style={{
                         height: "30px",
@@ -230,7 +233,7 @@ export function CraftingTable() {
                     disabled={isWin || craftingActions.length === 0}
                     onClick={() => updCraftingActions({ $set: [] })}
                 >
-                    <Refresh style={{ 
+                    <Refresh style={{
                         height: "100%",
                         margin: "0px -4px",
                     }} />

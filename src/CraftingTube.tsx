@@ -2,11 +2,11 @@ import { CraftingAction, SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 import { JSX } from "preact";
-import { css, cx } from "@emotion/css";
+import { css, cx, keyframes } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
 import { useRecoilValue } from "recoil";
-import { craftingActionsRecoil, tubesState } from "./CraftingTable";
+import { appliedCraftingActionsRecoil, craftingActionsRecoil, tubesState } from "./CraftingTable";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 
 export function CraftingTube({ style }: {
@@ -15,10 +15,11 @@ export function CraftingTube({ style }: {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
+    const appliedCraftingActions = useRecoilValue(appliedCraftingActionsRecoil);
     const tubes = useRecoilValue(tubesState);
     const tube = tubes[0];
     const isSecondaryAvailable = tubes.length > 1;
-    
+
     function Wave({ isFirst, ...props }: { isFirst: boolean, className?: string }) {
         return <svg
             id="Layer_2"
@@ -39,7 +40,7 @@ export function CraftingTube({ style }: {
 
     function Slot({ i }: { i: number; }) {
         const isNext = i === tube.length;
-        const isTopContent = i === tube.length - 1;
+        const isTopContent = i === tube.length - 1; 
         const hasContent = i < tube.length;
         const isFirst = i === 0;
 
@@ -58,7 +59,7 @@ export function CraftingTube({ style }: {
 
             ...(hasContent && {
                 backgroundColor: substanceColors[tube[i]],
-                color: "#ffffffff",
+                color: "#ffffffff", 
                 borderColor: "transparent",
             }),
 
@@ -99,7 +100,7 @@ export function CraftingTube({ style }: {
                     width: "23px",
                     height: "40px",
                 }}
-                onClick={() => act({ action: "pourFromMainIntoSecondary" })}
+                onClick={() => act({ action: "pourFromMainIntoSecondary", time: performance.now() })}
             ><ArrowLeft style={{ height: 80, margin: -20 }} /></button>}
         </div>;
     }
@@ -114,6 +115,30 @@ export function CraftingTube({ style }: {
         borderTopColor: "#ffffff30",
         ...style,
     }}>
+        {("action" in appliedCraftingActions) && (() => {
+            const k = keyframes`
+                0% {
+                    transform: translate(0, -300px);
+                }
+                100% {
+                    transform: translate(0, -150px);
+                }
+                ## ${appliedCraftingActions.action.time}
+            `
+            const tube = appliedCraftingActions.stateAfterAction.tubes[0];
+            return <div style={{position: "relative"}}>
+                <div 
+                    className={css`& {
+                        position: absolute;
+                        animation-name: ${k};
+                        animation-duration: ${appliedCraftingActions.duration}ms;
+                        animation-delay: ${appliedCraftingActions.action.time - performance.now()}ms;
+                    }`}
+                >
+                    {tube[tube.length - 1]}
+                </div>
+            </div>
+        })()}
         <Slot i={0} />
         <Slot i={1} />
         <Slot i={2} />

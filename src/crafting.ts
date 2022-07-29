@@ -13,14 +13,19 @@ export type Reaction = {
 export type CraftingAction = {
     action: "addIngredient",
     ingredientId: SubstanceId,
+    time: number,
 } | {
     action: "addTube",
+    time: number,
 } | {
     action: "trashTube",
+    time: number,
 } | {
     action: "pourFromSecondaryIntoMain",
+    time: number,
 } | {
     action: "pourFromMainIntoSecondary",
+    time: number,
 };
 
 export type CraftingState = {

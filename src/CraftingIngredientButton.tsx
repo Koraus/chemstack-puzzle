@@ -27,7 +27,7 @@ export function CraftingIngredientButton({ sid, mirrored = false }: {
     return <button
         className={buttonCss}
         disabled={isWin}
-        onClick={() => act({ action: "addIngredient", ingredientId: sid })}
+        onClick={() => act({ action: "addIngredient", ingredientId: sid, time: performance.now() })}
         style={{
             transformOrigin: "50% 70%",
             transform: `rotate(${(mirrored ? -1 : 1) * 15}deg)`,

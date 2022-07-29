@@ -60,7 +60,7 @@ function TubeSlot({
                     height: "32px",
                     margin: "-36px 0px 0px 17px",
                 }}
-                onClick={() => act({ action: "pourFromSecondaryIntoMain" })}
+                onClick={() => act({ action: "pourFromSecondaryIntoMain", time: performance.now() })}
             ><ArrowRight style={{ height: 80, margin: -20 }} /></button>
         </div>}
     </div>;
