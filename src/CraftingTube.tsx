@@ -122,26 +122,27 @@ export function CraftingTube({ style }: {
         ...style,
     }}>
         {("action" in appliedCraftingActions) && (() => {
-            const k = keyframes`
-                0% {
-                    transform: translate(0, -300px);
-                }
-                100% {
-                    transform: translate(0, -150px);
-                }
-                ## ${appliedCraftingActions.action.time}
-            `
-            const tube = appliedCraftingActions.stateAfterAction.tubes[0];
+            const { action } = appliedCraftingActions;
+            if (action.action !== "addIngredient") { return null; }
             return <div style={{ position: "relative" }}>
                 <div
                     className={css`& {
                         position: absolute;
-                        animation-name: ${k};
+                        animation-name: ${keyframes`
+                            0% {
+                                transform: translate(0, -300px);
+                            }
+                            100% {
+                                transform: translate(0, -150px);
+                            }
+                            ## ${time}
+                        `};
                         animation-duration: ${appliedCraftingActions.duration}ms;
-                        animation-delay: ${appliedCraftingActions.action.time - time}ms;
+                        animation-delay: ${action.time - time}ms;
+                        animation-fill-mode: both;
                     }`}
                 >
-                    {tube[tube.length - 1]}
+                    {action.ingredientId}
                 </div>
             </div>
         })()}
