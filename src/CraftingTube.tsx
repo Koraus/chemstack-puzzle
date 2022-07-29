@@ -2,77 +2,77 @@ import { CraftingAction, SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 import { JSX } from "preact";
+import { useMemo } from "preact/hooks";
 import { css, cx, keyframes } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
 import { useRecoilValue } from "recoil";
 import { appliedCraftingActionsRecoil, craftingActionsRecoil, tubesState } from "./CraftingTable";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
+import { useRxSubscribe } from "./utils/useRxSubscribe";
+import * as rx from "rxjs";
 
-export function CraftingTube({ style }: {
-    style?: JSX.CSSProperties;
-}) {
+function Wave({ isFirst, ...props }: { isFirst: boolean, className?: string }) {
+    return <svg
+        id="Layer_2"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 64.87 45.06"
+        {...props}
+    >
+        <g id="Layer_6">
+            <g class="cls-2">
+                {isFirst
+                    ? <path class="cls-1" d="M0,13.42c.83,16.28,13.67,29.37,29.83,30.64h5.12c16.04-1.25,28.81-14.18,29.8-30.29-.84-4.49-9.53,18.63-31.72-3.69C18.09-4.97,.9-2.6,0,13.42Z" />
+                    : <path class="cls-1" d="M33.08,10.08C17.72-5.38,0-2.46,0,14.76v13.77c0,8.57,6.95,15.53,15.53,15.53H49.34c8.58,0,15.53-6.95,15.53-15.53V14.76c0-8.15-8.39,18.86-31.79-4.68Z" />
+                }
+            </g>
+        </g>
+    </svg>;
+}
+
+
+function Slot({ i }: { i: number; }) {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
-    const appliedCraftingActions = useRecoilValue(appliedCraftingActionsRecoil);
     const tubes = useRecoilValue(tubesState);
     const tube = tubes[0];
     const isSecondaryAvailable = tubes.length > 1;
 
-    function Wave({ isFirst, ...props }: { isFirst: boolean, className?: string }) {
-        return <svg
-            id="Layer_2"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 64.87 45.06"
-            {...props}
-        >
-            <g id="Layer_6">
-                <g class="cls-2">
-                    {isFirst
-                        ? <path class="cls-1" d="M0,13.42c.83,16.28,13.67,29.37,29.83,30.64h5.12c16.04-1.25,28.81-14.18,29.8-30.29-.84-4.49-9.53,18.63-31.72-3.69C18.09-4.97,.9-2.6,0,13.42Z" />
-                        : <path class="cls-1" d="M33.08,10.08C17.72-5.38,0-2.46,0,14.76v13.77c0,8.57,6.95,15.53,15.53,15.53H49.34c8.58,0,15.53-6.95,15.53-15.53V14.76c0-8.15-8.39,18.86-31.79-4.68Z" />
-                    }
-                </g>
-            </g>
-        </svg>;
-    }
+    const isNext = i === tube.length;
+    const isTopContent = i === tube.length - 1;
+    const hasContent = i < tube.length;
+    const isFirst = i === 0;
 
-    function Slot({ i }: { i: number; }) {
-        const isNext = i === tube.length;
-        const isTopContent = i === tube.length - 1; 
-        const hasContent = i < tube.length;
-        const isFirst = i === 0;
+    return <div style={{
+        textAlign: "center",
+        margin: `0px 6px 6px 6px`,
+        width: `28px`,
+        height: `56px`,
+        border: "2px dashed #ffffff60",
+        borderRadius: "5px",
+        fontSize: "38px",
+        lineHeight: "58px",
+        color: "#ffffff60",
+        backgroundColor: "#ffffff08",
+        position: "relative",
 
-        return <div style={{
-            textAlign: "center",
-            margin: `0px 6px 6px 6px`,
-            width: `28px`,
-            height: `56px`,
-            border: "2px dashed #ffffff60",
-            borderRadius: "5px",
-            fontSize: "38px",
-            lineHeight: "58px",
-            color: "#ffffff60",
-            backgroundColor: "#ffffff08",
-            position: "relative",
+        ...(hasContent && {
+            backgroundColor: substanceColors[tube[i]],
+            color: "#ffffffff",
+            borderColor: "transparent",
+        }),
 
-            ...(hasContent && {
-                backgroundColor: substanceColors[tube[i]],
-                color: "#ffffffff", 
-                borderColor: "transparent",
-            }),
-
-            ...(isFirst && {
-                borderBottomLeftRadius: "15px",
-                borderBottomRightRadius: "15px",
-            }),
-        }}>
-            {isNext
-                ? <>
-                    <Wave
-                        {...{ isFirst }}
-                        className={css`
+        ...(isFirst && {
+            borderBottomLeftRadius: "15px",
+            borderBottomRightRadius: "15px",
+        }),
+    }}>
+        {isNext
+            ? <>
+                <Wave
+                    {...{ isFirst }}
+                    className={css`
                         & {
                             position: absolute;
                             bottom: 0px;
@@ -85,27 +85,33 @@ export function CraftingTube({ style }: {
                             stroke-width: 5px;
                         }
                     `}
-                    />+
-                </>
-                : tube[i]
-            }
-            {isTopContent && isSecondaryAvailable && <button
-                className={cx(buttonCss)}
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    position: "absolute",
-                    left: "-24px",
-                    top: ["-10px", "3px", "16px"][i],
-                    width: "23px",
-                    height: "40px",
-                }}
-                onClick={() => act({ action: "pourFromMainIntoSecondary", time: performance.now() })}
-            ><ArrowLeft style={{ height: 80, margin: -20 }} /></button>}
-        </div>;
-    }
+                />+
+            </>
+            : tube[i]
+        }
+        {isTopContent && isSecondaryAvailable && <button
+            className={cx(buttonCss)}
+            style={{
+                display: "flex",
+                alignItems: "center",
+                position: "absolute",
+                left: "-24px",
+                top: ["-10px", "3px", "16px"][i],
+                width: "23px",
+                height: "40px",
+            }}
+            onClick={() => act({ action: "pourFromMainIntoSecondary", time: performance.now() })}
+        ><ArrowLeft style={{ height: 80, margin: -20 }} /></button>}
+    </div>;
+}
 
-    return <div style={{
+export function CraftingTube({ style }: {
+    style?: JSX.CSSProperties;
+}) {
+    const appliedCraftingActions = useRecoilValue(appliedCraftingActionsRecoil);
+    const time = useRxSubscribe(() => rx.animationFrames(), [])?.timestamp ?? performance.now();
+
+    return useMemo(() => <div style={{
         ...flex.colRev,
 
         height: "220px",
@@ -126,13 +132,13 @@ export function CraftingTube({ style }: {
                 ## ${appliedCraftingActions.action.time}
             `
             const tube = appliedCraftingActions.stateAfterAction.tubes[0];
-            return <div style={{position: "relative"}}>
-                <div 
+            return <div style={{ position: "relative" }}>
+                <div
                     className={css`& {
                         position: absolute;
                         animation-name: ${k};
                         animation-duration: ${appliedCraftingActions.duration}ms;
-                        animation-delay: ${appliedCraftingActions.action.time - performance.now()}ms;
+                        animation-delay: ${appliedCraftingActions.action.time - time}ms;
                     }`}
                 >
                     {tube[tube.length - 1]}
@@ -142,5 +148,5 @@ export function CraftingTube({ style }: {
         <Slot i={0} />
         <Slot i={1} />
         <Slot i={2} />
-    </div>;
+    </div>, [appliedCraftingActions, style]); // does not depend on time
 }
