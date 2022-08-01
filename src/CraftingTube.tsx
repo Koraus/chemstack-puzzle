@@ -11,7 +11,7 @@ import { appliedCraftingActionsRecoil, craftingActionsRecoil, tubesState } from 
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { ReactComponent as CraftingTubeSvg } from "./craftingTube.svg";
 
-const PourFromMainIntoSecondaryButton = () => {
+const PourFromMainIntoSecondaryButton = ({ i }: { i: number; }) => {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
@@ -65,7 +65,7 @@ function Slot({ i }: { i: number; }) {
         {tube[i]}
         {isTopContent &&
             isSecondaryAvailable &&
-            <PourFromMainIntoSecondaryButton />}
+            <PourFromMainIntoSecondaryButton i={i}/>}
     </div>;
 }
 
