@@ -15,7 +15,7 @@ function* traverseJSXElementTree(el) {
 const injectSlots = (jsx, tpl) => {
     for (const el of traverseJSXElementTree(jsx)) {
         const id = el.openingElement.attributes.find(attr => attr.name.name === "id")?.value.value;
-        if (!id) { return; }
+        if (!id) { continue; }
 
         if (el.openingElement.selfClosing) {
             el.openingElement.selfClosing = false;
