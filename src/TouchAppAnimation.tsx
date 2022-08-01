@@ -1,7 +1,6 @@
 import { TouchApp } from '@emotion-icons/material-rounded/TouchApp';
 import { JSX } from "preact";
-import { css, cx } from '@emotion/css';
-import { useAnimationFrameTime } from './utils/useAnimationFrameTime';
+import { css, cx, keyframes } from '@emotion/css';
 
 
 export function TouchAppAnimation({
@@ -10,8 +9,6 @@ export function TouchAppAnimation({
     style?: JSX.CSSProperties;
     className?: string;
 }) {
-    const t = useAnimationFrameTime([]);
-    const s = 1 + 0.1 * Math.sin(t / 300);
     return <div
         className={cx(css`
             & {
@@ -20,20 +17,38 @@ export function TouchAppAnimation({
                 pointer-events: none;
 
                 position: relative;
+                z-index: 1;
             }
         `, className)}
-        style={{...style}}
+        style={{ ...style }}
     >
         <div style={{
             width: "100%",
             position: "absolute",
             transformOrigin: "48% 23%",
-            transform: `translate(-48%, -23%)`,
+            transform: `translate(-48%, -23%) rotate(-20deg)`,
         }}>
-            <TouchApp style={{
-                transformOrigin: "48% 23%",
-                transform: `scale(${s}) rotate(-20deg)`,
-            }} />
+            <TouchApp className={css`& {
+                transform-origin: 48% 23%;
+                animation-name: ${keyframes`
+                    0% {
+                        transform: scale(1);
+                    }
+                    10% {
+                        transform: scale(0.6);
+                    }
+                    30% {
+                        transform: scale(1);
+                    }
+                    100% {
+                        transform: scale(1);
+                    }
+                `};
+                animation-duration: 1300ms;
+                animation-fill-mode: both;
+                animation-iteration-count: infinite;
+                animation-timing-function: linear;
+            }`} />
         </div>
     </div>;
 }
