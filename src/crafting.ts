@@ -161,7 +161,6 @@ export function craftingReduce(
 ) {
     const afterAction = craftingAct(state, action);
     const afterReactions = craftingReact(afterAction.state, reactions);
-    console.log(afterReactions);
     const afterCleanups = craftingCleanup(afterReactions.state);
     const afterGiveaway = craftingGiveaway(afterCleanups.state);
 
