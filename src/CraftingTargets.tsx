@@ -1,7 +1,6 @@
 import { css, cx } from "@emotion/css";
 import { selector, useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from "recoil";
 import { buttonCss } from "./buttonCss";
-import { appliedCraftingActionsRecoil, craftingActionsRecoil } from "./CraftingTable";
 import { levelPresetRecoil } from "./LevelList";
 import { reactionsLibraryRecoil } from "./ReactionsLibrary";
 import { Tube, TubeAsContainer } from "./Tube";
@@ -11,6 +10,7 @@ import { DoubleArrow } from '@emotion-icons/material-rounded/DoubleArrow';
 import { levelPresets } from "./levelPresets";
 import { isWinRecoil } from "./Win";
 import { TouchAppAnimation } from "./TouchAppAnimation";
+import { craftingActionsRecoil, getCraftingState, craftingStateInTimeRecoil } from "./craftingActionsRecoil";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const craftingTargetsRecoil = selector({
@@ -46,12 +46,6 @@ export const craftingTargetsRecoil = selector({
         });
     }
 });
-
-export const craftingTargetsLeftRecoil =  selector({
-    key: "craftingTargetsLeft",
-    get: ({ get }) => get(appliedCraftingActionsRecoil).stateFinal.targets,
-});
-
 
 function NextLevelButton({ ...props }: { disabled?: boolean }) {
     const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
@@ -92,7 +86,7 @@ export function CraftingTargets({ style, className }: {
     style?: CSSProperties,
     className?: string,
 }) {
-    const targets = useRecoilValue(craftingTargetsLeftRecoil);
+    const { targets } = getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
     
     const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
     const isWin = useRecoilValue(isWinRecoil);

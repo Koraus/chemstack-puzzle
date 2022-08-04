@@ -1,5 +1,5 @@
 import { useRecoilValue } from 'recoil';
-import { craftingActionsRecoil } from './CraftingTable';
+import { craftingActionsRecoil } from './craftingActionsRecoil';
 import { levelPresetRecoil } from "./LevelList";
 import { SubstanceId } from "./crafting";
 import { substanceColors } from './substanceColors';

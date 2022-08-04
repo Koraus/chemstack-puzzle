@@ -1,6 +1,5 @@
 import { useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
 import { css, cx } from "@emotion/css";
-import { craftingActionsRecoil } from "./CraftingTable";
 import { isWinRecoil } from "./Win";
 import { levelPresetRecoil } from "./LevelList";
 import { StateUpdater } from "preact/hooks";
@@ -9,6 +8,7 @@ import { buttonCss } from "./buttonCss";
 import { JSX } from "preact";
 import { Menu } from '@emotion-icons/material-rounded/Menu';
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
+import { craftingActionsRecoil } from './craftingActionsRecoil';
 
 
 export function Header({

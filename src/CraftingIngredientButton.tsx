@@ -6,14 +6,13 @@ import { CraftingAction } from './crafting';
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { isWinRecoil } from "./Win";
 import { buttonCss } from "./buttonCss";
-import { craftingActionsRecoil } from "./CraftingTable";
+import { useCraftingAct } from "./craftingActionsRecoil";
 
 export function CraftingIngredientButton({ sid, mirrored = false }: {
     sid: SubstanceId;
     mirrored?: boolean;
 }) {
-    const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
-    const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
+    const act = useCraftingAct();
     const isWin = useRecoilValue(isWinRecoil);
 
     function IngredintButtonWave() {

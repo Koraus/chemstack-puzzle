@@ -1,5 +1,4 @@
-import { atom, DefaultValue, useRecoilTransaction_UNSTABLE, useRecoilValue } from "recoil";
-import { craftingActionsRecoil } from "./CraftingTable";
+import { atom, useRecoilTransaction_UNSTABLE, useRecoilValue } from "recoil";
 import { apipe } from "./utils/apipe";
 import * as it from "./utils/it";
 import { useEffect, useRef } from "preact/hooks";
@@ -11,6 +10,7 @@ type CSSProperties = import("preact").JSX.CSSProperties;
 import * as amplitude from "@amplitude/analytics-browser";
 import { Done } from '@emotion-icons/material-rounded/Done';
 import { RemoveDone } from '@emotion-icons/material-rounded/RemoveDone';
+import { craftingActionsRecoil } from "./craftingActionsRecoil";
 
 
 export const levelPresetRecoil = atom({

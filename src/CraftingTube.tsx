@@ -1,15 +1,14 @@
-import { CraftingAction, SubstanceId } from "./crafting";
+import { CraftingAction } from "./crafting";
 import { substanceColors } from "./substanceColors";
-import * as flex from "./utils/flex";
 import { JSX } from "preact";
-import { useEffect, useState, useRef } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { css, cx, keyframes } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
 import { useRecoilValue } from "recoil";
-import { appliedCraftingActionsRecoil, craftingActionsRecoil, tubesState } from "./CraftingTable";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { ReactComponent as CraftingTubeSvg } from "./craftingTube.svg";
+import { craftingActionsRecoil, getCraftingState, craftingStateInTimeRecoil, useCraftingState } from "./craftingActionsRecoil";
 
 function PourFromMainIntoSecondaryButton({ style, className }: {
     className?: string,
@@ -35,15 +34,14 @@ function PourFromMainIntoSecondaryButton({ style, className }: {
 export function CraftingTube({ style }: {
     style?: JSX.CSSProperties;
 }) {
-    const appliedCraftingActions = useRecoilValue(appliedCraftingActionsRecoil);
+    const craftingStateInTime = useCraftingState();
+    const time = craftingStateInTime.currentTime;
+    const craftingState = craftingStateInTime.currentState;
 
-    const [time, setTime] = useState(0);
-    useEffect(() => setTime(performance.now()), [appliedCraftingActions]);
 
-    const tubes = appliedCraftingActions.stateFinal.tubes;
-    const tube = tubes[0];
-    const isSecondaryAvailable = tubes.length > 1;
-    const isTopContent = (i: number) => i === tube.length - 1;
+    const tube = craftingState.state.tubes[0];
+    const prevTube = craftingState.prevState.tubes[0];
+    const isSecondaryAvailable = craftingState.state.tubes.length > 1;
 
     return <div className={cx(css`& {
         width: 57px;
@@ -52,10 +50,23 @@ export function CraftingTube({ style }: {
         <CraftingTubeSvg
             className={cx(css`
                 ${[0, 1, 2].map(i => {
+                const prevIsNext = prevTube.length === i;
+                const prevHasContent = prevTube.length > i;
+                const prevIsTopContent = i === prevTube.length - 1;
                 const isNext = tube.length === i;
                 const hasContent = tube.length > i;
                 const isTopContent = i === tube.length - 1;
                 return `
+                    & #prev_slot${i}_content {
+                        display: none;
+                    }
+                    & #prev_slot${i}_content_back {
+                        fill: ${substanceColors[prevTube[i]]};
+                    }
+                    & #prev_slot${i}_number {
+                        font-family: 'Bahnschrift', sans-serif;
+                        text-anchor: middle;
+                    }
                     & #slot${i}_add {
                         ${isNext ? "" : "display: none;"}
                     }
@@ -70,12 +81,11 @@ export function CraftingTube({ style }: {
                         text-anchor: middle;
                     }
                     ${(() => {
+                        // action add ingr animation
                         if (!isTopContent) { return ""; }
-                        if (!("action" in appliedCraftingActions)) { return ""; }
-                        const { action } = appliedCraftingActions;
-                        if (action.action !== "addIngredient") { return ""; }
-                        const startTime = action.time;
-                        const duration = appliedCraftingActions.duration;
+                        if (craftingState.id !== "craftingAct") { return ""; }
+                        if (craftingState.diffCustom.action !== "addIngredient") { return ""; }
+                        const { start, duration } = craftingState;
                         return `
                             & #slot${i}_content {
                                 animation-name: ${keyframes`
@@ -91,7 +101,7 @@ export function CraftingTube({ style }: {
                                     ## ${time}
                                 `};
                                 animation-duration: ${duration}ms;
-                                animation-delay: ${startTime - time}ms;
+                                animation-delay: ${start - time}ms;
                                 animation-fill-mode: both;
                                 animation-timing-function: linear;
                             }
@@ -115,16 +125,89 @@ export function CraftingTube({ style }: {
                                     ## ${time}
                                 `};
                                 animation-duration: ${duration}ms;
-                                animation-delay: ${startTime - time}ms;
+                                animation-delay: ${start - time}ms;
                                 animation-fill-mode: both;
                                 animation-timing-function: linear;
                             }
                         `;
                     })()}
+                    ${(() => {
+                        // reaction animation
+                        if (craftingState.id !== "craftingReact") { return ""; }
+                        const reaction = craftingState.diffCustom.find(d => d[0] === 0)?.[1];
+                        if (!reaction) { return ""; }
+                        const { start, duration, state, prevState } = craftingState;
+                        console.log(craftingState);
+                        const tube = craftingState.state.tubes[0];
+                        const prevTube = craftingState.prevState.tubes[0];
+
+                        let s = `
+                            & #prev_slot${i}_content {
+                                ${prevHasContent ? "display: unset;" : "display: none;"}
+                            }
+                        `;
+
+                        if (i >= prevTube.length - reaction.reagents.length) {
+                            s += `
+                                & #prev_slot${i}_content_ {
+                                    animation-name: ${keyframes`
+                                        0% {
+                                            transform: scale(1);
+                                        }
+                                        49% {
+                                            transform: scale(0);
+                                        }
+                                        50% {
+                                            transform: scale(0);
+                                        }
+                                        100% {
+                                            transform: scale(0);
+                                        }
+                                        ## ${time}
+                                    `};
+                                    animation-duration: ${duration}ms;
+                                    animation-delay: ${start - time}ms;
+                                    animation-fill-mode: both;
+                                    animation-timing-function: linear;
+                                }
+                            ;`
+                        }
+
+                        if (i >= tube.length - reaction.products.length) {
+                            s += `
+                                & #slot${i}_content_ {
+                                    animation-name: ${keyframes`
+                                        0% {
+                                            transform: scale(0);
+                                        }
+                                        49% {
+                                            transform: scale(0);
+                                        }
+                                        50% {
+                                            transform: scale(0);
+                                        }
+                                        100% {
+                                            transform: scale(1);
+                                        }
+                                        ## ${time}
+                                    `};
+                                    animation-duration: ${duration}ms;
+                                    animation-delay: ${start - time}ms;
+                                    animation-fill-mode: both;
+                                    animation-timing-function: linear;
+                                }
+                            `;
+                        }
+
+                        return s;
+                    })()}
                 `;
             }).join('\n')}
             `)}
             slots={{
+                prev_slot0_number: prevTube[0],
+                prev_slot1_number: prevTube[1],
+                prev_slot2_number: prevTube[2],
                 slot0_number: tube[0],
                 slot1_number: tube[1],
                 slot2_number: tube[2],

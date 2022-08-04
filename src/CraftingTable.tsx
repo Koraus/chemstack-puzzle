@@ -1,13 +1,10 @@
-import update from "immutability-helper";
-import { atom, selector, useRecoilValue } from 'recoil';
-import { Reaction, SubstanceId } from "./crafting";
+import { useRecoilValue } from 'recoil';
 import * as flex from "./utils/flex";
 import * as _ from "lodash";
 import { Tube } from "./Tube";
-import { CraftingAction, craftingReduce } from './crafting';
+import { CraftingAction } from './crafting';
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
-import { reactionsLibraryRecoil } from "./ReactionsLibrary";
-import { CraftingTargets, craftingTargetsLeftRecoil, craftingTargetsRecoil } from "./CraftingTargets";
+import { CraftingTargets } from "./CraftingTargets";
 import { isWinRecoil } from "./Win";
 import { levelPresetRecoil } from "./LevelList";
 import { buttonCss } from "./buttonCss";
@@ -20,43 +17,7 @@ import { JSX } from "preact";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Close } from '@emotion-icons/material-rounded/Close';
-
-export const craftingActionsRecoil = atom({
-    key: "craftingActions",
-    default: [] as CraftingAction[],
-});
-
-export const appliedCraftingActionsRecoil = selector({
-    key: "appliedCraftingActions",
-    get: ({ get }) => {
-        const actions = get(craftingActionsRecoil);
-        const reactions = get(reactionsLibraryRecoil);
-        const targets = get(craftingTargetsRecoil);
-        let state: ReturnType<typeof craftingReduce> | undefined;
-        for (let i = 0; i < actions.length; i++) {
-            const action = actions[i];
-            state = craftingReduce(
-                { reactions },
-                action,
-                state?.stateFinal
-                ?? { tubes: [[]], targets });
-        }
-        return {
-            ...(state ?? {
-                stateFinal: {
-                    tubes: [[] as SubstanceId[]],
-                    targets,
-                }
-            }),
-            duration: 500,
-        };
-    }
-});
-
-export const tubesState = selector({
-    key: "tubes",
-    get: ({ get }) => get(appliedCraftingActionsRecoil).stateFinal.tubes,
-})
+import { craftingActionsRecoil, craftingStateInTimeRecoil, getCraftingState } from "./craftingActionsRecoil";
 
 function CraftingIngredientPanel({
     style, className,
@@ -64,12 +25,12 @@ function CraftingIngredientPanel({
     style?: JSX.CSSProperties;
     className?: string;
 }) {
-    const tubes = useRecoilValue(tubesState);
+    const { tubes, targets } = 
+        getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
     const { ingredientCount } = useRecoilValue(levelPresetRecoil);
     const ingredients = Array.from({ length: ingredientCount }, (_, i) => i);
     const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
-    const targets = useRecoilValue(craftingTargetsLeftRecoil);
-
+    
     const hintSid =
         isFirstLevel
         && targets.length > 0
@@ -110,9 +71,9 @@ export function CraftingTable() {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
-    const tubes = useRecoilValue(tubesState);
+    const { tubes, targets } = 
+        getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
     const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
-    const targets = useRecoilValue(craftingTargetsLeftRecoil);
     const isWin = useRecoilValue(isWinRecoil);
 
     const hintReset =

@@ -1,6 +1,6 @@
 import { useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
 import update from "immutability-helper";
-import { craftingActionsRecoil } from './CraftingTable';
+import { craftingActionsRecoil } from './craftingActionsRecoil';
 import { levelPresetRecoil } from './LevelList';
 import { buttonCss } from './buttonCss';
 import { cx, css } from '@emotion/css';
