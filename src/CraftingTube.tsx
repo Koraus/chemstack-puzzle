@@ -11,63 +11,26 @@ import { appliedCraftingActionsRecoil, craftingActionsRecoil, tubesState } from 
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { ReactComponent as CraftingTubeSvg } from "./craftingTube.svg";
 
-function PourFromMainIntoSecondaryButton ({ i }: { i: number; }) {
+function PourFromMainIntoSecondaryButton({ style, className }: {
+    className?: string,
+    style?: JSX.CSSProperties;
+}) {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
     return <button
-        className={cx(buttonCss)}
+        className={cx(buttonCss, className)}
         style={{
             display: "flex",
-            position: "absolute",
-            left: "-24px",
-            top: ["-10px", "3px", "16px"][i],
 
             alignItems: "center",
             width: "23px",
             height: "40px",
+            ...style,
         }}
         onClick={() => act({ action: "pourFromMainIntoSecondary", time: performance.now() })}
     ><ArrowLeft style={{ height: 80, margin: -20 }} /></button>;
 };
-
-function Slot({ i }: { i: number; }) {
-    const tubes = useRecoilValue(tubesState);
-    const tube = tubes[0];
-    const isSecondaryAvailable = tubes.length > 1;
-
-    const isTopContent = i === tube.length - 1;
-    const hasContent = i < tube.length;
-    const isFirst = i === 0;
-
-
-    return <div style={{
-        textAlign: "center",
-        margin: `0px 6px 6px 6px`,
-        width: `28px`,
-        height: `56px`,
-        border: "2px solid transparent",
-        borderRadius: "5px",
-        fontSize: "38px",
-        lineHeight: "58px",
-        color: "#ffffffff",
-        position: "relative",
-
-        ...(hasContent && {
-            backgroundColor: substanceColors[tube[i]],
-        }),
-
-        ...(isFirst && {
-            borderBottomLeftRadius: "15px",
-            borderBottomRightRadius: "15px",
-        }),
-    }}>
-        {tube[i]}
-        {isTopContent &&
-            isSecondaryAvailable &&
-            <PourFromMainIntoSecondaryButton i={i}/>}
-    </div>;
-}
 
 export function CraftingTube({ style }: {
     style?: JSX.CSSProperties;
@@ -77,8 +40,10 @@ export function CraftingTube({ style }: {
     const [time, setTime] = useState(0);
     useEffect(() => setTime(performance.now()), [appliedCraftingActions]);
 
-    const tube = appliedCraftingActions.stateFinal.tubes[0];
-    const isNext = (i: number) => tube.length === i;
+    const tubes = appliedCraftingActions.stateFinal.tubes;
+    const tube = tubes[0];
+    const isSecondaryAvailable = tubes.length > 1;
+    const isTopContent = (i: number) => i === tube.length - 1;
 
     return <div className={cx(css`& {
         width: 57px;
@@ -86,12 +51,16 @@ export function CraftingTube({ style }: {
     }`)} style={style}>
         <CraftingTubeSvg
             className={cx(css`
-                ${[0, 1, 2].map(i => `
+                ${[0, 1, 2].map(i => {
+                const isNext = tube.length === i;
+                const hasContent = tube.length > i;
+                const isTopContent = i === tube.length - 1;
+                return `
                     & #slot${i}_add {
-                        ${isNext(i) ? "" : "display: none;"}
+                        ${isNext ? "" : "display: none;"}
                     }
                     & #slot${i}_content {
-                        ${tube.length > i ? "" : "display: none;"}
+                        ${hasContent ? "" : "display: none;"}
                     }
                     & #slot${i}_content_back {
                         fill: ${substanceColors[tube[i]]};
@@ -100,7 +69,60 @@ export function CraftingTube({ style }: {
                         font-family: 'Bahnschrift', sans-serif;
                         text-anchor: middle;
                     }
-                `).join('\n')}
+                    ${(() => {
+                        if (!isTopContent) { return ""; }
+                        if (!("action" in appliedCraftingActions)) { return ""; }
+                        const { action } = appliedCraftingActions;
+                        if (action.action !== "addIngredient") { return ""; }
+                        const startTime = action.time;
+                        const duration = appliedCraftingActions.duration;
+                        return `
+                            & #slot${i}_content {
+                                animation-name: ${keyframes`
+                                    0% {
+                                        transform: translate(0, -400px);
+                                    }
+                                    50% {
+                                        transform: translate(0, 10px);
+                                    }
+                                    100% {
+                                        transform: translate(0, 0px);
+                                    }
+                                    ## ${time}
+                                `};
+                                animation-duration: ${duration}ms;
+                                animation-delay: ${startTime - time}ms;
+                                animation-fill-mode: both;
+                                animation-timing-function: linear;
+                            }
+                            & #slot${i}_content_ {
+                                animation-name: ${keyframes`
+                                    0% {
+                                        transform: scale(1, 1);
+                                    }
+                                    50% {
+                                        transform: scale(1, 1);
+                                    }
+                                    60% {
+                                        transform: scale(1.1, 0.8);
+                                    }
+                                    78% {
+                                        transform: scale(0.8, 1.3);
+                                    }
+                                    100% {
+                                        transform: scale(1, 1);
+                                    }
+                                    ## ${time}
+                                `};
+                                animation-duration: ${duration}ms;
+                                animation-delay: ${startTime - time}ms;
+                                animation-fill-mode: both;
+                                animation-timing-function: linear;
+                            }
+                        `;
+                    })()}
+                `;
+            }).join('\n')}
             `)}
             slots={{
                 slot0_number: tube[0],
@@ -108,43 +130,12 @@ export function CraftingTube({ style }: {
                 slot2_number: tube[2],
             }}
         />
-
-        {/* <div style={{
-            ...flex.colRev,
-
-            height: "220px",
-            border: "6px solid transparent",
-            position: "absolute",
-            top: 0,
-        }}>
-            {("action" in appliedCraftingActions) && (() => {
-                const { action } = appliedCraftingActions;
-                if (action.action !== "addIngredient") { return null; }
-                return <div style={{ position: "relative" }}>
-                    <div
-                        className={css`& {
-                        position: absolute;
-                        animation-name: ${keyframes`
-                            0% {
-                                transform: translate(0, -300px);
-                            }
-                            100% {
-                                transform: translate(0, -150px);
-                            }
-                            ## ${time}
-                        `};
-                        animation-duration: ${appliedCraftingActions.duration}ms;
-                        animation-delay: ${action.time - time}ms;
-                        animation-fill-mode: both;
-                    }`}
-                    >
-                        {action.ingredientId}
-                    </div>
-                </div>
-            })()}
-            <Slot i={0} />
-            <Slot i={1} />
-            <Slot i={2} />
-        </div> */}
+        {isSecondaryAvailable && tube.length > 0 && <PourFromMainIntoSecondaryButton
+            style={{
+                position: "absolute",
+                left: "-10px",
+                top: ["64%", "42%", "19%"][tube.length - 1],
+            }}
+        />}
     </div>;
 }

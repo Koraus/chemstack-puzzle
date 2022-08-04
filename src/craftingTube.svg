@@ -265,19 +265,25 @@
 				</g>
 			</g>
 			<g id="slot0_content">
-				<path id="slot0_content_back" class="st5" d="M77.9,319.9H35.3c-6.1,0-11,4.9-11,11V406c0,17.9,14.5,32.5,32.4,32.5l0,0
+				<g id="slot0_content_" transform-origin="56.70000076293945 438.5">
+					<path id="slot0_content_back" class="st5" d="M77.9,319.9H35.3c-6.1,0-11,4.9-11,11V406c0,17.9,14.5,32.5,32.4,32.5l0,0
 					c17.8,0,32.4-14.5,32.4-32.5v-75.1C89,324.8,84,319.9,77.9,319.9L77.9,319.9z" />
-				<text id="slot0_number" transform="matrix(1 0 0 1 58 406.1079)" class="st7 st8 st9"></text>
+					<text id="slot0_number" transform="matrix(1 0 0 1 58 406.1079)" class="st7 st8 st9"></text>
+				</g>
 			</g>
-			<g id="slot1_content">
-				<path id="slot1_content_back" class="st5" d="M78.1,188.6H35.2c-6.1,0-11,4.9-11,11v96.6c0,6.1,4.9,11,11,11h42.9c6.1,0,11-4.9,11-11
+			<g id="slot1_content" >
+				<g id="slot1_content_" transform-origin="56.65000534057617 307.20001220703125">
+					<path id="slot1_content_back" class="st5" d="M78.1,188.6H35.2c-6.1,0-11,4.9-11,11v96.6c0,6.1,4.9,11,11,11h42.9c6.1,0,11-4.9,11-11
 					v-96.6C89.1,193.5,84.2,188.6,78.1,188.6L78.1,188.6z" />
-				<text id="slot1_number" transform="matrix(1 0 0 1 58 275.0574)" class="st7 st8 st9"></text>
+					<text id="slot1_number" transform="matrix(1 0 0 1 58 275.0574)" class="st7 st8 st9"></text>
+				</g>
 			</g>
 			<g id="slot2_content">
-				<path id="slot2_content_back" class="st5" d="M89.1,68.4v96.5c0,6.1-4.9,11-11,11H35.3c-6.1,0-11-4.9-11-11V68.4c0-6.1,4.9-11,11-11
+				<g id="slot2_content_" transform-origin="56.70000076293945 175.89999389648438">
+					<path id="slot2_content_back" class="st5" d="M89.1,68.4v96.5c0,6.1-4.9,11-11,11H35.3c-6.1,0-11-4.9-11-11V68.4c0-6.1,4.9-11,11-11
 					h42.9C84.2,57.4,89.1,62.3,89.1,68.4z" />
-				<text id="slot2_number" transform="matrix(1 0 0 1 58 143.9079)" class="st7 st8 st9"></text>
+					<text id="slot2_number" transform="matrix(1 0 0 1 58 143.9079)" class="st7 st8 st9"></text>
+				</g>
 			</g>
 		</g>
 	</g>
