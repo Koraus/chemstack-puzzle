@@ -97,7 +97,7 @@ export function craftingReact(
         prevState: state,
         state: update(state, diff),
         // start: action.time,
-        duration: 400,
+        duration: applicableReactions.length > 0 ? 400 : 0,
     };
 }
 
@@ -123,7 +123,7 @@ export function craftingCleanup(
         prevState: state,
         state: update(state, diff),
         // start: action.time,
-        duration: 400,
+        duration: cleanups.length > 0 ? 400 : 0,
     };
 }
 
@@ -148,7 +148,7 @@ export function craftingGiveaway(
         prevState: state,
         state: update(state, diff),
         // start: action.time,
-        duration: 400,
+        duration: tubeToGiveAwayIndex >= 0 ? 400 : 0,
     };
 }
 
@@ -177,6 +177,6 @@ export function craftingReduce(
             afterReactions,
             afterCleanups,
             afterGiveaway,
-        ]
+        ].filter(x => x.duration > 0),
     }
 }
