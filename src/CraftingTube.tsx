@@ -222,6 +222,27 @@ export function CraftingTube({ style }: {
                     reaction,
                     ...craftingStateInTime,
                 }),
+                craftingState.id === "craftingAct"
+                && craftingState.diffCustom.action === "addTube"
+                && css`
+                    & {
+                        transform-origin: bottom;
+                        animation-name: ${keyframes`
+                            0% {
+                                transform: scale(0);
+                            }
+                            100% {
+                                transform: scale(1);
+                            }
+                            ## ${time}
+                        `};
+                        animation-duration: ${craftingState.duration}ms;
+                        animation-delay: ${craftingState.start - time}ms;
+                        animation-fill-mode: both;
+                        animation-timing-function: linear;
+                    }
+                `,
+
             )}
             slots={{
                 prev_slot0_number: prevTube[0],
