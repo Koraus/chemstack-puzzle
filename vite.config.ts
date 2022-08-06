@@ -52,13 +52,36 @@ const svgrTemplate = (variables, { tpl }) => {
 export default defineConfig({
     plugins: [
         preact({ devtoolsInProd: true }),
-        viteSingleFile(),
         BuildInfo(),
         svgr({
             svgrOptions: {
                 template: svgrTemplate,
             }
         }),
+        viteSingleFile(),
+        {
+            name: "clean up svgr-ed svgs",
+            generateBundle(_, bundle) {
+                const svgsToCleanUp = [
+                    'src/craftingTube.svg'
+                ];
+
+                for (const name of svgsToCleanUp) {
+                    const key = Object.entries(bundle)
+                        .find(([key, asset]) => asset.name === name)?.[0];
+                    if (key) {
+                        delete bundle[key];
+                        console.log(
+                            "clean up svgr-ed svgs:", 
+                            key, "removed from bundle");
+                    } else {
+                        console.log(
+                            "clean up svgr-ed svgs:", 
+                            name, "not found in bundle");
+                    }
+                }
+            },
+        }
     ],
     server: {
         port: 3685,
