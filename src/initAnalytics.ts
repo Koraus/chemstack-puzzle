@@ -13,6 +13,3 @@ init(amplitudeApiKey ?? "stub", undefined, {
         logLevel: Types.LogLevel.Verbose,
     }),
 });
-identify(new Identify()
-    .set("location.href", location.href)
-);

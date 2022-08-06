@@ -13,14 +13,19 @@ export type Reaction = {
 export type CraftingAction = {
     action: "addIngredient",
     ingredientId: SubstanceId,
+    time: number,
 } | {
     action: "addTube",
+    time: number,
 } | {
     action: "trashTube",
+    time: number,
 } | {
     action: "pourFromSecondaryIntoMain",
+    time: number,
 } | {
     action: "pourFromMainIntoSecondary",
+    time: number,
 };
 
 export type CraftingState = {
@@ -28,25 +33,11 @@ export type CraftingState = {
     targets: SubstanceId[][],
 }
 
-export type AppliedCraftingAction = {
-    stateInitial: CraftingState,
+export function craftingAct(
+    state: CraftingState,
     action: CraftingAction,
-    stateAfterAction: CraftingState,
-    reactions: Record<number, Reaction>;
-    stateAfterReactions: CraftingState;
-    cleanups: Record<number, SubstanceId[]>;
-    stateAfterCleanups: CraftingState;
-    stateFinal: CraftingState;
-}
-
-export function craftingReduce(
-    { reactions }: {
-        reactions: Reaction[],
-    },
-    action: CraftingAction,
-    stateInitial: CraftingState,
 ) {
-    const stateAfterAction = update(stateInitial, ((): Spec<CraftingState> => {
+    const diff = ((state: CraftingState): Spec<CraftingState> => {
         switch (action.action) {
             case "addIngredient": return {
                 tubes: { 0: { $push: [action.ingredientId] } },
@@ -59,68 +50,133 @@ export function craftingReduce(
             };
             case "pourFromMainIntoSecondary": return {
                 tubes: {
-                    0: { $splice: [[stateInitial.tubes[0].length - 1]] },
-                    1: { $push: [stateInitial.tubes[0][stateInitial.tubes[0].length - 1]] },
+                    0: { $splice: [[state.tubes[0].length - 1]] },
+                    1: { $push: [state.tubes[0][state.tubes[0].length - 1]] },
                 }
             };
             case "pourFromSecondaryIntoMain": return {
                 tubes: {
-                    0: { $push: [stateInitial.tubes[1][stateInitial.tubes[1].length - 1]] },
-                    1: { $splice: [[stateInitial.tubes[1].length - 1]] },
+                    0: { $push: [state.tubes[1][state.tubes[1].length - 1]] },
+                    1: { $splice: [[state.tubes[1].length - 1]] },
                 }
             };
         }
-    })());
-
-    const applicableReactions = stateAfterAction.tubes
+    })(state);
+    return {
+        id: "craftingAct" as const,
+        diffCustom: action,
+        diff,
+        prevState: state,
+        state: update(state, diff),
+        start: action.time,
+        duration: 400,
+    };
+}
+export function craftingReact(
+    state: CraftingState,
+    reactions: Reaction[],
+) {
+    const applicableReactions = state.tubes
         .map((tube, i) => [i, reactions.find(r =>
             r.reagents[1] === tube[tube.length - 1]
             && r.reagents[0] === tube[tube.length - 2])] as const)
         .filter((x): x is [number, Reaction] => x[1] !== undefined);
 
-    const stateAfterReactions = update(stateAfterAction, {
+    const diff =  {
         tubes: {
             ...(Object.fromEntries(applicableReactions.map(([i, r]) => ([i, {
-                $splice: [[stateAfterAction.tubes[i].length - 2, 2, ...r.products]]
+                $splice: [[state.tubes[i].length - 2, 2, ...r.products]]
             }]))) as Record<number, Spec<CraftingState["tubes"][0]>>),
         }
-    });
+    };
 
-    const cleanups = stateAfterReactions.tubes
-        .map((tube, i) => [i, tube.splice(3)] as const)
+    return {
+        id: "craftingReact" as const,
+        diffCustom: applicableReactions,
+        diff,
+        prevState: state,
+        state: update(state, diff),
+        // start: action.time,
+        duration: applicableReactions.length > 0 ? 400 : 0,
+    };
+}
+
+export function craftingCleanup(
+    state: CraftingState,
+) {
+    const cleanups = state.tubes
+        .map((tube, i) => [i, tube.slice(3)] as const)
         .filter((x) => x[1].length > 0);
 
-    const stateAfterCleanups = update(stateAfterReactions, {
+    const diff = {
         tubes: {
             ...(Object.fromEntries(cleanups.map(([i, r]) => ([i, {
                 $splice: [[3]]
             }]))) as Record<number, Spec<CraftingState["tubes"][0]>>),
         }
-    });
+    };
 
-    const tubeToGiveAwayIndex = stateAfterCleanups.tubes.findIndex(tube =>
-        stateAfterCleanups.targets[0].every((sid, i) => tube[i] === sid));
+    return {
+        id: "craftingCleanup" as const,
+        diffCustom: cleanups,
+        diff,
+        prevState: state,
+        state: update(state, diff),
+        // start: action.time,
+        duration: cleanups.length > 0 ? 400 : 0,
+    };
+}
 
-    const stateAfterGiveAway =
+export function craftingGiveaway(
+    state: CraftingState,
+) {
+    const tubeToGiveAwayIndex = state.tubes.findIndex(tube =>
+        state.targets[0].every((sid, i) => tube[i] === sid));
+
+    const diff: Spec<typeof state> =
         tubeToGiveAwayIndex >= 0
-            ? update(stateAfterCleanups, {
-                tubes: stateAfterCleanups.tubes.length > 1
+            ? {
+                tubes: state.tubes.length > 1
                     ? { $splice: [[tubeToGiveAwayIndex, 1]] }
                     : { 0: { $set: [] } },
                 targets: { $splice: [[0, 1]] },
-            })
-            : stateAfterCleanups;
+            } : {};
+    return {
+        id: "craftingGiveaway" as const,
+        diffCustom: tubeToGiveAwayIndex,
+        diff,
+        prevState: state,
+        state: update(state, diff),
+        // start: action.time,
+        duration: tubeToGiveAwayIndex >= 0 ? 400 : 0,
+    };
+}
+
+export function craftingReduce(
+    { reactions }: {
+        reactions: Reaction[],
+    },
+    action: CraftingAction,
+    state: CraftingState,
+) {
+    const afterAction = craftingAct(state, action);
+    const afterReactions = craftingReact(afterAction.state, reactions);
+    const afterCleanups = craftingCleanup(afterReactions.state);
+    const afterGiveaway = craftingGiveaway(afterCleanups.state);
 
     return {
-        stateInitial,
+        prevState: state,
         action,
-        stateAfterAction,
-        reactions: applicableReactions,
-        stateAfterReactions,
-        cleanups,
-        stateAfterCleanups,
-        tubeToGiveAwayIndex,
-        stateAfterGiveAway,
-        stateFinal: stateAfterGiveAway,
+        afterAction,
+        afterReactions,
+        afterCleanups,
+        afterGiveaway,
+        state: afterGiveaway.state,
+        children: [
+            afterAction,
+            afterReactions,
+            afterCleanups,
+            afterGiveaway,
+        ].filter(x => x.duration > 0),
     }
 }

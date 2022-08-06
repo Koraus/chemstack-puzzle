@@ -1,13 +1,10 @@
-import update from "immutability-helper";
-import { atom, selector, useRecoilValue } from 'recoil';
-import { Reaction, SubstanceId } from "./crafting";
+import { useRecoilValue } from 'recoil';
 import * as flex from "./utils/flex";
 import * as _ from "lodash";
 import { Tube } from "./Tube";
-import { CraftingAction, craftingReduce } from './crafting';
+import { CraftingAction } from './crafting';
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
-import { reactionsLibraryRecoil } from "./ReactionsLibrary";
-import { CraftingTargets, craftingTargetsLeftRecoil, craftingTargetsRecoil } from "./CraftingTargets";
+import { CraftingTargets } from "./CraftingTargets";
 import { isWinRecoil } from "./Win";
 import { levelPresetRecoil } from "./LevelList";
 import { buttonCss } from "./buttonCss";
@@ -15,45 +12,12 @@ import { CraftingIngredientButton } from "./CraftingIngredientButton";
 import { CraftingTube } from "./CraftingTube";
 import { levelPresets } from "./levelPresets";
 import { TouchAppAnimation } from "./TouchAppAnimation";
-import { css, cx } from "@emotion/css";
+import { css, cx, keyframes } from "@emotion/css";
 import { JSX } from "preact";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Close } from '@emotion-icons/material-rounded/Close';
-
-export const craftingActionsRecoil = atom({
-    key: "craftingActions",
-    default: [] as CraftingAction[],
-});
-
-export const appliedCraftingActionsRecoil = selector({
-    key: "appliedCraftingActions",
-    get: ({ get }) => {
-        const actions = get(craftingActionsRecoil);
-        const reactions = get(reactionsLibraryRecoil);
-        const targets = get(craftingTargetsRecoil);
-        let state: ReturnType<typeof craftingReduce> | undefined;
-        for (let i = 0; i < actions.length; i++) {
-            const action = actions[i];
-            state = craftingReduce(
-                { reactions },
-                action,
-                state?.stateFinal
-                ?? { tubes: [[]], targets });
-        }
-        return state ?? {
-            stateFinal: {
-                tubes: [[] as SubstanceId[]],
-                targets,
-            }
-        };
-    }
-});
-
-export const tubesState = selector({
-    key: "tubes",
-    get: ({ get }) => get(appliedCraftingActionsRecoil).stateFinal.tubes,
-})
+import { craftingActionsRecoil, craftingStateInTimeRecoil, getCraftingState, useCraftingState } from "./craftingActionsRecoil";
 
 function CraftingIngredientPanel({
     style, className,
@@ -61,11 +25,11 @@ function CraftingIngredientPanel({
     style?: JSX.CSSProperties;
     className?: string;
 }) {
-    const tubes = useRecoilValue(tubesState);
+    const { tubes, targets } =
+        getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
     const { ingredientCount } = useRecoilValue(levelPresetRecoil);
     const ingredients = Array.from({ length: ingredientCount }, (_, i) => i);
     const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
-    const targets = useRecoilValue(craftingTargetsLeftRecoil);
 
     const hintSid =
         isFirstLevel
@@ -107,9 +71,13 @@ export function CraftingTable() {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
-    const tubes = useRecoilValue(tubesState);
+    const craftingStateInTime = useCraftingState();
+    const time = craftingStateInTime.currentTime;
+    const craftingState = craftingStateInTime.currentState;
+
+    const { tubes, targets } =
+        getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
     const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
-    const targets = useRecoilValue(craftingTargetsLeftRecoil);
     const isWin = useRecoilValue(isWinRecoil);
 
     const hintReset =
@@ -137,14 +105,70 @@ export function CraftingTable() {
                 flex: 1,
             }}>
                 {tubes.slice(1).map((t, i) => {
-                    if (i === 0) { return <Tube isPourable tube={t} />; }
+                    if (i === 0) { 
+                        return <Tube 
+                            isPourable 
+                            tube={t}
+                            className={cx(
+                                craftingState.id === 'craftingAct'
+                                && craftingState.diffCustom.action === 'addTube'
+                                && css`
+                                    & {
+                                        transform-origin: bottom;
+                                        animation-name: ${keyframes`
+                                            0% {
+                                                transform: translate3d(43px, 0, 39px);
+                                            }
+                                            100% {
+                                                transform: translate3d(0, 0, 0);
+                                            }
+                                            ## ${time}
+                                        `};
+                                        animation-duration: ${craftingState.duration}ms;
+                                        animation-delay: ${craftingState.start - time}ms;
+                                        animation-fill-mode: both;
+                                        animation-timing-function: linear;
+                                    }
+                                `,
+    
+                            )} 
+                        />;
+                    }
+                    const prevDx = (i - 1 - 1) * 23 + 15;
+                    const prevDz = Math.pow((i - 1), 0.4) * 20 + 40;
                     const dx = (i - 1) * 23 + 15;
                     const dz = Math.pow((i - 1), 0.4) * 20 + 40;
                     return <Tube
                         style={{
                             position: "absolute",
                             transform: `translate3d(${-dx}px, 0, ${-dz}px)`,
+
+
                         }}
+                        className={cx(
+                            craftingState.id === 'craftingAct'
+                            && craftingState.diffCustom.action === 'addTube'
+                            && css`
+                                & {
+                                    transform-origin: bottom;
+                                    animation-name: ${keyframes`
+                                        0% {
+                                            transform: translate3d(${-prevDx}px, 0, ${-prevDz}px);
+                                        }
+                                        100% {
+                                            transform: translate3d(${-dx}px, 0, ${-dz}px);
+                                        }
+                                        ## ${time}
+                                    `};
+                                    animation-duration: ${craftingState.duration}ms;
+                                    animation-delay: ${craftingState.start - time}ms;
+                                    animation-fill-mode: both;
+                                    animation-timing-function: linear;
+                                }
+                            `,
+
+                        )}
+
                         shadow={<div style={{
                             position: "absolute",
                             top: 0,
@@ -179,7 +203,7 @@ export function CraftingTable() {
                         alignItems: "center",
                     }}
                     disabled={isWin || tubes.length > 6}
-                    onClick={() => act({ action: "addTube" })}
+                    onClick={() => act({ action: "addTube", time: performance.now() })}
                 >
                     <Add style={{
                         height: "30px",
@@ -201,7 +225,7 @@ export function CraftingTable() {
                         alignItems: "center",
                     }}
                     disabled={isWin || tubes.length <= 1}
-                    onClick={() => act({ action: "trashTube" })}
+                    onClick={() => act({ action: "trashTube", time: performance.now() })}
                 >
                     <Close style={{
                         height: "30px",
@@ -230,7 +254,7 @@ export function CraftingTable() {
                     disabled={isWin || craftingActions.length === 0}
                     onClick={() => updCraftingActions({ $set: [] })}
                 >
-                    <Refresh style={{ 
+                    <Refresh style={{
                         height: "100%",
                         margin: "0px -4px",
                     }} />

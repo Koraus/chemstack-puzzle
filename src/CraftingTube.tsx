@@ -1,121 +1,264 @@
-import { CraftingAction, SubstanceId } from "./crafting";
+import { CraftingAction, Reaction, SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
-import * as flex from "./utils/flex";
 import { JSX } from "preact";
-import { css, cx } from "@emotion/css";
+import { css, cx, keyframes } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
-import { useRecoilValue } from "recoil";
-import { craftingActionsRecoil, tubesState } from "./CraftingTable";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
+import { ReactComponent as CraftingTubeSvg } from "./craftingTube.svg";
+import { craftingActionsRecoil, useCraftingState } from "./craftingActionsRecoil";
 
-export function CraftingTube({ style }: {
+function PourFromMainIntoSecondaryButton({ style, className }: {
+    className?: string,
     style?: JSX.CSSProperties;
 }) {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
-    const tubes = useRecoilValue(tubesState);
-    const tube = tubes[0];
-    const isSecondaryAvailable = tubes.length > 1;
-    
-    function Wave({ isFirst, ...props }: { isFirst: boolean, className?: string }) {
-        return <svg
-            id="Layer_2"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 64.87 45.06"
-            {...props}
-        >
-            <g id="Layer_6">
-                <g class="cls-2">
-                    {isFirst
-                        ? <path class="cls-1" d="M0,13.42c.83,16.28,13.67,29.37,29.83,30.64h5.12c16.04-1.25,28.81-14.18,29.8-30.29-.84-4.49-9.53,18.63-31.72-3.69C18.09-4.97,.9-2.6,0,13.42Z" />
-                        : <path class="cls-1" d="M33.08,10.08C17.72-5.38,0-2.46,0,14.76v13.77c0,8.57,6.95,15.53,15.53,15.53H49.34c8.58,0,15.53-6.95,15.53-15.53V14.76c0-8.15-8.39,18.86-31.79-4.68Z" />
+    return <button
+        className={cx(buttonCss, className)}
+        style={{
+            display: "flex",
+
+            alignItems: "center",
+            width: "23px",
+            height: "40px",
+            ...style,
+        }}
+        onClick={() => act({ action: "pourFromMainIntoSecondary", time: performance.now() })}
+    ><ArrowLeft style={{ height: 80, margin: -20 }} /></button>;
+};
+
+function addIngredientAnimation({
+    i,
+    currentTime,
+    currentState: {
+        start,
+        duration,
+    },
+}: {
+    i: number,
+    currentTime: number,
+    currentState: {
+        start: number,
+        duration: number,
+    }
+}) {
+    return css`
+        & #slot${i}_content {
+            animation-name: ${keyframes`
+                0% {
+                    transform: translate(0, -400px);
+                }
+                50% {
+                    transform: translate(0, 10px);
+                }
+                100% {
+                    transform: translate(0, 0px);
+                }
+                ## ${currentTime}
+            `};
+            animation-duration: ${duration}ms;
+            animation-delay: ${start - currentTime}ms;
+            animation-fill-mode: both;
+            animation-timing-function: linear;
+        }
+        & #slot${i}_content_ {
+            animation-name: ${keyframes`
+                0% {
+                    transform: scale(1, 1);
+                }
+                50% {
+                    transform: scale(1, 1);
+                }
+                60% {
+                    transform: scale(1.1, 0.8);
+                }
+                78% {
+                    transform: scale(0.8, 1.3);
+                }
+                100% {
+                    transform: scale(1, 1);
+                }
+                ## ${currentTime}
+            `};
+            animation-duration: ${duration}ms;
+            animation-delay: ${start - currentTime}ms;
+            animation-fill-mode: both;
+            animation-timing-function: linear;
+        }
+    `;
+}
+
+function reactionAnimation({
+    prevTube,
+    tube,
+    reaction,
+    currentTime,
+    currentState: {
+        start,
+        duration,
+    },
+}: {
+    prevTube: SubstanceId[],
+    tube: SubstanceId[],
+    reaction: Reaction,
+    currentTime: number,
+    currentState: {
+        start: number,
+        duration: number,
+    }
+}) {
+    let s = "";
+    s += reaction.reagents.map((_, i, arr) => `
+        & #prev_slot${prevTube.length - arr.length + i}_content {
+            display: unset;
+        }
+        & #prev_slot${prevTube.length - arr.length + i}_content_ {
+            animation-name: ${keyframes`
+                0% {
+                    transform: scale(1);
+                }
+                49% {
+                    transform: scale(0);
+                }
+                50% {
+                    transform: scale(0);
+                }
+                100% {
+                    transform: scale(0);
+                }
+                ## ${currentTime}
+            `};
+            animation-duration: ${duration}ms;
+            animation-delay: ${start - currentTime}ms;
+            animation-fill-mode: both;
+            animation-timing-function: linear;
+        }`).join("\n");
+    s += reaction.products.map((_, i, arr) => `
+        & #slot${tube.length - arr.length + i}_content_ {
+            animation-name: ${keyframes`
+                0% {
+                    transform: scale(0);
+                }
+                49% {
+                    transform: scale(0);
+                }
+                50% {
+                    transform: scale(0);
+                }
+                100% {
+                    transform: scale(1);
+                }
+                ## ${currentTime}
+            `};
+            animation-duration: ${duration}ms;
+            animation-delay: ${start - currentTime}ms;
+            animation-fill-mode: both;
+            animation-timing-function: linear;
+        }`).join("\n");
+    return css`${s}`;
+}
+
+export function CraftingTube({ style }: {
+    style?: JSX.CSSProperties;
+}) {
+    const craftingStateInTime = useCraftingState();
+    const time = craftingStateInTime.currentTime;
+    const craftingState = craftingStateInTime.currentState;
+
+
+    const tube = craftingState.state.tubes[0];
+    const prevTube = craftingState.prevState.tubes[0];
+    const isSecondaryAvailable = craftingState.state.tubes.length > 1;
+
+    const reaction =
+        craftingState.id === "craftingReact"
+        && craftingState.diffCustom.find(d => d[0] === 0)?.[1];
+
+    return <div className={cx(css`& {
+        width: 57px;
+        position: relative;
+    }`)} style={style}>
+        <CraftingTubeSvg
+            className={cx(css`
+                ${[0, 1, 2].map(i => {
+                const isNext = tube.length === i;
+                const hasContent = tube.length > i;
+                return `
+                    & #prev_slot${i}_content {
+                        display: none;
                     }
-                </g>
-            </g>
-        </svg>;
-    }
+                    & #prev_slot${i}_content_back {
+                        fill: ${substanceColors[prevTube[i]]};
+                    }
+                    & #slot${i}_add {
+                        ${isNext ? "" : "display: none;"}
+                    }
+                    & #slot${i}_content {
+                        ${hasContent ? "" : "display: none;"}
+                    }
+                    & #slot${i}_content_back {
+                        fill: ${substanceColors[tube[i]]};
+                    }
+                    & #prev_slot${i}_number, & #slot${i}_number {
+                        font-family: 'Bahnschrift', sans-serif;
+                        text-anchor: middle;
+                    }
+                `;
+            }).join('\n')}
+            `,
+                craftingState.id === "craftingAct"
+                && craftingState.diffCustom.action === "addIngredient"
+                && addIngredientAnimation({
+                    i: tube.length - 1,
+                    ...craftingStateInTime
+                }),
+                craftingState.id === "craftingReact"
+                && reaction
+                && reactionAnimation({
+                    tube,
+                    prevTube,
+                    reaction,
+                    ...craftingStateInTime,
+                }),
+                craftingState.id === "craftingAct"
+                && craftingState.diffCustom.action === "addTube"
+                && css`
+                    & {
+                        transform-origin: bottom;
+                        animation-name: ${keyframes`
+                            0% {
+                                transform: scale(0);
+                            }
+                            100% {
+                                transform: scale(1);
+                            }
+                            ## ${time}
+                        `};
+                        animation-duration: ${craftingState.duration}ms;
+                        animation-delay: ${craftingState.start - time}ms;
+                        animation-fill-mode: both;
+                        animation-timing-function: linear;
+                    }
+                `,
 
-    function Slot({ i }: { i: number; }) {
-        const isNext = i === tube.length;
-        const isTopContent = i === tube.length - 1;
-        const hasContent = i < tube.length;
-        const isFirst = i === 0;
-
-        return <div style={{
-            textAlign: "center",
-            margin: `0px 6px 6px 6px`,
-            width: `28px`,
-            height: `56px`,
-            border: "2px dashed #ffffff60",
-            borderRadius: "5px",
-            fontSize: "38px",
-            lineHeight: "58px",
-            color: "#ffffff60",
-            backgroundColor: "#ffffff08",
-            position: "relative",
-
-            ...(hasContent && {
-                backgroundColor: substanceColors[tube[i]],
-                color: "#ffffffff",
-                borderColor: "transparent",
-            }),
-
-            ...(isFirst && {
-                borderBottomLeftRadius: "15px",
-                borderBottomRightRadius: "15px",
-            }),
-        }}>
-            {isNext
-                ? <>
-                    <Wave
-                        {...{ isFirst }}
-                        className={css`
-                        & {
-                            position: absolute;
-                            bottom: 0px;
-                            left: 0px;
-                            transform: scale(1.15);
-                        }
-                        & .cls-1 {
-                            fill: transparent;
-                            stroke: #C0C7CF;
-                            stroke-width: 5px;
-                        }
-                    `}
-                    />+
-                </>
-                : tube[i]
-            }
-            {isTopContent && isSecondaryAvailable && <button
-                className={cx(buttonCss)}
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    position: "absolute",
-                    left: "-24px",
-                    top: ["-10px", "3px", "16px"][i],
-                    width: "23px",
-                    height: "40px",
-                }}
-                onClick={() => act({ action: "pourFromMainIntoSecondary" })}
-            ><ArrowLeft style={{ height: 80, margin: -20 }} /></button>}
-        </div>;
-    }
-
-    return <div style={{
-        ...flex.colRev,
-
-        height: "220px",
-        background: "#ffffff4d",
-        borderRadius: "0px 0px 999px 999px",
-        border: "6px solid #ffffff90",
-        borderTopColor: "#ffffff30",
-        ...style,
-    }}>
-        <Slot i={0} />
-        <Slot i={1} />
-        <Slot i={2} />
+            )}
+            slots={{
+                prev_slot0_number: prevTube[0],
+                prev_slot1_number: prevTube[1],
+                prev_slot2_number: prevTube[2],
+                slot0_number: tube[0],
+                slot1_number: tube[1],
+                slot2_number: tube[2],
+            }}
+        />
+        {isSecondaryAvailable && tube.length > 0 && <PourFromMainIntoSecondaryButton
+            style={{
+                position: "absolute",
+                left: "-10px",
+                top: ["64%", "42%", "19%"][tube.length - 1],
+            }}
+        />}
     </div>;
 }

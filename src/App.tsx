@@ -28,7 +28,6 @@ const _css = css`
 
 export function App() {
     const [showMenu, setShowMenu] = useState(false);
-    const [showTeam, setShowTeam] = useState(false);
 
     return <div className={cx(_css)}>
         <div style={{ ...flex.col }}>

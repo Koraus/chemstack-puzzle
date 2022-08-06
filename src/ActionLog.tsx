@@ -1,8 +1,8 @@
 import { useRecoilValue } from 'recoil';
 import { useState } from "preact/hooks";
 type CSSProperties = import("preact").JSX.CSSProperties;
-import { craftingActionsRecoil } from './CraftingTable';
 import { buttonCss } from './buttonCss';
+import { craftingActionsRecoil } from './craftingActionsRecoil';
 
 export function ActionLog({ style }: { style?: CSSProperties }) {
     const actions = useRecoilValue(craftingActionsRecoil)

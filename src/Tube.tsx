@@ -1,12 +1,11 @@
 import { cx } from "@emotion/css";
-import { CraftingAction, SubstanceId } from "./crafting";
+import { SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 import { JSX, ComponentChildren } from "preact";
-import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { buttonCss } from "./buttonCss";
 import { ArrowRight } from "@emotion-icons/material-rounded/ArrowRight";
-import { craftingActionsRecoil } from "./CraftingTable";
+import { useCraftingAct } from "./craftingActionsRecoil";
 
 function TubeSlot({
     isBottom,
@@ -17,8 +16,7 @@ function TubeSlot({
     isPourable?: boolean,
     sid: SubstanceId;
 }) {
-    const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
-    const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
+    const act = useCraftingAct();
 
 
     return <div style={{
@@ -60,7 +58,7 @@ function TubeSlot({
                     height: "32px",
                     margin: "-36px 0px 0px 17px",
                 }}
-                onClick={() => act({ action: "pourFromSecondaryIntoMain" })}
+                onClick={() => act({ action: "pourFromSecondaryIntoMain", time: performance.now() })}
             ><ArrowRight style={{ height: 80, margin: -20 }} /></button>
         </div>}
     </div>;
