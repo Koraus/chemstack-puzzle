@@ -10,7 +10,6 @@ import { levelPresetRecoil } from "./LevelList";
 import { buttonCss } from "./buttonCss";
 import { CraftingIngredientButton } from "./CraftingIngredientButton";
 import { CraftingTube } from "./CraftingTube";
-import { levelPresets } from "./levelPresets";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import { css, cx, keyframes } from "@emotion/css";
 import { JSX } from "preact";
@@ -78,6 +77,7 @@ export function CraftingTable() {
 
     const tutorial = useRecoilValue(tutorialRecoil);
     const hintReset = tutorial.some(t => t.kind === "reset");
+    const hintAddTube = tutorial.some(t => t.kind === "addTube");
 
     return <div style={{
         backgroundColor: "#f4fff559",
@@ -204,6 +204,10 @@ export function CraftingTable() {
                         margin: "0 0 0 -6px",
                         zIndex: 1,
                     }} />
+                    {(hintAddTube) && <TouchAppAnimation className={css`& {
+                        position: absolute;
+                        transform: translate(24px, 21px);
+                    }`} />}
                     <div style={{
                         margin: "0 0 0 -11px",
                         width: "10px",

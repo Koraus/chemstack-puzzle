@@ -3,12 +3,11 @@ import { selector, useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue
 import { buttonCss } from "./buttonCss";
 import { levelPresetRecoil } from "./LevelList";
 import { reactionsLibraryRecoil } from "./ReactionsLibrary";
-import { Tube, TubeAsContainer } from "./Tube";
+import { TubeAsContainer, TubeSlot } from "./Tube";
 import { createRand } from "./utils/createRand";
 import * as flex from "./utils/flex";
 import { DoubleArrow } from '@emotion-icons/material-rounded/DoubleArrow';
 import { levelPresets } from "./levelPresets";
-import { isWinRecoil } from "./Win";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import { craftingActionsRecoil, getCraftingState, craftingStateInTimeRecoil } from "./craftingActionsRecoil";
 import { tutorialRecoil } from "./tutorialRecoil";
@@ -88,11 +87,16 @@ export function CraftingTargets({ style, className }: {
     className?: string,
 }) {
     const { targets } = getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
-    
+
     const tutorial = useRecoilValue(tutorialRecoil);
     const hintNext = tutorial.some(t => t.kind === "next");
 
     function TubeAt({ i }: { i: number }) {
+        const isHinted = (slotIndex: number) =>
+            i === 0
+            && tutorial.some(t =>
+                t.kind === "target"
+                && t.slotIndex === slotIndex);
         const target = targets[i];
         const dx = (i - 1) * 23 + 15;
         const dz = Math.pow((i - 1), 0.4) * 20 + 40;
@@ -116,7 +120,18 @@ export function CraftingTargets({ style, className }: {
                 }
                 : {};
         return target
-            ? <Tube {...depthProps} tube={target} isTarget />
+            ? <TubeAsContainer {...depthProps} isTarget >
+                <TubeSlot
+                    isHinted={isHinted(0)}
+                    sid={target[0]}
+                    isBottom />
+                <TubeSlot
+                    isHinted={isHinted(1)}
+                    sid={target[1]} />
+                <TubeSlot
+                    isHinted={isHinted(2)}
+                    sid={target[2]} />
+            </TubeAsContainer>
             : <TubeAsContainer {...depthProps} isTarget>
                 <NextLevelButton disabled={i > 0} />
             </TubeAsContainer>

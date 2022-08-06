@@ -4,7 +4,7 @@ const e = mapCharCodes(c => c + 57);
 
 export const levelPresets = [
     {
-        name: "Level 1",
+        name: "Tutorial 1",
         substanceCount: 3,
         ingredientCount: 3,
         targets: ["..."],
@@ -12,10 +12,13 @@ export const levelPresets = [
 
     ...[
         ["..."],
-        ["@#@", "-.-"],
-        ["#@#", "%"],
+        [".*.", "-.-"],
+        ["@#@"],
+        ["$"],
+        [ "!!", "$.$"],
+        ["-.-", "%"],
     ].map((targets, i) => ({
-        name: `Level 2-${i + 1}`,
+        name: `Tutorial ${1 + i + 1}`,
         substanceCount: 4,
         ingredientCount: 3,
         targets,
@@ -25,7 +28,7 @@ export const levelPresets = [
         substanceCount: 5,
         ingredientCount: 3,
         targets: [[
-            ['&5,>&'],
+            ['&&&5,>&'],
             ['*(70;(3', '6-'],
             [';/,', '-9,,', '>693+'],
             ['>033', '56;', '-(33'],
@@ -56,7 +59,7 @@ export const levelPresets = [
         substanceCount: p.substanceCount,
         ingredientCount: p.ingredientCount - j,
         targets: targets.map(e),
-        name: `Level ${2 + i + 1}-${j + 1}-${k + 1}`,
+        name: `Level ${i + 1}-${j + 1}-${k + 1}`,
     })))),
 
     ...[{

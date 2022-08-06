@@ -6,6 +6,8 @@ import { Reaction } from './crafting';
 import { KeyboardArrowUp } from '@emotion-icons/material-rounded/KeyboardArrowUp';
 import { generateReactionsLibrary } from './generateReactionsLibrary';
 import { getCraftingState, craftingStateInTimeRecoil } from './craftingActionsRecoil';
+import { tutorialRecoil } from './tutorialRecoil';
+import { css, keyframes } from '@emotion/css';
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const reactionsLibraryRecoil = selector({
@@ -25,6 +27,7 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     const mainTube = tubes[0];
     const currentSubstance = mainTube[mainTube.length - 1];
     const reactions = useRecoilValue(reactionsLibraryRecoil);
+    const tutorial = useRecoilValue(tutorialRecoil);
 
     function IngredientSlot({ sid }: { sid?: number }) {
         return <div style={{
@@ -45,6 +48,9 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
             reaction.reagents[1] === tube[tube.length - 1]
             && reaction.reagents[0] === tube[tube.length - 2]
         );
+        const isHinted = tutorial.some(t =>
+            t.kind === 'reaction'
+            && t.reaction.every((sid, i) => sid === reaction.reagents[i]));
 
         return <div style={{
             position: "relative",
@@ -90,6 +96,35 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                     border: "2px solid yellow",
                     borderRadius: "3px",
                 }}> </div>}
+            {isHinted && <div
+                className={css`& {
+                    z-index: 1;
+                    position: absolute;
+                    top: 1px;
+                    left: 1px;
+                    bottom: 1px;
+                    right: 1px;
+                    border: 2px solid #ffffffa0;
+                    border-radius: 3px;
+                    animation-name: ${keyframes`
+                        0% {
+                            transform: scale(1, 1);
+                        }
+                        10% {
+                            transform: scale(0.8, 1.2);
+                        }
+                        30% {
+                            transform: scale(1, 1);
+                        }
+                        100% {
+                            transform: scale(1, 1);
+                        }
+                    `};
+                    animation-duration: 1300ms;
+                    animation-fill-mode: both;
+                    animation-iteration-count: infinite;
+                    animation-timing-function: linear;
+                }`}> </div>}
         </div>;
     }
 

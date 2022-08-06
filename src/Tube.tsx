@@ -1,4 +1,4 @@
-import { cx } from "@emotion/css";
+import { css, cx, keyframes } from "@emotion/css";
 import { SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
@@ -7,14 +7,16 @@ import { buttonCss } from "./buttonCss";
 import { ArrowRight } from "@emotion-icons/material-rounded/ArrowRight";
 import { useCraftingAct } from "./craftingActionsRecoil";
 
-function TubeSlot({
+export function TubeSlot({
     isBottom,
     isPourable,
     sid,
+    isHinted,
 }: {
     isBottom?: boolean,
     isPourable?: boolean,
     sid: SubstanceId;
+    isHinted?: boolean;
 }) {
     const act = useCraftingAct();
 
@@ -45,6 +47,34 @@ function TubeSlot({
         }),
     }}>
         {sid}
+        {isHinted && <div className={css`& {
+            z-index: 1;
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            bottom: 1px;
+            right: 1px;
+            border: 2px solid #ffffffa0;
+            border-radius: 3px;
+            animation-name: ${keyframes`
+                0% {
+                    transform: scale(1, 1);
+                }
+                10% {
+                    transform: scale(1.5, 1.5);
+                }
+                30% {
+                    transform: scale(1, 1);
+                }
+                100% {
+                    transform: scale(1, 1);
+                }
+            `};
+            animation-duration: 1300ms;
+            animation-fill-mode: both;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }`}></div>}
         {isPourable && <div style={{ 
             position: "absolute", 
         }}>
@@ -107,8 +137,7 @@ export function Tube({
 }: {
     tube: SubstanceId[];
     style?: JSX.CSSProperties;
-    className?: string,
-    isTarget?: boolean;
+    className?: string;
     isPourable?: boolean;
     shadow?: ComponentChildren;
 }) {
