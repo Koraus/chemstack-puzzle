@@ -1,4 +1,4 @@
-import { init, identify, Identify, Types } from "@amplitude/analytics-browser";
+import { init, Types } from "@amplitude/analytics-browser";
 import { appVersion } from "./appVersion";
 
 const amplitudeApiKey = import.meta.env["VITE_AMPLITUDE_API_KEY"];

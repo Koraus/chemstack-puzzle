@@ -2,8 +2,6 @@ import { css } from "@emotion/css";
 import { useRecoilValue } from 'recoil';
 import { SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
-import { CraftingAction } from './crafting';
-import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { isWinRecoil } from "./Win";
 import { buttonCss } from "./buttonCss";
 import { useCraftingAct } from "./craftingActionsRecoil";

@@ -2,7 +2,7 @@ import { useRecoilValue } from 'recoil';
 import * as flex from "./utils/flex";
 import * as _ from "lodash";
 import { Tube } from "./Tube";
-import { CraftingAction } from './crafting';
+import { CraftingAction, SubstanceId } from './crafting';
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { CraftingTargets } from "./CraftingTargets";
 import { isWinRecoil } from "./Win";
@@ -18,6 +18,7 @@ import { Refresh } from '@emotion-icons/material-rounded/Refresh';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Close } from '@emotion-icons/material-rounded/Close';
 import { craftingActionsRecoil, craftingStateInTimeRecoil, getCraftingState, useCraftingState } from "./craftingActionsRecoil";
+import { tutorialRecoil } from './tutorialRecoil';
 
 function CraftingIngredientPanel({
     style, className,
@@ -25,17 +26,13 @@ function CraftingIngredientPanel({
     style?: JSX.CSSProperties;
     className?: string;
 }) {
-    const { tubes, targets } =
-        getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
+    const tutorial = useRecoilValue(tutorialRecoil);
+    const needHint = (sid: SubstanceId) => tutorial.some(t => 
+        t.kind === "addIngredient"
+        && t.ingredientId === sid);
+
     const { ingredientCount } = useRecoilValue(levelPresetRecoil);
     const ingredients = Array.from({ length: ingredientCount }, (_, i) => i);
-    const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
-
-    const hintSid =
-        isFirstLevel
-        && targets.length > 0
-        && tubes[0].every((_, i) => tubes[0][i] === targets[0][i])
-        && targets[0][tubes[0].length];
 
     const touchAppAnimationCss = css`& {
         position: absolute;
@@ -52,7 +49,7 @@ function CraftingIngredientPanel({
                 .filter((_, i) => !(i > 2))
                 .map(sid => <div style={{ position: "relative", }}>
                     <CraftingIngredientButton sid={sid} />
-                    {(hintSid === sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
+                    {needHint(sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
                 </div>)}
         </div>
         <div style={{ ...flex.rowRev, flex: 1 }}>
@@ -60,7 +57,7 @@ function CraftingIngredientPanel({
                 .filter((_, i) => (i > 2))
                 .map(sid => <div style={{ position: "relative", }}>
                     <CraftingIngredientButton sid={sid} mirrored />
-                    {(hintSid === sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
+                    {needHint(sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
                 </div>)}
         </div>
     </div>
@@ -75,15 +72,12 @@ export function CraftingTable() {
     const time = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
 
-    const { tubes, targets } =
+    const { tubes } =
         getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
-    const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
     const isWin = useRecoilValue(isWinRecoil);
 
-    const hintReset =
-        isFirstLevel
-        && targets.length > 0
-        && !tubes[0].every((_, i) => tubes[0][i] === targets[0][i]);
+    const tutorial = useRecoilValue(tutorialRecoil);
+    const hintReset = tutorial.some(t => t.kind === "reset");
 
     return <div style={{
         backgroundColor: "#f4fff559",

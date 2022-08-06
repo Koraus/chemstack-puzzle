@@ -11,6 +11,7 @@ import { levelPresets } from "./levelPresets";
 import { isWinRecoil } from "./Win";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import { craftingActionsRecoil, getCraftingState, craftingStateInTimeRecoil } from "./craftingActionsRecoil";
+import { tutorialRecoil } from "./tutorialRecoil";
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const craftingTargetsRecoil = selector({
@@ -88,9 +89,8 @@ export function CraftingTargets({ style, className }: {
 }) {
     const { targets } = getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
     
-    const isFirstLevel = useRecoilValue(levelPresetRecoil).name === levelPresets[0].name;
-    const isWin = useRecoilValue(isWinRecoil);
-    const hintWin = isFirstLevel && isWin;
+    const tutorial = useRecoilValue(tutorialRecoil);
+    const hintNext = tutorial.some(t => t.kind === "next");
 
     function TubeAt({ i }: { i: number }) {
         const target = targets[i];
@@ -135,7 +135,7 @@ export function CraftingTargets({ style, className }: {
     >
         {targets.map((_, i) => <TubeAt i={i} />)}
         <TubeAt i={targets.length} />
-        {(hintWin) && <TouchAppAnimation className={css`& {
+        {(hintNext) && <TouchAppAnimation className={css`& {
             position: absolute;
             transform: translate(20px, 120px);
         }`} />}
