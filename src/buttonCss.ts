@@ -9,7 +9,6 @@ export const buttonCss = css`
     color: #283C5A;
     border: none;
     border-radius: 4px;
-    margin: 5px;
     padding: 5px;
 }
 &:disabled {

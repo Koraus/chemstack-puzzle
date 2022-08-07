@@ -12,8 +12,7 @@
     "files": [
         "./node_modules/vite/client.d.ts", 
         "./node_modules/vite-plugin-info/client.d.ts",
-        "./node_modules/vite-plugin-svgr/client.d.ts",
-        "src/generateReactionsLibrary.ts"
+        "./node_modules/vite-plugin-svgr/client.d.ts"
     ],
     "include": ["./src/"],
 }

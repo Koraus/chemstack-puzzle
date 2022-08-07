@@ -1,4 +1,4 @@
-import { cx } from "@emotion/css";
+import { css, cx } from "@emotion/css";
 import * as flex from "./utils/flex";
 import { Groups } from '@emotion-icons/material-rounded/Groups';
 import { JSX } from "preact";
@@ -15,21 +15,19 @@ const shuffled = <T,>(arr: T[]) => {
 
 
 export function AboutTeam({
-    style, className,
+    className, ...props
 }: {
     style?: JSX.CSSProperties;
     className?: string;
 }) {
     return <div
-        className={cx(className)}
-        style={{
-            ...flex.col,
-            color: "white",
-            padding: "10px 30px",
-            textAlign: "left",
-            justifyContent: "center",
-            ...style
-        }}
+        className={cx(flex.col, css`$ {
+            color: white;
+            padding: 10px 30px;
+            text-align: left;
+            justify-content: center;
+        }`, className)}
+        {...props}
     >
         <Groups style={{ height: 30, width: 30 }} />
         {(() => {

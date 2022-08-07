@@ -43,7 +43,7 @@ function CraftingIngredientPanel({
         className={cx(className)}
         style={{ ...style }}
     >
-        <div style={{ ...flex.row, flex: 1 }}>
+        <div style={{ ...flex.rowS, flex: 1 }}>
             {ingredients
                 .filter((_, i) => !(i > 2))
                 .map(sid => <div style={{ position: "relative", }}>
@@ -51,7 +51,7 @@ function CraftingIngredientPanel({
                     {needHint(sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
                 </div>)}
         </div>
-        <div style={{ ...flex.rowRev, flex: 1 }}>
+        <div style={{ ...flex.rowRevS, flex: 1 }}>
             {ingredients
                 .filter((_, i) => (i > 2))
                 .map(sid => <div style={{ position: "relative", }}>
@@ -82,16 +82,16 @@ export function CraftingTable() {
     return <div style={{
         backgroundColor: "#f4fff559",
         padding: "8px 10px",
-        ...flex.col,
+        ...flex.colS,
     }}>
-        <CraftingIngredientPanel style={{ ...flex.row }} />
+        <CraftingIngredientPanel style={{ ...flex.rowS }} />
 
         <div style={{
-            ...flex.row,
+            ...flex.rowS,
             marginTop: 10,
         }}>
             <div style={{
-                ...flex.rowRev,
+                ...flex.rowRevS,
                 position: "relative",
                 perspective: "120px",
                 perspectiveOrigin: "center 120px",
@@ -181,19 +181,19 @@ export function CraftingTable() {
             <CraftingTargets style={{ flex: 1 }} />
         </div>
 
-        <div style={{ ...flex.row, flex: 1 }}>
+        <div style={{ ...flex.rowS, flex: 1 }}>
 
             <div style={{ flex: 3 }}>
             </div>
             <div style={{
                 flex: 5,
-                ...flex.row,
+                ...flex.rowS,
                 justifyContent: "space-between",
             }}>
                 <button
                     className={buttonCss}
                     style={{
-                        ...flex.row,
+                        ...flex.rowS,
                         alignItems: "center",
                     }}
                     disabled={isWin || tubes.length > 6}
@@ -219,7 +219,7 @@ export function CraftingTable() {
                 <button
                     className={buttonCss}
                     style={{
-                        ...flex.row,
+                        ...flex.rowS,
                         alignItems: "center",
                     }}
                     disabled={isWin || tubes.length <= 1}
@@ -240,11 +240,11 @@ export function CraftingTable() {
                     }}></div>
                 </button>
             </div>
-            <div style={{ ...flex.rowRev, flex: 3 }}>
+            <div style={{ ...flex.rowRevS, flex: 3 }}>
                 <button
                     className={buttonCss}
                     style={{
-                        ...flex.row,
+                        ...flex.rowS,
                         width: 33,
                         color: "#ff7070",
                         position: "relative",

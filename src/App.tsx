@@ -1,110 +1,65 @@
 import "./initAnalytics";
 
-import * as _ from "lodash";
 import { css, cx } from "@emotion/css";
 import { CraftingTable } from "./CraftingTable";
 import { WinEffect } from "./Win";
 import { ReactionsLibrary } from "./ReactionsLibrary";
-import { ActionLog } from "./ActionLog";
-import { Statistics } from "./Statistics";
 import * as flex from "./utils/flex";
-import { LevelEditor } from "./LevelEditor";
-import { LevelList, LoadHighestLevelEffect } from "./LevelList";
-import { useState, useEffect } from "preact/hooks";
-import { Header } from "./Header";
-import { Github } from '@emotion-icons/bootstrap/Github';
-import { OpenInNew } from '@emotion-icons/material-rounded/OpenInNew';
-import { buttonCss } from "./buttonCss";
-import { AboutTeam } from "./AboutTeam";
-
-const _css = css`
-& {
-    max-width: 414px;
-    background: linear-gradient(#344763, #081f41);
-    margin: auto;
-    font-family: 'Bahnschrift', sans-serif;
-}
-`;
+import { LoadHighestLevelEffect } from "./LevelList";
+import { LevelListHeaderButton } from './LevelListHeaderButton';
+import { ResetLevelHeaderButton } from './ResetLevelHeaderButton';
+import { HeaderTitle } from './HeaderTitle';
+import { Footer } from "./Footer";
+import { useMemo } from "preact/hooks";
+import { useWindowSize } from "./utils/useWindowSize";
 
 export function App() {
-    const [showMenu, setShowMenu] = useState(false);
+    const windowSize = useWindowSize();
+    const isHorizontal = (windowSize?.innerWidth ?? 0) > 900;
 
-    return <div className={cx(_css)}>
-        <div style={{ ...flex.col }}>
-            <Header
-                className={css`
-                    & {
-                        margin: 14px 34px 10px 34px;
-                    }
-                `}
-                showMenuState={[showMenu, setShowMenu]}
-            />
-            {showMenu &&
-                <div style={{
-                    ...flex.row,
-                    backgroundColor: "#ffffff20",
-                }}>
-                    <LevelList style={{
-                        flex: 2,
-                        borderRight: "1px solid #ffffff50"
-                    }} />
-                    {/* <LevelEditor style={{
-                        flex: 5,
-                    }} /> */}
-                    <AboutTeam style={{
-                        flex: 3,
-                    }} />
+    const main = useMemo(() => <>
+        <ReactionsLibrary />
+        <CraftingTable />
+    </>, []);
+
+    return <div className={cx(css`& {
+        max-width: ${isHorizontal ? 900 : 414}px;
+        background: linear-gradient(#344763, #081f41);
+        margin: auto;
+        font-family: 'Bahnschrift', sans-serif;
+    }`)}>
+        {isHorizontal && <div className={cx(flex.row)}>
+            <div className={cx(flex.col)} style={{ flex: 1 }}>
+                <div className={cx(flex.row, css`& { padding: 14px 0 10px 0; }`)} >
+                    <LevelListHeaderButton className={css`& { flex: 1; }`} />
+                    <HeaderTitle isHorizontal className={css`& { flex-grow: 999; }`} />
                 </div>
-            }
-
-            <ReactionsLibrary />
-            <CraftingTable />
-
-            <div style={{
-                ...flex.row,
-                marginBottom: 20,
-            }}>
-                <ActionLog style={{ flex: 1 }} />
-                {/* <Statistics style={{ flex: 1 }} /> */}
             </div>
 
-            <div style={{
-                ...flex.row,
-                justifyContent: "center",
-                alignItems: "center",
-                padding: "8px 14px",
-                backgroundColor: "#ffffff20",
-            }}>
-                <a
-                    style={{
-                        flex: 1,
-                        color: "white",
-                        fontSize: "24px",
-                        textAlign: "left",
-                    }}
-                    target="_blank"
-                    href="https://www.gkzr.me"
-                >
-                    <OpenInNew style={{ height: 20, marginRight: 5 }} />
-                    GKZR
-                </a>
-                <a
-                    style={{
-                        flex: 1,
-                        display: "block",
-                        fontSize: "16px",
-                        lineHeight: "28px",
-                        color: "white",
-                        textAlign: "right",
-                    }}
-                    target="_blank"
-                    href="https://github.com/ndry/chemstack-puzzle"
-                >
-                    chemstack-puzzle
-                    <Github style={{ height: 20, marginLeft: 5 }} />
-                </a>
+            <div className={cx(flex.col, css`& {width: 414px}`)}>{main}</div>
+
+            <div style={{ flex: 1, ...flex.colS }}>
+                <div className={cx(flex.rowRev, css`& { padding: 14px 0 10px 0; }`)} >
+                    <ResetLevelHeaderButton className={css`& { flex: 1; }`} />
+                    <div className={cx(css`& { flex-grow: 999; }`)}></div>
+                </div>
+                <div className={cx(css`& { flex-grow: 999; }`)}></div>
+                <Footer isHorizontal />
             </div>
-        </div>
+        </div>}
+
+        {!isHorizontal && <div className={cx(flex.col)}>
+            <div className={cx(flex.row, css`& { padding: 14px 0 10px 0; }`)} >
+                <LevelListHeaderButton className={css`& { flex: 1; }`} />
+                <HeaderTitle className={css`& { flex-grow: 999; }`} />
+                <ResetLevelHeaderButton className={css`& { flex: 1; }`} />
+            </div>
+
+            {main}
+
+            <Footer />
+        </div>}
+
         <WinEffect />
         <LoadHighestLevelEffect />
     </div>

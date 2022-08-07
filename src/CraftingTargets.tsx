@@ -140,7 +140,7 @@ export function CraftingTargets({ style, className }: {
     return <div
         className={cx(className)}
         style={{
-            ...flex.row,
+            ...flex.rowS,
             ...style,
             position: "relative",
             perspective: "120px",

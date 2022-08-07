@@ -101,7 +101,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         const __DEBUG_allowAnyLevel = true && import.meta.env.DEV;
         return <a
             style={{
-                ...flex.row,
+                ...flex.rowS,
                 padding: "3px",
                 textDecoration: "none",
                 textTransform: "uppercase",
@@ -130,14 +130,10 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                     whiteSpace: "nowrap",
                 }}
             >{levelPreset.name}</span>
-            {isComplete &&
- 
-                <Done className={css` & {     
-                    color: #a8d26b;
-                    height: 19px;
-                    } `}
-                ></Done>
-            }
+            {isComplete && <Done className={css`& {
+                color: #a8d26b;
+                height: 19px;
+            } `} />}
 
         </a>;
     }
@@ -150,8 +146,8 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         }}
     >
         <div style={{
-            height: "140px",
             overflowY: "scroll",
+            height: "100%",
         }}>{levelPresets.map(levelPreset => <Entry {...{ levelPreset }} />)}</div>
 
         <button
@@ -169,7 +165,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                 && resetLevel()
             }
         >
-            <RemoveDone style={{height: "24px"}}/>
-            </button>
+            <RemoveDone style={{ height: "24px" }} />
+        </button>
     </div>
 };

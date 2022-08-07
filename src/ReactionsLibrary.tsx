@@ -56,7 +56,7 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
             position: "relative",
         }}>
             <div style={{
-                ...flex.col,
+                ...flex.colS,
                 textAlign: "center",
             }}>
                 <IngredientSlot sid={reaction.products[2]} />
@@ -129,12 +129,12 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     }
 
     return <div style={{
-        ...flex.row,
+        ...flex.rowS,
         justifyContent: "center",
         padding: "0px 3px",
         ...style,
     }}><div style={{
-        ...flex.row,
+        ...flex.rowS,
         padding: "24px 0px 20px",
         overflowX: "scroll",
         userSelect: "none",

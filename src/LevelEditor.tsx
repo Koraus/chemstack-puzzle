@@ -147,8 +147,8 @@ export function LevelEditor({ style }: { style?: CSSProperties }) {
                     </div>
 
                 </div>
-                <div style={{ ...flex.col }}>
-                    <div style={{ ...flex.col, alignItems: "center" }}>
+                <div style={{ ...flex.colS }}>
+                    <div style={{ ...flex.colS, alignItems: "center" }}>
                         Max Substances
                         <NumberInput
                             value={levelPreset.substanceMaxCount}
