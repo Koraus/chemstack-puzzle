@@ -15,31 +15,21 @@ import { useState, useEffect } from 'preact/hooks';
 import { WinFireworks } from "./WinFireworks";
 
 export function App() {
-    const targetSizes = {
-        landscape: { width: 922, height: 487 },
-        portrait: { width: 414, height: 568 },
-    };
     const [isLandscape, setIsLandscape] = useState(false);
     useEffect(() => {
-        const upd = () => {
-            const isScreenLandscape = window.screen.orientation.type.startsWith("landscape");
-            const landspaceWidthFits = window.innerWidth > targetSizes.landscape.width;
-            const portraitHeightFits = window.innerHeight > targetSizes.portrait.height;
-            setIsLandscape(isScreenLandscape && (landspaceWidthFits || !portraitHeightFits));
-        };
+        const upd = () => setIsLandscape(window.matchMedia("(orientation: landscape)").matches);
         upd();
         window.addEventListener('resize', upd);
         return () => window.removeEventListener('resize', upd);
     }, []);
-    const targetSize = targetSizes[isLandscape ? "landscape" : "portrait"];
-
+    
     const main = useMemo(() => <>
         <ReactionsLibrary />
         <CraftingTable />
     </>, []);
 
     return <div className={cx(css`& {
-        max-width: ${targetSize.width}px;
+        max-width: ${isLandscape ? 922 : 414}px;
         background: linear-gradient(#344763, #081f41);
         margin: auto;
         font-family: 'Bahnschrift', sans-serif;
