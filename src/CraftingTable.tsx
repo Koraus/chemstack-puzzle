@@ -26,7 +26,7 @@ function CraftingIngredientPanel({
     className?: string;
 }) {
     const tutorial = useRecoilValue(tutorialRecoil);
-    const needHint = (sid: SubstanceId) => tutorial.some(t => 
+    const needHint = (sid: SubstanceId) => tutorial.some(t =>
         t.kind === "addIngredient"
         && t.ingredientId === sid);
 
@@ -99,9 +99,9 @@ export function CraftingTable() {
                 flex: 1,
             }}>
                 {tubes.slice(1).map((t, i) => {
-                    if (i === 0) { 
-                        return <Tube 
-                            isPourable 
+                    if (i === 0) {
+                        return <Tube
+                            isPourable
                             tube={t}
                             className={cx(
                                 craftingState.id === 'craftingAct'
@@ -123,9 +123,29 @@ export function CraftingTable() {
                                         animation-fill-mode: both;
                                         animation-timing-function: linear;
                                     }
+                                `
+                                ,
+                                craftingState.id === 'craftingAct'
+                                && craftingState.diffCustom.action === 'trashTube'
+                                && css`
+                                & {
+                                    animation-name: ${keyframes`
+                                    0% {
+                                        transform: translate3d(0, 0, 0);
+                                    }
+                                    100% {
+                                        transform: translate3d(43px, 0, 39px);
+                                    }
+                                    ## ${time}
+                                `};
+                                animation-duration: ${craftingState.duration}ms;
+                                animation-delay: ${craftingState.start - time}ms;
+                                animation-fill-mode: both;
+                                animation-timing-function: linear;
+                                }
                                 `,
-    
-                            )} 
+
+                            )}
                         />;
                     }
                     const prevDx = (i - 1 - 1) * 23 + 15;
@@ -159,7 +179,7 @@ export function CraftingTable() {
                                     animation-fill-mode: both;
                                     animation-timing-function: linear;
                                 }
-                            `,
+                            `,                          
 
                         )}
 
@@ -177,7 +197,7 @@ export function CraftingTable() {
                     />;
                 })}
             </div>
-            <CraftingTube style={{ margin: "-55px 40px -18px" }} />
+            <CraftingTube style={{ margin: "-55px 40px -18px" }}/>
             <CraftingTargets style={{ flex: 1 }} />
         </div>
 
