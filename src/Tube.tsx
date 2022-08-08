@@ -110,7 +110,7 @@ export function TubeAsContainer({
     return <div
         className={cx(className)}
         style={{
-            ...flex.colRev,
+            ...flex.colRevS,
 
             height: `155px`,
             background: "#95A1AD",

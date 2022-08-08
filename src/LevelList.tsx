@@ -101,11 +101,13 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         const __DEBUG_allowAnyLevel = true && import.meta.env.DEV;
         return <a
             style={{
-                ...flex.row,
-                padding: "3px",
+                ...flex.rowS,
+                padding: "6px 3px",
                 textDecoration: "none",
                 textTransform: "uppercase",
                 color: "grey",
+                fontSize: 20,
+                width: 200,
 
                 ...(isOpen && {
                     color: "white"
@@ -130,14 +132,10 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                     whiteSpace: "nowrap",
                 }}
             >{levelPreset.name}</span>
-            {isComplete &&
- 
-                <Done className={css` & {     
-                    color: #a8d26b;
-                    height: 19px;
-                    } `}
-                ></Done>
-            }
+            {isComplete && <Done className={css`& {
+                color: #a8d26b;
+                height: 28px;
+            } `} />}
 
         </a>;
     }
@@ -150,17 +148,17 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         }}
     >
         <div style={{
-            height: "140px",
             overflowY: "scroll",
+            height: "100%",
         }}>{levelPresets.map(levelPreset => <Entry {...{ levelPreset }} />)}</div>
 
         <button
             className={buttonCss}
             style={{
                 position: "absolute",
-                right: "0px",
-                bottom: "0px",
-                height: "30px",
+                right: "18px",
+                bottom: "8px",
+                height: "40px",
                 width: "40px",
                 color: "red"
             }}
@@ -169,7 +167,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                 && resetLevel()
             }
         >
-            <RemoveDone style={{height: "24px"}}/>
-            </button>
+            <RemoveDone style={{ height: "100%" }} />
+        </button>
     </div>
 };
