@@ -102,10 +102,12 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         return <a
             style={{
                 ...flex.rowS,
-                padding: "3px",
+                padding: "6px 3px",
                 textDecoration: "none",
                 textTransform: "uppercase",
                 color: "grey",
+                fontSize: 20,
+                width: 200,
 
                 ...(isOpen && {
                     color: "white"
@@ -132,7 +134,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
             >{levelPreset.name}</span>
             {isComplete && <Done className={css`& {
                 color: #a8d26b;
-                height: 19px;
+                height: 28px;
             } `} />}
 
         </a>;
@@ -154,9 +156,9 @@ export function LevelList({ style }: { style?: CSSProperties }) {
             className={buttonCss}
             style={{
                 position: "absolute",
-                right: "0px",
-                bottom: "0px",
-                height: "30px",
+                right: "18px",
+                bottom: "8px",
+                height: "40px",
                 width: "40px",
                 color: "red"
             }}
@@ -165,7 +167,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                 && resetLevel()
             }
         >
-            <RemoveDone style={{ height: "24px" }} />
+            <RemoveDone style={{ height: "100%" }} />
         </button>
     </div>
 };

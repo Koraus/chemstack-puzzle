@@ -22,24 +22,21 @@ export function LevelListHeaderButton({
                 display: block;
                 color: #f7f7f750;
                 text-decoration: none;
-                padding: 0 14px 0 34px;
+                padding: 0 14px 0 24px;
                 height: 32px;
             }`}
             href="#"
             onClick={() => setShowMenu(!showMenu)}
         > <Menu style={{ height: "100%" }} />
         </a>
-        {showMenu &&
-            <div style={{
-                ...flex.rowS,
-                position: "fixed",
-                top: 55,
-                bottom: 0,
-                backgroundColor: "#202020",
-                zIndex: 1,
-                borderRight: "1px solid #ffffff50",
-            }}>
-                <LevelList />
-            </div>}
+        {showMenu && <LevelList style={{
+            ...flex.rowS,
+            position: "absolute",
+            top: 35,
+            height: 380,
+            backgroundColor: "#344763",
+            zIndex: 10,
+            borderRight: "2px solid #ffffff50",
+        }} />}
     </div>;
 }

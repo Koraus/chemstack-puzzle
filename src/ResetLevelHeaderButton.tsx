@@ -23,7 +23,7 @@ export function ResetLevelHeaderButton({
                 display: block;
                 color: #f7f7f750;
                 text-decoration: none;
-                padding: 0 34px 0 14px;
+                padding: 0 24px 0 14px;
                 height: 32px;
             }`}
             href="#"
