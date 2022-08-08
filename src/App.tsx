@@ -11,11 +11,24 @@ import { ResetLevelHeaderButton } from './ResetLevelHeaderButton';
 import { HeaderTitle } from './HeaderTitle';
 import { Footer } from "./Footer";
 import { useMemo } from "preact/hooks";
-import { useWindowSize } from "./utils/useWindowSize";
+import { useState, useEffect } from 'preact/hooks';
 
 export function App() {
-    const windowSize = useWindowSize();
-    const isHorizontal = (windowSize?.innerWidth ?? 0) > 900;
+    const [isLandscape, setIsLandscape] = useState(false);
+    useEffect(() => {
+        const upd = () => {
+            const targetLandscape = { width: 900, height: 467 };
+            const targetProtrait = { width: 414, height: 568 };
+
+            const isScreenLandscape = window.screen.orientation.type.startsWith("landscape");
+            const landspaceWidthFits = window.innerWidth > targetLandscape.width;
+            const portraitHeightFits = window.innerHeight > targetProtrait.height;
+            setIsLandscape(isScreenLandscape && (landspaceWidthFits || !portraitHeightFits));
+        };
+        upd();
+        window.addEventListener('resize', upd);
+        return () => window.removeEventListener('resize', upd);
+    }, []);
 
     const main = useMemo(() => <>
         <ReactionsLibrary />
@@ -23,12 +36,12 @@ export function App() {
     </>, []);
 
     return <div className={cx(css`& {
-        max-width: ${isHorizontal ? 900 : 414}px;
+        max-width: ${isLandscape ? 900 : 414}px;
         background: linear-gradient(#344763, #081f41);
         margin: auto;
         font-family: 'Bahnschrift', sans-serif;
     }`)}>
-        {isHorizontal && <div className={cx(flex.row)}>
+        {isLandscape && <div className={cx(flex.row)}>
             <div className={cx(flex.col)} style={{ flex: 1 }}>
                 <div className={cx(flex.row, css`& { padding: 14px 0 10px 0; }`)} >
                     <LevelListHeaderButton className={css`& { flex: 1; }`} />
@@ -48,7 +61,7 @@ export function App() {
             </div>
         </div>}
 
-        {!isHorizontal && <div className={cx(flex.col)}>
+        {!isLandscape && <div className={cx(flex.col)}>
             <div className={cx(flex.row, css`& { padding: 14px 0 10px 0; }`)} >
                 <LevelListHeaderButton className={css`& { flex: 1; }`} />
                 <HeaderTitle className={css`& { flex-grow: 999; }`} />
