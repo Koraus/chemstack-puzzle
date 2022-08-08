@@ -18,11 +18,21 @@ const gravity = keyframes`
     }
 `;
 
+function randNormal(): number {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while(v === 0) v = Math.random();
+    let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    num = num / 10.0 + 0.5; // Translate to 0 -> 1
+    if (num > 1 || num < 0) return randNormal() // resample between 0 and 1
+    return num
+}
+
 const generatePosition = () => keyframes`
     ${Array.from({ length: 5 }, (_, i) => `
         ${i * 20}%, ${i * 20 + 20 - 0.1}% {
-            top: ${Math.random() * 100}%;
-            left: ${Math.random() * 100}%;
+            top: ${randNormal() * 100}%;
+            left: ${randNormal() * 100}%;
         }
     `).join("\n")}
 `;

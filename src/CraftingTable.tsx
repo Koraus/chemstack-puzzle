@@ -80,10 +80,50 @@ export function CraftingTable() {
     const hintAddTube = tutorial.some(t => t.kind === "addTube");
 
     return <div style={{
-        backgroundColor: "#f4fff559",
-        padding: "8px 10px",
+        padding: "16px 16px",
         ...flex.colS,
+        position: "relative",
     }}>
+        <div className={cx(css`& {
+            overflow: hidden;
+            background: linear-gradient(#142a4a, #00183c);
+            border: 5px solid #A2B5DD;
+            border-radius: 30px;
+            position: absolute;
+            perspective: 400px;
+            perspective-origin: center 120px;
+            transform-style: preserve-3d;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            overflow: hidden;
+        }`)}>
+            <div className={cx(css`& {
+                transform-origin: bottom;
+                transform: rotateX(90deg) translate(0, 30%);
+                width: 100%;
+                height: 100%;
+            }`)}>
+                <div className={cx(css`& {
+                    background: radial-gradient(closest-side, 
+                        #ffffffff 1%, 
+                        #ffffffe0 2%, 
+                        #ffffffc0 4%, 
+                        #ffffffa0 8%, 
+                        #ffffff80 16%, 
+                        #ffffff40 32%, 
+                        #ffffff20 64%, 
+                        #ffffff00);
+                    transform-origin: center;
+                    transform: scale(4);
+                    width: 100%;
+                    height: 100%;
+                }`)}>
+                </div>
+            </div>
+        </div>
+
         <CraftingIngredientPanel style={{ ...flex.rowS }} />
 
         <div style={{
@@ -195,6 +235,7 @@ export function CraftingTable() {
                     style={{
                         ...flex.rowS,
                         alignItems: "center",
+                        zIndex: 1,
                     }}
                     disabled={isWin || tubes.length > 6}
                     onClick={() => act({ action: "addTube", time: performance.now() })}
@@ -221,6 +262,7 @@ export function CraftingTable() {
                     style={{
                         ...flex.rowS,
                         alignItems: "center",
+                        zIndex: 1,
                     }}
                     disabled={isWin || tubes.length <= 1}
                     onClick={() => act({ action: "trashTube", time: performance.now() })}
