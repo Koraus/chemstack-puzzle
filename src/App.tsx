@@ -12,23 +12,26 @@ import { HeaderTitle } from './HeaderTitle';
 import { Footer } from "./Footer";
 import { useMemo } from "preact/hooks";
 import { useState, useEffect } from 'preact/hooks';
+import { WinFireworks } from "./WinFireworks";
 
 export function App() {
+    const targetSizes = {
+        landscape: { width: 922, height: 487 },
+        portrait: { width: 414, height: 568 },
+    };
     const [isLandscape, setIsLandscape] = useState(false);
     useEffect(() => {
         const upd = () => {
-            const targetLandscape = { width: 900, height: 467 };
-            const targetProtrait = { width: 414, height: 568 };
-
             const isScreenLandscape = window.screen.orientation.type.startsWith("landscape");
-            const landspaceWidthFits = window.innerWidth > targetLandscape.width;
-            const portraitHeightFits = window.innerHeight > targetProtrait.height;
+            const landspaceWidthFits = window.innerWidth > targetSizes.landscape.width;
+            const portraitHeightFits = window.innerHeight > targetSizes.portrait.height;
             setIsLandscape(isScreenLandscape && (landspaceWidthFits || !portraitHeightFits));
         };
         upd();
         window.addEventListener('resize', upd);
         return () => window.removeEventListener('resize', upd);
     }, []);
+    const targetSize = targetSizes[isLandscape ? "landscape" : "portrait"];
 
     const main = useMemo(() => <>
         <ReactionsLibrary />
@@ -36,11 +39,22 @@ export function App() {
     </>, []);
 
     return <div className={cx(css`& {
-        max-width: ${isLandscape ? 900 : 414}px;
+        max-width: ${targetSize.width}px;
         background: linear-gradient(#344763, #081f41);
         margin: auto;
         font-family: 'Bahnschrift', sans-serif;
+        position: relative;
     }`)}>
+        <WinFireworks className={cx(css`& {
+            overflow: hidden;
+            position: absolute;
+            top: 0px;
+            bottom: 0px;
+            right: 0px;
+            left: 0px;
+            z-index: 2;
+        }`)} />
+
         {isLandscape && <div className={cx(flex.row)}>
             <div className={cx(flex.col)} style={{ flex: 1 }}>
                 <div className={cx(flex.row, css`& { padding: 14px 0 10px 0; }`)} >
