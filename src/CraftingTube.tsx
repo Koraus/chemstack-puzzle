@@ -188,16 +188,16 @@ export function CraftingTube({ style }: {
     const reaction =
         craftingState.id === "craftingReact"
         && craftingState.diffCustom.find(d => d[0] === 0)?.[1];
-
+        
     return <div className={cx(css`& {
         width: 57px;
         position: relative;
-    }`)} style={style}>
-        <CraftingTubeSvg
+    }`)} style={style}>  
+        <CraftingTubeSvg  
             className={cx(css`
                 ${[0, 1, 2].map(i => {
                 const isNext = tube.length === i;
-                const hasContent = tube.length > i;
+                const hasContent = tube.length > i;           
                 return `
                     & #prev_slot${i}_content {
                         display: none;
@@ -218,7 +218,7 @@ export function CraftingTube({ style }: {
                         font-family: 'Bahnschrift', sans-serif;
                         text-anchor: middle;
                     }
-                `;
+                `; 
             }).join('\n')}
             `,
                 craftingState.id === "craftingAct"
@@ -255,6 +255,40 @@ export function CraftingTube({ style }: {
                         animation-timing-function: linear;
                     }
                 `,
+                    craftingState.id === 'craftingAct'
+                    && craftingState.diffCustom.action === 'trashTube'
+                    && css`
+                    & {
+                        transform-origin: bottom;
+                        animation-name: ${keyframes`
+                        0% {
+                            transform: scale(1);
+                        }
+                        100% {
+                            transform: scale(0);
+                        }
+                        ## ${time}
+                    `};
+                    animation-duration: ${craftingState.duration}ms;
+                    animation-delay: ${craftingState.start - time}ms;
+                    animation-fill-mode: both;
+                    animation-timing-function: linear;
+                    } 
+
+                    & #prev_slot0_content {
+                        ${ prevTube.length <= 0 ?  '' :  'display: unset;'}
+                    }
+                    & #prev_slot1_content {  
+                        ${ prevTube.length <= 1 ?  '' :  'display: unset;'}
+                    },
+                    & #prev_slot2_content {
+                        ${ prevTube.length <= 2 ?  '' :  'display: unset;'}
+                    }
+
+                    & #slot0_content, #slot1_content, #slot2_content {
+                        display: none;
+                    }
+                    `,         
 
             )}
             slots={{
