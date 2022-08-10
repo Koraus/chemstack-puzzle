@@ -99,7 +99,10 @@ export function CraftingTubeSvg({
         desc,
         duration,
         start,
-    }, now, ...props
+    }, 
+    now,
+    noBorder, 
+    ...props
 }: {
     tubeTransition: StateTransition<
         SubstanceId[],
@@ -107,6 +110,7 @@ export function CraftingTubeSvg({
         | { id: "react", reaction: Reaction }
     >;
     now: number;
+    noBorder?: boolean;
     className?: string;
     style?: JSX.CSSProperties;
 }) {
@@ -147,6 +151,7 @@ export function CraftingTubeSvg({
             textCss,
             transparentTopCompansationCss,
             tubeContentCss,
+            noBorder && css`& #border { display: none; }`,
             "idle" === desc.id && css``,
             "prev" === desc.id && slotIndices.map(i => css`
                 & #prev_slot${i}_content {
