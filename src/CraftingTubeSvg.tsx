@@ -43,6 +43,9 @@ function pourDownAnimationCss({ i, now, start, duration }: {
                 0% { transform: translate(0, -400px); }
                 50% { transform: translate(0, 10px); }
                 100% { transform: translate(0, 0); }
+
+                0% { opacity: 0; }
+                15%, 100% { opacity: 1; }
             `} ${duration}ms ${start - now}ms linear both;
         }
         & #slot${i}_content_ {
@@ -52,6 +55,32 @@ function pourDownAnimationCss({ i, now, start, duration }: {
                 60% { transform: scale(1.1, 0.8); }
                 78% { transform: scale(0.8, 1.3); }
                 100% { transform: scale(1, 1); }
+            `} ${duration}ms ${start - now}ms linear both;
+        }
+    `;
+}
+
+function pourUpAnimationCss({ i, now, start, duration }: {
+    i: number,
+    now: number,
+    start: number,
+    duration: number,
+}) {
+    return css`
+        & #prev_slot${i}_content {
+            animation: ${keyframes`
+                0% { transform: translate(0, 0); }
+                100% { transform: translate(0, -400px); }
+
+                0%, 85% { opacity: 1; }
+                100% { opacity: 0; }
+            `} ${duration}ms ${start - now}ms linear both;
+        }
+        & #prev_slot${i}_content_ {
+            animation: ${keyframes`
+                0% { transform: scale(1, 1); }
+                20% { transform: scale(0.9, 1.05); }
+                100% { transform: scale(0.7, 1.2); }
             `} ${duration}ms ${start - now}ms linear both;
         }
     `;
@@ -164,7 +193,9 @@ export function CraftingTubeSvg({
             "pourDown" === desc.id && pourDownAnimationCss({ 
                 i: tube.length - 1, 
                 duration, start, now }),
-            "pourUp" === desc.id && css``,
+            "pourUp" === desc.id && pourUpAnimationCss({
+                i: prevTube.length - 1,
+                duration, start, now }),
             "clean" === desc.id && css``,
             "react" === desc.id && reactAnimationCss({ 
                 tube,
