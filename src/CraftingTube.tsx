@@ -1,177 +1,10 @@
-import { CraftingAction, Reaction, SubstanceId } from "./crafting";
-import { substanceColors } from "./substanceColors";
+import { Reaction, SubstanceId } from "./crafting";
 import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
-import { buttonCss } from "./buttonCss";
-import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
-import { useUpdRecoilState } from "./utils/useUpdRecoilState";
-import { ReactComponent as CraftingTubeSvg } from "./craftingTube.svg";
-import { craftingActionsRecoil, useCraftingState } from "./craftingActionsRecoil";
-import { TouchAppAnimation } from "./TouchAppAnimation";
-import { tutorialRecoil } from "./tutorialRecoil";
-import { useRecoilValue } from "recoil";
+import { useCraftingState } from "./craftingActionsRecoil";
+import { PourFromMainIntoSecondaryButton } from "./PourFromMainIntoSecondaryButton";
+import { CraftingTubeSvg } from "./CraftingTubeSvg";
 
-function PourFromMainIntoSecondaryButton({ style, className }: {
-    className?: string,
-    style?: JSX.CSSProperties;
-}) {
-    const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
-    const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
-
-    const tutorial = useRecoilValue(tutorialRecoil);
-    const isHinted = tutorial.some(t => t.kind === "pourFromMainIntoSecondary");
-
-    return <button
-        className={cx(buttonCss, className)}
-        style={{
-            display: "flex",
-            position: "relative",
-
-            alignItems: "center",
-            width: "23px",
-            height: "40px",
-            ...style,
-        }}
-        onClick={() => act({ action: "pourFromMainIntoSecondary", time: performance.now() })}
-    >
-        <ArrowLeft style={{ height: 80, margin: -20 }} />
-        {(isHinted) && <TouchAppAnimation className={css`& {
-            position: absolute;
-            transform: translate(12px, 22px);
-        }`} />}
-    </button>;
-};
-
-function addIngredientAnimation({
-    i,
-    currentTime,
-    currentState: {
-        start,
-        duration,
-    },
-}: {
-    i: number,
-    currentTime: number,
-    currentState: {
-        start: number,
-        duration: number,
-    }
-}) {
-    return css`
-        & #slot${i}_content {
-            animation-name: ${keyframes`
-                0% {
-                    transform: translate(0, -400px);
-                }
-                50% {
-                    transform: translate(0, 10px);
-                }
-                100% {
-                    transform: translate(0, 0px);
-                }
-                ## ${currentTime}
-            `};
-            animation-duration: ${duration}ms;
-            animation-delay: ${start - currentTime}ms;
-            animation-fill-mode: both;
-            animation-timing-function: linear;
-        }
-        & #slot${i}_content_ {
-            animation-name: ${keyframes`
-                0% {
-                    transform: scale(1, 1);
-                }
-                50% {
-                    transform: scale(1, 1);
-                }
-                60% {
-                    transform: scale(1.1, 0.8);
-                }
-                78% {
-                    transform: scale(0.8, 1.3);
-                }
-                100% {
-                    transform: scale(1, 1);
-                }
-                ## ${currentTime}
-            `};
-            animation-duration: ${duration}ms;
-            animation-delay: ${start - currentTime}ms;
-            animation-fill-mode: both;
-            animation-timing-function: linear;
-        }
-    `;
-}
-
-function reactionAnimation({
-    prevTube,
-    tube,
-    reaction,
-    currentTime,
-    currentState: {
-        start,
-        duration,
-    },
-}: {
-    prevTube: SubstanceId[],
-    tube: SubstanceId[],
-    reaction: Reaction,
-    currentTime: number,
-    currentState: {
-        start: number,
-        duration: number,
-    }
-}) {
-    let s = "";
-    s += reaction.reagents.map((_, i, arr) => `
-        & #prev_slot${prevTube.length - arr.length + i}_content {
-            display: unset;
-        }
-        & #prev_slot${prevTube.length - arr.length + i}_content_ {
-            animation-name: ${keyframes`
-                0% {
-                    transform: scale(1);
-                }
-                49% {
-                    transform: scale(0);
-                }
-                50% {
-                    transform: scale(0);
-                }
-                100% {
-                    transform: scale(0);
-                }
-                ## ${currentTime}
-            `};
-            animation-duration: ${duration}ms;
-            animation-delay: ${start - currentTime}ms;
-            animation-fill-mode: both;
-            animation-timing-function: linear;
-        }`).join("\n");
-    s += reaction.products.map((_, i, arr) => `
-        & #slot${tube.length - arr.length + i}_content_ {
-            animation-name: ${keyframes`
-                0% {
-                    transform: scale(0);
-                }
-                49% {
-                    transform: scale(0);
-                }
-                50% {
-                    transform: scale(0);
-                }
-                100% {
-                    transform: scale(1);
-                }
-                ## ${currentTime}
-            `};
-            animation-duration: ${duration}ms;
-            animation-delay: ${start - currentTime}ms;
-            animation-fill-mode: both;
-            animation-timing-function: linear;
-        }`).join("\n");
-    return css`${s}`;
-}
 
 export function CraftingTube({ style }: {
     style?: JSX.CSSProperties;
@@ -180,7 +13,6 @@ export function CraftingTube({ style }: {
     const time = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
 
-
     const tube = craftingState.state.tubes[0];
     const prevTube = craftingState.prevState.tubes[0];
     const isSecondaryAvailable = craftingState.state.tubes.length > 1;
@@ -188,76 +20,27 @@ export function CraftingTube({ style }: {
     const reaction =
         craftingState.id === "craftingReact"
         && craftingState.diffCustom.find(d => d[0] === 0)?.[1];
-        
+
     return <div className={cx(css`& {
         width: 57px;
         position: relative;
-    }`)} style={style}>  
-        <CraftingTubeSvg  
-            className={cx(css`
-                ${[0, 1, 2].map(i => {
-                const isNext = tube.length === i;
-                const hasContent = tube.length > i;           
-                return `
-                    & #prev_slot${i}_content {
-                        display: none;
-                    }
-                    & #prev_slot${i}_content_back {
-                        fill: ${substanceColors[prevTube[i]]};
-                    }
-                    & #slot${i}_add {
-                        ${isNext ? "" : "display: none;"}
-                    }
-                    & #slot${i}_content {
-                        ${hasContent ? "" : "display: none;"}
-                    }
-                    & #slot${i}_content_back {
-                        fill: ${substanceColors[tube[i]]};
-                    }
-                    & #prev_slot${i}_number, & #slot${i}_number {
-                        font-family: 'Bahnschrift', sans-serif;
-                        text-anchor: middle;
-                    }
-                `; 
-            }).join('\n')}
-            `,
-                craftingState.id === "craftingAct"
-                && craftingState.diffCustom.action === "addIngredient"
-                && addIngredientAnimation({
-                    i: tube.length - 1,
-                    ...craftingStateInTime
-                }),
-                craftingState.id === "craftingReact"
-                && reaction
-                && reactionAnimation({
-                    tube,
-                    prevTube,
-                    reaction,
-                    ...craftingStateInTime,
-                }),
+    }`)} style={style}>
+        <CraftingTubeSvg
+            className={cx(
                 craftingState.id === "craftingAct"
                 && craftingState.diffCustom.action === "addTube"
                 && css`
                     & {
                         transform-origin: bottom;
-                        animation-name: ${keyframes`
-                            0% {
-                                transform: scale(0);
-                            }
-                            100% {
-                                transform: scale(1);
-                            }
-                            ## ${time}
-                        `};
-                        animation-duration: ${craftingState.duration}ms;
-                        animation-delay: ${craftingState.start - time}ms;
-                        animation-fill-mode: both;
-                        animation-timing-function: linear;
+                        animation: ${keyframes`
+                            0% { transform: scale(0); }
+                            100% { transform: scale(1); }
+                        `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                     }
                 `,
-                    craftingState.id === 'craftingAct'
-                    && craftingState.diffCustom.action === 'trashTube'
-                    && css`
+                craftingState.id === 'craftingAct'
+                && craftingState.diffCustom.action === 'trashTube'
+                && css`
                     & {
                         transform-origin: bottom;
                         animation-name: ${keyframes`
@@ -274,31 +57,33 @@ export function CraftingTube({ style }: {
                     animation-fill-mode: both;
                     animation-timing-function: linear;
                     } 
-
-                    & #prev_slot0_content {
-                        ${ prevTube.length <= 0 ?  '' :  'display: unset;'}
-                    }
-                    & #prev_slot1_content {  
-                        ${ prevTube.length <= 1 ?  '' :  'display: unset;'}
-                    },
-                    & #prev_slot2_content {
-                        ${ prevTube.length <= 2 ?  '' :  'display: unset;'}
-                    }
-
-                    & #slot0_content, #slot1_content, #slot2_content {
-                        display: none;
-                    }
-                    `,         
-
+                    `,
             )}
-            slots={{
-                prev_slot0_number: prevTube[0],
-                prev_slot1_number: prevTube[1],
-                prev_slot2_number: prevTube[2],
-                slot0_number: tube[0],
-                slot1_number: tube[1],
-                slot2_number: tube[2],
+            tubeTransition={{
+                prevState: craftingState.prevState.tubes[0],
+                state: craftingState.state.tubes[0],
+                start: craftingState.start,
+                duration: craftingState.duration,
+                desc: (() => {
+                    if (craftingState.id === "craftingAct") {
+                        switch (craftingState.diffCustom.action) {
+                            case "addIngredient": return { id: "pourDown" };
+                            case "addTube": return { id: "idle" };
+                            case "trashTube": return { id: "prev" };
+                            case "pourFromMainIntoSecondary": return { id: "pourUp" };
+                            case "pourFromSecondaryIntoMain": return { id: "pourDown" };
+                        }
+                    }
+                    if (craftingState.id === "craftingReact" && reaction) {
+                        return { id: "react", reaction };
+                    }
+                    if (craftingState.id === "craftingCleanup") {
+                        return { id: "clean" };
+                    }
+                    return { id: "idle" };
+                })(),
             }}
+            now={time}
         />
         {isSecondaryAvailable && tube.length > 0 && <PourFromMainIntoSecondaryButton
             style={{
