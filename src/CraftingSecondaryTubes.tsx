@@ -47,11 +47,16 @@ function Tube({ i, ...props }: {
                 desc: (() => {
                     if (craftingState.id === "craftingAct") {
                         switch (craftingState.diffCustom.action) {
-                            case "addIngredient": return { id: "idle" };
-                            case "addTube": return { id: "idle" };
-                            case "trashTube": return { id: "prev" };
-                            case "pourFromMainIntoSecondary": return { id: "pourDown" };
-                            case "pourFromSecondaryIntoMain": return { id: "pourUp" };
+                            case "trashTube": 
+                                return { id: "prev" };
+                            case "pourFromMainIntoSecondary":
+                                if (i === 0) {
+                                    return { id: "pourDown" };
+                                }
+                            case "pourFromSecondaryIntoMain":
+                                if (i === 0) {
+                                    return { id: "pourUp" };
+                                }
                         }
                     }
                     if (craftingState.id === "craftingReact" && reaction) {
