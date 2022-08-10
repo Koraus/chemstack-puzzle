@@ -1,7 +1,6 @@
 import { useRecoilValue } from 'recoil';
 import * as flex from "./utils/flex";
 import * as _ from "lodash";
-import { Tube } from "./Tube";
 import { CraftingAction, SubstanceId } from './crafting';
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { CraftingTargets } from "./CraftingTargets";
@@ -11,13 +10,14 @@ import { buttonCss } from "./buttonCss";
 import { CraftingIngredientButton } from "./CraftingIngredientButton";
 import { CraftingTube } from "./CraftingTube";
 import { TouchAppAnimation } from "./TouchAppAnimation";
-import { css, cx, keyframes } from "@emotion/css";
+import { css, cx } from "@emotion/css";
 import { JSX } from "preact";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Close } from '@emotion-icons/material-rounded/Close';
-import { craftingActionsRecoil, craftingStateInTimeRecoil, getCraftingState, useCraftingState } from "./craftingActionsRecoil";
+import { craftingActionsRecoil, craftingStateInTimeRecoil, getCraftingState } from "./craftingActionsRecoil";
 import { tutorialRecoil } from './tutorialRecoil';
+import { CraftingSecondaryTubes } from './CraftingSecondaryTubes';
 
 function CraftingIngredientPanel({
     style, className,
@@ -66,10 +66,6 @@ export function CraftingTable() {
     const craftingActions = useRecoilValue(craftingActionsRecoil);
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
-
-    const craftingStateInTime = useCraftingState();
-    const time = craftingStateInTime.currentTime;
-    const craftingState = craftingStateInTime.currentState;
 
     const { tubes } =
         getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
@@ -126,118 +122,9 @@ export function CraftingTable() {
 
         <CraftingIngredientPanel style={{ ...flex.rowS }} />
 
-        <div style={{
-            ...flex.rowS,
-            marginTop: 10,
-        }}>
-            <div style={{
-                ...flex.rowRevS,
-                position: "relative",
-                perspective: "120px",
-                perspectiveOrigin: "center 120px",
-                transformStyle: "preserve-3d",
-                flex: 1,
-            }}>
-                {tubes.slice(1).map((t, i) => {
-                    if (i === 0) {
-                        return <Tube
-                            isPourable
-                            tube={t}
-                            className={cx(
-                                craftingState.id === 'craftingAct'
-                                && craftingState.diffCustom.action === 'addTube'
-                                && css`
-                                    & {
-                                        transform-origin: bottom;
-                                        animation-name: ${keyframes`
-                                            0% {
-                                                transform: translate3d(43px, 0, 39px);
-                                            }
-                                            100% {
-                                                transform: translate3d(0, 0, 0);
-                                            }
-                                            ## ${time}
-                                        `};
-                                        animation-duration: ${craftingState.duration}ms;
-                                        animation-delay: ${craftingState.start - time}ms;
-                                        animation-fill-mode: both;
-                                        animation-timing-function: linear;
-                                    }
-                                `
-                                ,
-                                craftingState.id === 'craftingAct'
-                                && craftingState.diffCustom.action === 'trashTube'
-                                && css`
-                                & {
-                                    animation-name: ${keyframes`
-                                    0% {
-                                        transform: translate3d(0, 0, 0);
-                                    }
-                                    100% {
-                                        transform: translate3d(43px, 0, 39px);
-                                    }
-                                    ## ${time}
-                                `};
-                                animation-duration: ${craftingState.duration}ms;
-                                animation-delay: ${craftingState.start - time}ms;
-                                animation-fill-mode: both;
-                                animation-timing-function: linear;
-                                }
-                                `,
-
-                            )}
-                        />;
-                    }
-                    const prevDx = (i - 1 - 1) * 23 + 15;
-                    const prevDz = Math.pow((i - 1), 0.4) * 20 + 40;
-                    const dx = (i - 1) * 23 + 15;
-                    const dz = Math.pow((i - 1), 0.4) * 20 + 40;
-                    return <Tube
-                        style={{
-                            position: "absolute",
-                            transform: `translate3d(${-dx}px, 0, ${-dz}px)`,
-
-
-                        }}
-                        className={cx(
-                            craftingState.id === 'craftingAct'
-                            && craftingState.diffCustom.action === 'addTube'
-                            && css`
-                                & {
-                                    transform-origin: bottom;
-                                    animation-name: ${keyframes`
-                                        0% {
-                                            transform: translate3d(${-prevDx}px, 0, ${-prevDz}px);
-                                        }
-                                        100% {
-                                            transform: translate3d(${-dx}px, 0, ${-dz}px);
-                                        }
-                                        ## ${time}
-                                    `};
-                                    animation-duration: ${craftingState.duration}ms;
-                                    animation-delay: ${craftingState.start - time}ms;
-                                    animation-fill-mode: both;
-                                    animation-timing-function: linear;
-                                }
-                            `,                          
-
-                        )}
-
-                        shadow={<div style={{
-                            position: "absolute",
-                            top: 0,
-                            left: "47%",
-                            right: "-47%",
-                            bottom: "-5px",
-                            background: "#00000040",
-                            borderBottomLeftRadius: "999px",
-                            borderBottomRightRadius: "999px",
-                        }}></div>}
-                        tube={t}
-                    />;
-                })}
-            </div>
-            <CraftingTube style={{ margin: "-55px 40px -18px" }}/>
+        <div style={{ ...flex.rowS, marginTop: 10 }}>
+            <CraftingSecondaryTubes style={{ flex: 1 }} />
+            <CraftingTube style={{ margin: "-55px 40px -18px" }} />
             <CraftingTargets style={{ flex: 1 }} />
         </div>
 
