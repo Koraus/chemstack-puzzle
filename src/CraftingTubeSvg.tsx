@@ -85,6 +85,23 @@ function pourUpAnimationCss({ i, now, start, duration }: {
         }
     `;
 }
+function cleanUpAnimationCss ({ i, now, start, duration }: {
+    i: number,
+    now: number,
+    start: number,
+    duration: number,
+}){
+    return css`
+    & #prev_slot${i}_content_ {
+        animation: ${keyframes`
+            0% { transform: scale(1, 1); }
+            40% { transform: scale(2, 0.3); }
+            100% { transform: scale(3, 0.1); opacity: 0;}
+        `} ${duration}ms ${start - now}ms linear both;
+    }
+`;
+}
+
 
 function reactAnimationCss({
     prevTube,
@@ -191,7 +208,9 @@ export function CraftingTubeSvg({
             "pourUp" === desc.id && pourUpAnimationCss({
                 i: prevTube.length - 1,
                 duration, start, now }),
-            "clean" === desc.id && css``,
+            "clean" === desc.id && cleanUpAnimationCss({
+                i: prevTube.length - 1,
+                duration, start, now }),
             "react" === desc.id && reactAnimationCss({ 
                 tube,
                 prevTube,
