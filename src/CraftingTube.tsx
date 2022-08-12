@@ -43,20 +43,11 @@ export function CraftingTube({ style }: {
                 && css`
                     & {
                         transform-origin: bottom;
-                        animation-name: ${keyframes`
-                        0% {
-                            transform: scale(1);
-                        }
-                        100% {
-                            transform: scale(0);
-                        }
-                        ## ${time}
-                    `};
-                    animation-duration: ${craftingState.duration}ms;
-                    animation-delay: ${craftingState.start - time}ms;
-                    animation-fill-mode: both;
-                    animation-timing-function: linear;
-                    } 
+                        animation: ${keyframes`
+                            0% { transform: scale(1); }
+                            100% { transform: scale(0); }
+                        `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
+                        } 
                     `,
             )}
             tubeTransition={{

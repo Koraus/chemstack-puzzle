@@ -4,17 +4,14 @@ import { substanceColors } from "./substanceColors";
 import * as flex from "./utils/flex";
 import { JSX, ComponentChildren } from "preact";
 import { buttonCss } from "./buttonCss";
-import { ArrowRight } from "@emotion-icons/material-rounded/ArrowRight";
 import { useCraftingAct } from "./craftingActionsRecoil";
 
 export function TubeSlot({
     isBottom,
-    isPourable,
     sid,
     isHinted,
 }: {
     isBottom?: boolean,
-    isPourable?: boolean,
     sid: SubstanceId;
     isHinted?: boolean;
 }) {
@@ -57,40 +54,16 @@ export function TubeSlot({
             border: 2px solid #ffffffa0;
             border-radius: 3px;
             animation-name: ${keyframes`
-                0% {
-                    transform: scale(1, 1);
-                }
-                10% {
-                    transform: scale(1.5, 1.5);
-                }
-                30% {
-                    transform: scale(1, 1);
-                }
-                100% {
-                    transform: scale(1, 1);
-                }
+                0% { transform: scale(1, 1); }
+                10% { transform: scale(1.5, 1.5); }
+                30% { transform: scale(1, 1); }
+                100% { transform: scale(1, 1); }
             `};
             animation-duration: 1300ms;
             animation-fill-mode: both;
             animation-iteration-count: infinite;
             animation-timing-function: linear;
         }`}></div>}
-        {isPourable && <div style={{ 
-            position: "absolute", 
-        }}>
-            <button
-                className={cx(buttonCss)}
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    position: "fixed",
-                    width: "20px",
-                    height: "32px",
-                    margin: "-36px 0px 0px 17px",
-                }}
-                onClick={() => act({ action: "pourFromSecondaryIntoMain", time: performance.now() })}
-            ><ArrowRight style={{ height: 80, margin: -20 }} /></button>
-        </div>}
     </div>;
 }
 
@@ -132,25 +105,16 @@ export function TubeAsContainer({
 
 export function Tube({
     tube,
-    isPourable,
     ...props
 }: {
     tube: SubstanceId[];
     style?: JSX.CSSProperties;
     className?: string;
-    isPourable?: boolean;
     shadow?: ComponentChildren;
 }) {
     return <TubeAsContainer {...props}>
-        <TubeSlot
-            sid={tube[0]}
-            isPourable={isPourable && 1 === tube.length}
-            isBottom />
-        <TubeSlot
-            sid={tube[1]}
-            isPourable={isPourable && 2 === tube.length} />
-        <TubeSlot
-            sid={tube[2]}
-            isPourable={isPourable && 3 === tube.length} />
+        <TubeSlot sid={tube[0]} isBottom />
+        <TubeSlot sid={tube[1]} />
+        <TubeSlot sid={tube[2]} />
     </TubeAsContainer>;
 }

@@ -120,7 +120,7 @@ export function CraftingTable() {
             </div>
         </div>
 
-        <CraftingIngredientPanel style={{ ...flex.rowS }} />
+        <CraftingIngredientPanel style={{ ...flex.rowS, zIndex: 1 }} />
 
         <div style={{ ...flex.rowS, marginTop: 10 }}>
             <CraftingSecondaryTubes style={{ flex: 1 }} />
