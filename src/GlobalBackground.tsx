@@ -41,6 +41,8 @@ export function GlobalBackground({
                 perspective-origin: center 120px;
                 transform-style: preserve-3d;
                 position: fixed;
+                width: 33vmax;
+                height: 33vmax;
             }`)} ref={refFixedChild}>
 
                 <div className={cx(css`& {
