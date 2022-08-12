@@ -18,6 +18,7 @@ import { Close } from '@emotion-icons/material-rounded/Close';
 import { craftingActionsRecoil, craftingStateInTimeRecoil, getCraftingState } from "./craftingActionsRecoil";
 import { tutorialRecoil } from './tutorialRecoil';
 import { CraftingSecondaryTubes } from './CraftingSecondaryTubes';
+import { GlobalBackground } from './GlobalBackground';
 
 function CraftingIngredientPanel({
     style, className,
@@ -80,45 +81,11 @@ export function CraftingTable() {
         ...flex.colS,
         position: "relative",
     }}>
-        <div className={cx(css`& {
-            overflow: hidden;
-            background: linear-gradient(#142a4a, #00183c);
-            border: 5px solid #A2B5DD;
-            border-radius: 30px;
+        <GlobalBackground className={cx(css`& {
             position: absolute;
-            perspective: 400px;
-            perspective-origin: center 120px;
-            transform-style: preserve-3d;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            overflow: hidden;
-        }`)}>
-            <div className={cx(css`& {
-                transform-origin: bottom;
-                transform: rotateX(90deg) translate(0, 30%);
-                width: 100%;
-                height: 100%;
-            }`)}>
-                <div className={cx(css`& {
-                    background: radial-gradient(closest-side, 
-                        #ffffffff 1%, 
-                        #ffffffe0 2%, 
-                        #ffffffc0 4%, 
-                        #ffffffa0 8%, 
-                        #ffffff80 16%, 
-                        #ffffff40 32%, 
-                        #ffffff20 64%, 
-                        #ffffff00);
-                    transform-origin: center;
-                    transform: scale(4);
-                    width: 100%;
-                    height: 100%;
-                }`)}>
-                </div>
-            </div>
-        </div>
+            inset: 0;
+            z-index: -100;
+        }`)} />
 
         <CraftingIngredientPanel style={{ ...flex.rowS, zIndex: 1 }} />
 
