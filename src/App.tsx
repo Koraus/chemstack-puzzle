@@ -11,17 +11,14 @@ import { ResetLevelHeaderButton } from './ResetLevelHeaderButton';
 import { HeaderTitle } from './HeaderTitle';
 import { Footer } from "./Footer";
 import { useMemo } from "preact/hooks";
-import { useState, useEffect } from 'preact/hooks';
 import { WinFireworks } from "./WinFireworks";
+import { useMatchMedia } from "./utils/useMatchMedia";
 
 export function App() {
-    const [isLandscape, setIsLandscape] = useState(false);
-    useEffect(() => {
-        const upd = () => setIsLandscape(window.matchMedia("(orientation: landscape)").matches);
-        upd();
-        window.addEventListener('resize', upd);
-        return () => window.removeEventListener('resize', upd);
-    }, []);
+    const landscapeWidth = 922;
+    const portraitWidth = 414;
+
+    const isLandscape = useMatchMedia(`(orientation: landscape)`);
 
     const main = useMemo(() => <>
         <ReactionsLibrary />
@@ -40,7 +37,7 @@ export function App() {
     }`)}>
         <div className={cx(css`& {
             flex-grow: 1;
-            max-width: ${isLandscape ? 922 : 414}px;
+            max-width: ${isLandscape ? landscapeWidth : portraitWidth}px;
             position: relative;
         }`)}>
             <WinFireworks className={cx(css`& {
@@ -51,16 +48,19 @@ export function App() {
             }`)} />
 
             {isLandscape && <div className={cx(flex.row)}>
-                <div className={cx(flex.col)} style={{ flex: 1 }}>
+                <div className={cx(flex.col)}>
                     <div className={cx(flex.row, css`& { padding: 14px 0 10px 0; }`)} >
                         <LevelListHeaderButton className={css`& { flex: 1; }`} />
                         <HeaderTitle isHorizontal className={css`& { flex-grow: 999; }`} />
                     </div>
                 </div>
 
-                <div className={cx(flex.col, css`& {width: 414px}`)}>{main}</div>
+                <div className={cx(
+                    css`& { width: ${portraitWidth / landscapeWidth * 100}%; }`,
+                    flex.col,
+                )}>{main}</div>
 
-                <div style={{ flex: 1, ...flex.colS }}>
+                <div className={cx(flex.col)}>
                     <div className={cx(flex.rowRev, css`& { padding: 14px 0 10px 0; }`)} >
                         <ResetLevelHeaderButton className={css`& { flex: 1; }`} />
                         <div className={cx(css`& { flex-grow: 999; }`)}></div>

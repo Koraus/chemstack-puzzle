@@ -25,8 +25,8 @@ export function GlobalBackground({
         }
 
         upd();
-        parent.addEventListener("resize", upd);
-        return () => parent.removeEventListener("resize", upd);
+        window.addEventListener("resize", upd);
+        return () => window.removeEventListener("resize", upd);
 
     }, [refParent.current, refFixedChild.current]);
     return <div {...props} className={cx(css`& {

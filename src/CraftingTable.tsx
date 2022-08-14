@@ -42,7 +42,7 @@ function CraftingIngredientPanel({
 
     return <div
         className={cx(className)}
-        style={{ ...style }}
+        style={{ ...flex.rowS, ...style }}
     >
         <div style={{ ...flex.rowS, flex: 1 }}>
             {ingredients
@@ -87,7 +87,7 @@ export function CraftingTable() {
             z-index: -100;
         }`)} />
 
-        <CraftingIngredientPanel style={{ ...flex.rowS, zIndex: 1 }} />
+        <CraftingIngredientPanel style={{ zIndex: 1 }} />
 
         <div style={{ ...flex.rowS, marginTop: 10 }}>
             <CraftingSecondaryTubes style={{ flex: 1 }} />
