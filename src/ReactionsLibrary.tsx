@@ -7,7 +7,7 @@ import { KeyboardArrowUp } from '@emotion-icons/material-rounded/KeyboardArrowUp
 import { generateReactionsLibrary } from './generateReactionsLibrary';
 import { getCraftingState, craftingStateInTimeRecoil } from './craftingActionsRecoil';
 import { tutorialRecoil } from './tutorialRecoil';
-import { css, keyframes } from '@emotion/css';
+import { css, cx, keyframes } from '@emotion/css';
 type CSSProperties = import("preact").JSX.CSSProperties;
 
 export const reactionsLibraryRecoil = selector({
@@ -30,8 +30,9 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     const tutorial = useRecoilValue(tutorialRecoil);
 
     function IngredientSlot({ sid }: { sid?: number }) {
-        return <div style={{
-            backgroundColor: sid === undefined ? "#ffffff08" : substanceColors[sid],
+        return <div className={cx(css`& {
+            background-color: ${sid === undefined ? "#ffffff08" : substanceColors[sid]};
+        }`)} style={{
             color: sid === undefined ? "#ffffff10" : "#ffffffff",
             borderRadius: "3px",
             margin: "1px",

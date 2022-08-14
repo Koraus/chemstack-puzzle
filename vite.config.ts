@@ -29,7 +29,7 @@ const injectSlots = (jsx, tpl) => {
         }
         el.children = el.children ?? [];
 
-        const slotExpr = tpl`<>{props.slots?.${id}}</>`.expression;
+        const slotExpr = tpl`<>{props.slots?.["${id}"]}</>`.expression;
         el.children.push(...slotExpr.children);
     }
 }
