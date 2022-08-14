@@ -106,12 +106,12 @@ function pourUpAnimationCss({ i, now, start, duration }: {
         }
     `;
 }
-function cleanAnimationCss ({ i, now, start, duration }: {
+function cleanAnimationCss({ i, now, start, duration }: {
     i: number,
     now: number,
     start: number,
     duration: number,
-}){
+}) {
     return css`
     & #prev_slot${i}_content_ {
         animation: ${keyframes`
@@ -231,9 +231,7 @@ export function CraftingTubeSvg({
                 })],
             "clean" === desc.id && [
                 prevCss(prevTube.length),
-                cleanAnimationCss({
-                    i: prevTube.length - 1,
-                    duration, start, now}),
+                ...[3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
             ],
             "react" === desc.id && reactAnimationCss({
                 tube,
