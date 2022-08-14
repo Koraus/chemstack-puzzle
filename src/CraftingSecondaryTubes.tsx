@@ -3,9 +3,8 @@ import { css, cx, keyframes } from "@emotion/css";
 import { JSX } from "preact";
 import { useCraftingState } from "./craftingActionsRecoil";
 
-import { PourFromMainIntoSecondaryButton } from "./PourFromMainIntoSecondaryButton";
 import { PourFromSecondaryIntoMainButton } from "./PourFromSecondaryIntoMainButton";
-import { CraftingTubeSvg } from "./CraftingTubeSvg";
+import { TubeSvg } from "./TubeSvg";
 
 
 function Tube({ i, ...props }: {
@@ -35,7 +34,7 @@ function Tube({ i, ...props }: {
         }
         style={props.style}
     >
-        <CraftingTubeSvg
+        <TubeSvg
             noBorder
             className={cx(
             )}

@@ -63,7 +63,7 @@ export default defineConfig({
             name: "clean up svgr-ed svgs",
             generateBundle(_, bundle) {
                 const svgsToCleanUp = [
-                    'src/craftingTube.svg'
+                    'src/tube.svg'
                 ];
 
                 for (const name of svgsToCleanUp) {

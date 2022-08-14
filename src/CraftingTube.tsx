@@ -3,7 +3,7 @@ import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
 import { useCraftingState } from "./craftingActionsRecoil";
 import { PourFromMainIntoSecondaryButton } from "./PourFromMainIntoSecondaryButton";
-import { CraftingTubeSvg } from "./CraftingTubeSvg";
+import { TubeSvg } from "./TubeSvg";
 
 
 export function CraftingTube({ style }: {
@@ -25,7 +25,7 @@ export function CraftingTube({ style }: {
         width: 57px;
         position: relative;
     }`)} style={style}>
-        <CraftingTubeSvg
+        <TubeSvg
             className={cx(
                 craftingState.id === "craftingAct"
                 && craftingState.diffCustom.action === "addTube"

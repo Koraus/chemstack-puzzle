@@ -2,7 +2,7 @@ import { Reaction, SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
 import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
-import { ReactComponent as CraftingTubeSvgRaw } from "./craftingTube.svg";
+import { ReactComponent as TubeSvgRaw } from "./tube.svg";
 import { StateTransition } from "./StateTransition";
 
 
@@ -164,7 +164,7 @@ function reactAnimationCss({
 }
 
 
-export function CraftingTubeSvg({
+export function TubeSvg({
     tubeTransition: {
         prevState: prevTube,
         state: tube,
@@ -208,7 +208,7 @@ export function CraftingTubeSvg({
         [`slot${i}_number`, tube[i]],
     ]));
 
-    return <CraftingTubeSvgRaw
+    return <TubeSvgRaw
         {...props}
         className={cx(
             slotTransformOriginsCss,
