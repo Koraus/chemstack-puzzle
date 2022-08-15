@@ -46,7 +46,7 @@ function Tube({ i, ...props }: {
                 desc: (() => {
                     if (craftingState.id === "craftingAct") {
                         switch (craftingState.diffCustom.action) {
-                            case "trashTube": 
+                            case "trashTube":
                                 return { id: "prev" };
                             case "pourFromMainIntoSecondary":
                                 if (i === 0) {
@@ -63,6 +63,9 @@ function Tube({ i, ...props }: {
                     }
                     if (craftingState.id === "craftingCleanup") {
                         return { id: "clean" };
+                    }
+                    if (craftingState.id === "craftingGiveaway") {
+                        return { id: "prev" };
                     }
                     return { id: "idle" };
                 })(),
@@ -160,6 +163,16 @@ export function CraftingSecondaryTubes({
                             100% { transform: translate3d(${prevDx}px, 0, ${prevDz}px); }
                         `} ${duration}ms ${start - now}ms both linear;
                     }`,
+                    craftingState.id === 'craftingGiveaway'
+                    && css`
+                        & {
+                            transform-origin: bottom;
+                            animation: ${keyframes`
+                            35% { transform: translate3d(${dx}px, 0, ${dz}px); }
+                            100% { transform: translate3d(${prevDx}px, 0, ${prevDz}px); }
+                                `} ${duration}ms ${start - now}ms both linear;
+                            } 
+                        `,
                 )}
             />;
         })}

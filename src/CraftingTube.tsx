@@ -1,4 +1,4 @@
-import { Reaction, SubstanceId } from "./crafting";
+import { craftingGiveaway, Reaction, SubstanceId } from "./crafting";
 import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
 import { useCraftingState } from "./craftingActionsRecoil";
@@ -49,6 +49,17 @@ export function CraftingTube({ style }: {
                         `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                         } 
                     `,
+                craftingState.id === 'craftingGiveaway'
+                && css`
+                    & {
+                        transform-origin: bottom;
+                        animation: ${keyframes`
+                        0% { transform: translateY(0); opacity: 1; }
+                        100% {transform: translateY(-20%);     opacity: 0;}
+                        `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
+                        } 
+                    `,
+
             )}
             tubeTransition={{
                 prevState: craftingState.prevState.tubes[0],
@@ -70,6 +81,9 @@ export function CraftingTube({ style }: {
                     }
                     if (craftingState.id === "craftingCleanup") {
                         return { id: "clean" };
+                    }
+                    if (craftingState.id === "craftingGiveaway") {
+                        return { id: "prev" };
                     }
                     return { id: "idle" };
                 })(),
