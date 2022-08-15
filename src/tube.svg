@@ -3,7 +3,7 @@
     <defs>
         <style>
             .cls-1 {
-                fill: url(#radial-gradient-3);
+                fill: url(#slot2_content_back1_gradient);
             }
 
             .cls-1,
@@ -15,7 +15,7 @@
             }
 
             .cls-6 {
-                fill: url(#linear-gradient-2);
+                fill: url(#slot0_content_back_gradient);
             }
 
             .cls-7,
@@ -25,11 +25,11 @@
             }
 
             .cls-2 {
-                fill: url(#radial-gradient);
+                fill: url(#slot0_content_back1_gradient);
             }
 
             .cls-10 {
-                fill: url(#linear-gradient-6);
+                fill: url(#slot4_content_back_gradient);
             }
 
             .cls-11 {
@@ -42,7 +42,7 @@
             }
 
             .cls-3 {
-                fill: url(#radial-gradient-5);
+                fill: url(#slot4_content_back1_gradient);
             }
 
             .cls-13 {
@@ -106,7 +106,7 @@
             }
 
             .cls-24 {
-                fill: url(#linear-gradient-5);
+                fill: url(#slot3_content_back_gradient);
             }
 
             .cls-25 {
@@ -126,15 +126,15 @@
             }
 
             .cls-4 {
-                fill: url(#radial-gradient-2);
+                fill: url(#slot1_content_back1_gradient);
             }
 
             .cls-5 {
-                fill: url(#radial-gradient-4);
+                fill: url(#slot3_content_back1_gradient);
             }
 
             .cls-26 {
-                fill: url(#linear-gradient-3);
+                fill: url(#slot1_content_back_gradient);
             }
 
             .cls-27 {
@@ -146,7 +146,7 @@
             }
 
             .cls-28 {
-                fill: url(#linear-gradient-4);
+                fill: url(#slot2_content_back_gradient);
             }
         </style>
         <linearGradient id="linear-gradient" x1="60.27607" y1="803.57019" x2="147.1706" y2="803.57019"
@@ -157,12 +157,12 @@
             <stop offset=".89236" stop-color="#9fcdd7" />
             <stop offset="1" stop-color="#aedde5" />
         </linearGradient>
-        <linearGradient id="linear-gradient-2" x1="103.87395" y1="1002.58766" x2="103.87395" y2="888.9422"
+        <linearGradient id="slot0_content_back_gradient" x1="103.87395" y1="1002.58766" x2="103.87395" y2="888.9422"
             gradientTransform="matrix(1, 0, 0, 1, 0, 0)" gradientUnits="userSpaceOnUse">
             <stop offset="0" stop-color="#ff4b33" />
             <stop offset="1" stop-color="#ffab03" />
         </linearGradient>
-        <radialGradient id="radial-gradient" cx="103.72342" cy="945.76484" fx="87.89381" fy="920.99993" r="70.618"
+        <radialGradient id="slot0_content_back1_gradient" cx="103.72342" cy="945.76484" fx="87.89381" fy="920.99993" r="70.618"
             gradientTransform="matrix(1, 0, 0, 1, 0, 0)" gradientUnits="userSpaceOnUse">
             <stop offset="0" stop-color="#ffab03" />
             <stop offset=".08938" stop-color="#ffab03" stop-opacity=".86889" />
@@ -173,18 +173,18 @@
             <stop offset=".91095" stop-color="#ffab03" stop-opacity=".02651" />
             <stop offset="1" stop-color="#ffab03" stop-opacity="0" />
         </radialGradient>
-        <linearGradient id="linear-gradient-3" x1="103.72342" y1="876.7711" x2="103.72342" y2="763.1257"
+        <linearGradient id="slot1_content_back_gradient" x1="103.72342" y1="876.7711" x2="103.72342" y2="763.1257"
             gradientTransform="matrix(1, 0, 0, 1, 0, 0)" gradientUnits="userSpaceOnUse">
             <stop offset="0" stop-color="#ff4b33" />
             <stop offset="1" stop-color="#ffab03" />
         </linearGradient>
-        <radialGradient id="radial-gradient-2" cy="819.88357" fy="795.11866" xlink:href="#radial-gradient" />
-        <linearGradient id="linear-gradient-4" y1="750.82032" y2="637.17492" xlink:href="#linear-gradient-3" />
-        <radialGradient id="radial-gradient-3" cy="693.99762" fy="669.23271" xlink:href="#radial-gradient" />
-        <linearGradient id="linear-gradient-5" y1="624.94679" y2="511.30139" xlink:href="#linear-gradient-3" />
-        <radialGradient id="radial-gradient-4" cy="568.12409" fy="543.35918" xlink:href="#radial-gradient" />
-        <linearGradient id="linear-gradient-6" y1="499.07326" y2="385.42786" xlink:href="#linear-gradient-3" />
-        <radialGradient id="radial-gradient-5" cy="442.25056" fy="417.48565" xlink:href="#radial-gradient" />
+        <radialGradient id="slot1_content_back1_gradient" cy="819.88357" fy="795.11866" xlink:href="#slot0_content_back1_gradient" />
+        <linearGradient id="slot2_content_back_gradient" y1="750.82032" y2="637.17492" xlink:href="#slot0_content_back_gradient" />
+        <radialGradient id="slot2_content_back1_gradient" cy="693.99762" fy="669.23271" xlink:href="#slot0_content_back1_gradient" />
+        <linearGradient id="slot3_content_back_gradient" y1="624.94679" y2="511.30139" xlink:href="#slot0_content_back_gradient" />
+        <radialGradient id="slot3_content_back1_gradient" cy="568.12409" fy="543.35918" xlink:href="#slot0_content_back1_gradient" />
+        <linearGradient id="slot4_content_back_gradient" y1="499.07326" y2="385.42786" xlink:href="#slot0_content_back_gradient" />
+        <radialGradient id="slot4_content_back1_gradient" cy="442.25056" fy="417.48565" xlink:href="#slot0_content_back1_gradient" />
         <linearGradient id="linear-gradient-7" x1="91.26459" y1="1004.18015" x2="91.26459" y2="600.14811"
             gradientTransform="matrix(1, 0, 0, 1, 0, 0)" gradientUnits="userSpaceOnUse">
             <stop offset="0" stop-color="#fff" />

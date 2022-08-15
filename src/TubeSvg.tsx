@@ -5,9 +5,9 @@ import { css, cx, keyframes } from "@emotion/css";
 import { ReactComponent as TubeSvgRaw } from "./tube.svg";
 import { StateTransition } from "./StateTransition";
 
-const darkerColor = (hexColor: string) => {
+const secondaryColor = (hexColor: string) => {
     const { h, s, l } = rgbToHsl(hexColorToRgb(hexColor));
-    return `hsl(${h}, ${s}%, ${l * 0.75}%)`;
+    return `hsl(${((h - 20) + 360) % 360}, ${s * 0.85}%, ${l * 0.85}%)`;
 }
 
 const slotIndices = [0, 1, 2, 3, 4];
@@ -19,10 +19,10 @@ const slotIndices = [0, 1, 2, 3, 4];
 //     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
 // })
 const bBoxes = [
-    { x: 72.625, y: 888.942, width: 62.346, height: 113.645 }, 
-    { x: 72.625, y: 763.060, width: 62.195, height: 113.710 }, 
-    { x: 72.625, y: 637.174, width: 62.195, height: 113.645 }, 
-    { x: 72.625, y: 511.301, width: 62.195, height: 113.645 }, 
+    { x: 72.625, y: 888.942, width: 62.346, height: 113.645 },
+    { x: 72.625, y: 763.060, width: 62.195, height: 113.710 },
+    { x: 72.625, y: 637.174, width: 62.195, height: 113.645 },
+    { x: 72.625, y: 511.301, width: 62.195, height: 113.645 },
     { x: 72.625, y: 385.427, width: 62.195, height: 113.645 },
 ];
 
@@ -44,6 +44,33 @@ const textCss = slotIndices.map(i => css`
     }
 `);
 
+function SlotGradients({ svgIdPrefix, i, prev }: {
+    svgIdPrefix: string, i: number, prev?: boolean
+}) {
+    const _prev = prev ? "prev_" : "";
+    return <>
+        <linearGradient
+            id={`_${svgIdPrefix}${_prev}_slot${i}_content_back_gradient`}
+            href={`#slot${i}_content_back_gradient`}
+        >
+            <stop offset="0" stop-color="#ff4b33" />
+            <stop offset="1" stop-color="#ffab03" />
+        </linearGradient>
+        <radialGradient
+            id={`_${svgIdPrefix}${_prev}_slot${i}_content_back1_gradient`}
+            href={`#slot${i}_content_back1_gradient`}
+        >
+            <stop offset="0" stop-color="#ffab03" />
+            <stop offset=".08938" stop-color="#ffab03" stop-opacity=".86889" />
+            <stop offset=".28173" stop-color="#ffab03" stop-opacity=".60853" />
+            <stop offset=".46471" stop-color="#ffab03" stop-opacity=".39138" />
+            <stop offset=".63301" stop-color="#ffab03" stop-opacity=".22209" />
+            <stop offset=".78353" stop-color="#ffab03" stop-opacity=".10055" />
+            <stop offset=".91095" stop-color="#ffab03" stop-opacity=".02651" />
+            <stop offset="1" stop-color="#ffab03" stop-opacity="0" />
+        </radialGradient>
+    </>
+}
 
 export function getBBoxCoords(
     bBox: { x: number, y: number, width: number, height: number },
@@ -203,6 +230,7 @@ export function TubeSvg({
     },
     now,
     noBorder,
+    svgIdPrefix,
     ...props
 }: {
     tubeTransition: StateTransition<
@@ -212,21 +240,52 @@ export function TubeSvg({
     >;
     now: number;
     noBorder?: boolean;
+    svgIdPrefix: string;
     className?: string;
     style?: JSX.CSSProperties;
 }) {
+    const tubeContentGradientsCss = slotIndices.map(i => {
+        const prevColor = substanceColors[prevTube[i]] ?? "#00000000";
+        const color = substanceColors[tube[i]] ?? "#00000000";
+        return css`
+            & #_${svgIdPrefix}_prev_slot${i}_content_back1_gradient * {
+                stop-color: ${prevColor};
+            }
+            & #_${svgIdPrefix}_prev_slot${i}_content_back_gradient :nth-child(1) {
+                stop-color: ${secondaryColor(prevColor)};
+            }
+            & #_${svgIdPrefix}_prev_slot${i}_content_back_gradient :nth-child(2) {
+                stop-color: ${prevColor};
+            }
 
+            & #_${svgIdPrefix}_slot${i}_content_back1_gradient * {
+                stop-color: ${color};
+            }
+            & #_${svgIdPrefix}_slot${i}_content_back_gradient :nth-child(1) {
+                stop-color: ${secondaryColor(color)};
+            }
+            & #_${svgIdPrefix}_slot${i}_content_back_gradient :nth-child(2) {
+                stop-color: ${color};
+            }
+        `;
+    });
     const tubeContentCss = slotIndices.map(i => {
         const isNext = tube.length === i;
-        const prevColor = substanceColors[prevTube[i]];
-        const color = substanceColors[tube[i]];
         return css`
             & #prev_slot${i}_content_back {
-                fill: ${prevColor};
+                fill: url(#_${svgIdPrefix}_prev_slot${i}_content_back_gradient);
             }
+            & #prev_slot${i}_content_back1 {
+                fill: url(#_${svgIdPrefix}_prev_slot${i}_content_back1_gradient);
+            }
+
             & #slot${i}_content_back {
-                fill: ${color};
+                fill: url(#_${svgIdPrefix}_slot${i}_content_back_gradient);
             }
+            & #slot${i}_content_back1 {
+                fill: url(#_${svgIdPrefix}_slot${i}_content_back1_gradient);
+            }
+
             & #slot${i}_add {
                 display: ${isNext ? "unset" : "none"};
             }
@@ -237,43 +296,59 @@ export function TubeSvg({
         [`slot${i}_number`, tube[i]],
     ]));
 
-    return <TubeSvgRaw
-        {...props}
-        className={cx(
-            slotTransformOriginsCss,
-            textCss,
-            transparentTopCompansationCss,
-            tubeContentCss,
-            "idle" === desc.id && idleCss(tube.length),
-            "prev" === desc.id && prevCss(prevTube.length),
-            "pourDown" === desc.id && [
-                idleCss(tube.length),
-                pourDownAnimationCss({
-                    i: tube.length - 1,
+    return <>
+        <TubeSvgRaw
+            {...props}
+            className={cx(
+                slotTransformOriginsCss,
+                textCss,
+                transparentTopCompansationCss,
+                tubeContentCss,
+                "idle" === desc.id && idleCss(tube.length),
+                "prev" === desc.id && prevCss(prevTube.length),
+                "pourDown" === desc.id && [
+                    idleCss(tube.length),
+                    pourDownAnimationCss({
+                        i: tube.length - 1,
+                        duration, start, now
+                    })],
+                "pourUp" === desc.id && [
+                    prevCss(prevTube.length),
+                    pourUpAnimationCss({
+                        i: prevTube.length - 1,
+                        duration, start, now
+                    })],
+                "clean" === desc.id && [
+                    prevCss(prevTube.length),
+                    ...[3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
+                ],
+                "react" === desc.id && reactAnimationCss({
+                    tube,
+                    prevTube,
+                    reaction: desc.reaction,
                     duration, start, now
-                })],
-            "pourUp" === desc.id && [
-                prevCss(prevTube.length),
-                pourUpAnimationCss({
-                    i: prevTube.length - 1,
-                    duration, start, now
-                })],
-            "clean" === desc.id && [
-                prevCss(prevTube.length),
-                ...[3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
-            ],
-            "react" === desc.id && reactAnimationCss({
-                tube,
-                prevTube,
-                reaction: desc.reaction,
-                duration, start, now
-            }),
-            noBorder && [
-                css`& #border { display: none; }`,
-                ...slotIndices.map(i => css`& #slot${i}_add { display: none; }`),
-            ],
-            props.className)}
-        slots={{
-            ...tubeContentSlots,
-        }} />;
+                }),
+                noBorder && [
+                    css`& #border { display: none; }`,
+                    ...slotIndices.map(i => css`& #slot${i}_add { display: none; }`),
+                ],
+                props.className)}
+            slots={{
+                ...tubeContentSlots,
+            }} />
+        <svg className={cx(
+            tubeContentGradientsCss,
+            css`& {
+                position: absolute; 
+                height: 0;
+            }`,
+        )}>
+            <defs>
+                {slotIndices.map(i => <>
+                    <SlotGradients svgIdPrefix={svgIdPrefix} i={i} prev />
+                    <SlotGradients svgIdPrefix={svgIdPrefix} i={i} />
+                </>)}
+            </defs>
+        </svg>
+    </>;
 }

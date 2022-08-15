@@ -35,6 +35,7 @@ function Tube({ i, ...props }: {
         style={props.style}
     >
         <TubeSvg
+            svgIdPrefix={`SecondaryTube${i}`}
             noBorder
             className={cx(
             )}

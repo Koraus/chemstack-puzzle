@@ -26,6 +26,7 @@ export function CraftingTube({ style }: {
         position: relative;
     }`)} style={style}>
         <TubeSvg
+            svgIdPrefix="CraftingTube"
             className={cx(
                 craftingState.id === "craftingAct"
                 && craftingState.diffCustom.action === "addTube"
