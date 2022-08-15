@@ -50,12 +50,18 @@ export function CraftingTube({ style }: {
                         } 
                     `,
                 craftingState.id === 'craftingGiveaway'
+                && craftingState.diffCustom === 0
                 && css`
                     & {
                         transform-origin: bottom;
                         animation: ${keyframes`
-                        0% { transform: translateY(0); opacity: 1; }
-                        100% {transform: translateY(-20%);     opacity: 0;}
+                        0%, 3 { transform: translateY(0); }
+                        10% { transform: translateY(-12%); }
+                        15%, 58% { transform: translateY(-10%); opacity: 1; }
+                        60% { transform: translateY(-8%); }
+                        62% { transform: translateY(-10%); }
+                        100% { transform: translateY(-25%); opacity: 0; }
+
                         `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                         } 
                     `,
