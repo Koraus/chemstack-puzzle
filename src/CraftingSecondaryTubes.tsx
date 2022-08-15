@@ -172,24 +172,23 @@ export function CraftingSecondaryTubes({
                             35% { transform: translate3d(${dx}px, 0, ${dz}px); }
                             100% { transform: translate3d(${prevDx}px, 0, ${prevDz}px); }
                                 `} ${duration}ms ${start - now}ms both linear;
-                            } 
-                        `,
+                        } 
+                    `,
                     craftingState.id === 'craftingGiveaway'
                     && i + 1 === craftingState.diffCustom   
                     && css`
                         & {
                             transform-origin: bottom;
                             animation: ${keyframes`
-                            0%, 3 { transform: translateY(0); }
-                            10% { transform: translateY(-12%); }
-                            15%, 58% { transform: translateY(-10%); opacity: 1; }
-                            60% { transform: translateY(-8%); }
-                            62% { transform: translateY(-10%); }
-                            100% { transform: translateY(-25%); opacity: 0; }
-        
+                                0%, 3 { transform: translateY(0); }
+                                10% { transform: translateY(-6%); }
+                                15%, 58% { transform: translateY(-5%); opacity: 1; }
+                                60% { transform: translateY(-4%); }
+                                62% { transform: translateY(-5%); }
+                                100% { transform: translateY(-25%); opacity: 0; }
                             `} ${duration}ms ${start - now}ms both linear;
-                                } 
-                            `,
+                        } 
+                    `,
                 )}
             />;
         })}

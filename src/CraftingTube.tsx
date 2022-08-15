@@ -56,13 +56,12 @@ export function CraftingTube({ style }: {
                     & {
                         transform-origin: bottom;
                         animation: ${keyframes`
-                        0%, 3 { transform: translateY(0); }
-                        10% { transform: translateY(-12%); }
-                        15%, 58% { transform: translateY(-10%); opacity: 1; }
-                        60% { transform: translateY(-8%); }
-                        62% { transform: translateY(-10%); }
-                        100% { transform: translateY(-25%); opacity: 0; }
-
+                            0%, 3 { transform: translateY(0); }
+                            10% { transform: translateY(-6%); }
+                            15%, 58% { transform: translateY(-5%); opacity: 1; }
+                            60% { transform: translateY(-4%); }
+                            62% { transform: translateY(-5%); }
+                            100% { transform: translateY(-25%); opacity: 0; }
                         `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                         } 
                     `,
