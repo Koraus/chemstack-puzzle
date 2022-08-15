@@ -51,7 +51,12 @@ const svgrTemplate = (variables, { tpl }) => {
 
 export default defineConfig({
     plugins: [
-        preact({ devtoolsInProd: true }),
+        preact({ 
+            devtoolsInProd: true,
+            babel: {
+                plugins: ["@emotion/babel-plugin"],
+            },
+        }),
         BuildInfo(),
         svgr({
             svgrOptions: {
