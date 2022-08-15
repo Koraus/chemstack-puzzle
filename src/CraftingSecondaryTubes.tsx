@@ -47,7 +47,7 @@ function Tube({ i, ...props }: {
                 desc: (() => {
                     if (craftingState.id === "craftingAct") {
                         switch (craftingState.diffCustom.action) {
-                            case "trashTube": 
+                            case "trashTube":
                                 return { id: "prev" };
                             case "pourFromMainIntoSecondary":
                                 if (i === 0) {
@@ -64,6 +64,9 @@ function Tube({ i, ...props }: {
                     }
                     if (craftingState.id === "craftingCleanup") {
                         return { id: "clean" };
+                    }
+                    if (craftingState.id === "craftingGiveaway") {
+                        return { id: "prev" };
                     }
                     return { id: "idle" };
                 })(),
@@ -161,6 +164,32 @@ export function CraftingSecondaryTubes({
                             100% { transform: translate3d(${prevDx}px, 0, ${prevDz}px); }
                         `} ${duration}ms ${start - now}ms both linear;
                     }`,
+                    craftingState.id === 'craftingGiveaway'
+                    && css`
+                        & {
+                            transform-origin: bottom;
+                            animation: ${keyframes`
+                            35% { transform: translate3d(${dx}px, 0, ${dz}px); }
+                            100% { transform: translate3d(${prevDx}px, 0, ${prevDz}px); }
+                                `} ${duration}ms ${start - now}ms both linear;
+                            } 
+                        `,
+                    craftingState.id === 'craftingGiveaway'
+                    && i + 1 === craftingState.diffCustom   
+                    && css`
+                        & {
+                            transform-origin: bottom;
+                            animation: ${keyframes`
+                            0%, 3 { transform: translateY(0); }
+                            10% { transform: translateY(-12%); }
+                            15%, 58% { transform: translateY(-10%); opacity: 1; }
+                            60% { transform: translateY(-8%); }
+                            62% { transform: translateY(-10%); }
+                            100% { transform: translateY(-25%); opacity: 0; }
+        
+                            `} ${duration}ms ${start - now}ms both linear;
+                                } 
+                            `,
                 )}
             />;
         })}

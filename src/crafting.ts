@@ -148,7 +148,7 @@ export function craftingGiveaway(
         prevState: state,
         state: update(state, diff),
         // start: action.time,
-        duration: tubeToGiveAwayIndex >= 0 ? 400 : 0,
+        duration: tubeToGiveAwayIndex >= 0 ? 1200 : 0,
     };
 }
 
