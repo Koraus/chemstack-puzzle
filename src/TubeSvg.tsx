@@ -4,6 +4,7 @@ import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
 import { ReactComponent as TubeSvgRaw } from "./tube.svg";
 import { StateTransition } from "./StateTransition";
+import { memo } from "preact/compat";
 
 const secondaryColor = (hexColor: string) => {
     const { h, s, l } = rgbToHsl(hexColorToRgb(hexColor));
@@ -219,31 +220,13 @@ function reactAnimationCss({
     ]
 }
 
-
-export function TubeSvg({
-    tubeTransition: {
-        prevState: prevTube,
-        state: tube,
-        desc,
-        duration,
-        start,
-    },
-    now,
-    noBorder,
-    svgIdPrefix,
-    ...props
-}: {
-    tubeTransition: StateTransition<
-        SubstanceId[],
-        { id: "idle" | "prev" | "pourDown" | "pourUp" | "clean" }
-        | { id: "react", reaction: Reaction }
-    >;
-    now: number;
-    noBorder?: boolean;
+function TubeSvgRawWithContent({ tube, prevTube, svgIdPrefix, noAdd }: {
+    tube: SubstanceId[];
+    prevTube: SubstanceId[];
     svgIdPrefix: string;
-    className?: string;
-    style?: JSX.CSSProperties;
+    noAdd: boolean;
 }) {
+    console.log("inside TubeSvgRawWithContent", svgIdPrefix);
     const tubeContentGradientsCss = slotIndices.map(i => {
         const prevColor = substanceColors[prevTube[i]] ?? "#00000000";
         const color = substanceColors[tube[i]] ?? "#00000000";
@@ -298,50 +281,23 @@ export function TubeSvg({
 
     return <>
         <TubeSvgRaw
-            {...props}
             className={cx(
                 slotTransformOriginsCss,
                 textCss,
                 transparentTopCompansationCss,
                 tubeContentCss,
-                "idle" === desc.id && idleCss(tube.length),
-                "prev" === desc.id && prevCss(prevTube.length),
-                "pourDown" === desc.id && [
-                    idleCss(tube.length),
-                    pourDownAnimationCss({
-                        i: tube.length - 1,
-                        duration, start, now
-                    })],
-                "pourUp" === desc.id && [
-                    prevCss(prevTube.length),
-                    pourUpAnimationCss({
-                        i: prevTube.length - 1,
-                        duration, start, now
-                    })],
-                "clean" === desc.id && [
-                    prevCss(prevTube.length),
-                    ...[3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
-                ],
-                "react" === desc.id && reactAnimationCss({
-                    tube,
-                    prevTube,
-                    reaction: desc.reaction,
-                    duration, start, now
-                }),
-                noBorder && [
-                    css`& #border { display: none; }`,
-                    ...slotIndices.map(i => css`& #slot${i}_add { display: none; }`),
-                ],
-                props.className)}
+                noAdd && slotIndices.map(i => css`& #slot${i}_add { display: none; }`),
+                
+            )}
             slots={{
                 ...tubeContentSlots,
             }} />
         <svg className={cx(
             tubeContentGradientsCss,
             css`& {
-                position: absolute; 
-                height: 0;
-            }`,
+            position: absolute; 
+            height: 0;
+        }`,
         )}>
             <defs>
                 {slotIndices.map(i => <>
@@ -350,5 +306,69 @@ export function TubeSvg({
                 </>)}
             </defs>
         </svg>
-    </>;
+    </>
+}
+
+const MemoedTubeSvgRawWithContent = memo(TubeSvgRawWithContent);
+
+
+export function TubeSvg({
+    tubeTransition: {
+        prevState: prevTube,
+        state: tube,
+        desc,
+        duration,
+        start,
+    },
+    now,
+    noBorder,
+    svgIdPrefix,
+    ...props
+}: {
+    tubeTransition: StateTransition<
+        SubstanceId[],
+        { id: "idle" | "prev" | "pourDown" | "pourUp" | "clean" }
+        | { id: "react", reaction: Reaction }
+    >;
+    now: number;
+    noBorder?: boolean;
+    svgIdPrefix: string;
+    className?: string;
+    style?: JSX.CSSProperties;
+}) {
+    return <div {...props}
+        className={cx(
+            "idle" === desc.id && idleCss(tube.length),
+            "prev" === desc.id && prevCss(prevTube.length),
+            "pourDown" === desc.id && [
+                idleCss(tube.length),
+                pourDownAnimationCss({
+                    i: tube.length - 1,
+                    duration, start, now
+                })],
+            "pourUp" === desc.id && [
+                prevCss(prevTube.length),
+                pourUpAnimationCss({
+                    i: prevTube.length - 1,
+                    duration, start, now
+                })],
+            "clean" === desc.id && [
+                prevCss(prevTube.length),
+                ...[3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
+            ],
+            "react" === desc.id && reactAnimationCss({
+                tube,
+                prevTube,
+                reaction: desc.reaction,
+                duration, start, now
+            }),
+            props.className)}
+    >
+        <MemoedTubeSvgRawWithContent 
+            prevTube={prevTube}
+            tube={tube}
+            svgIdPrefix={svgIdPrefix}
+            noAdd={noBorder ?? false}
+         />
+    </div>;
 }
