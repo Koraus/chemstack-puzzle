@@ -50,7 +50,7 @@ export function GlobalBackground({
                     inset: 0;
                     transform-origin: center;
                     background: linear-gradient(black, #000e22 34%, #142a4a 55%, #e5f1f4);
-                    transform: scale(26) translate3d(0, 0, -2000px);
+                    transform: scale(40, 26) translate3d(0, 0, -2000px);
                 }`)}>
                 </div>
                 <div className={cx(css`& {
