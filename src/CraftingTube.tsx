@@ -76,8 +76,7 @@ export function CraftingTube({ style }: {
                     if (craftingState.id === "craftingAct") {
                         switch (craftingState.diffCustom.action) {
                             case "addIngredient": return { id: "pourDown" };
-                            case "addTube": return { id: "idle" };
-                            case "trashTube": return { id: "prev" };
+                            case "addTube": return { id: "next" };
                             case "pourFromMainIntoSecondary": return { id: "pourUp" };
                             case "pourFromSecondaryIntoMain": return { id: "pourDown" };
                         }
@@ -91,7 +90,7 @@ export function CraftingTube({ style }: {
                     if (craftingState.id === "craftingGiveaway") {
                         return { id: "prev" };
                     }
-                    return { id: "idle" };
+                    return { id: "prev" };
                 })(),
             }}
             now={time}

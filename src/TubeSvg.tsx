@@ -82,7 +82,7 @@ export function getBBoxCoords(
 
 const transparentTopCompansationCss = css`& { 
     margin-top: -562%; 
-    margin-bottom: -29%;
+    margin-bottom: -41%;
     margin-left: -50%;
     margin-right: -50%;
 }`;
@@ -353,9 +353,9 @@ export function TubeSvg({
                     i: prevTube.length - 1,
                     duration, start, now
                 })],
-            "clean" === desc.id && [
-                ...[3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
-            ],
+            "clean" === desc.id
+            && prevTube.length !== tube.length
+            && [3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
             "react" === desc.id && reactAnimationCss({
                 tube,
                 prevTube,
