@@ -35,7 +35,8 @@ export function LevelListHeaderButton({
             top: 35,
             height: 380,
             backgroundColor: "#344763",
-            zIndex: 10,
+            zIndex: 100,
+            transform: "translate3d(0,0,100px)",
             borderRight: "2px solid #ffffff50",
         }} />}
     </div>;

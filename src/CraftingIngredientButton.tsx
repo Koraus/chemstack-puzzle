@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css, cx } from "@emotion/css";
 import { useRecoilValue } from 'recoil';
 import { SubstanceId } from "./crafting";
 import { substanceColors } from "./substanceColors";
@@ -44,7 +44,9 @@ export function CraftingIngredientButton({ sid, mirrored = false }: {
                 fill: ${substanceColors[sid]}
             }
         `}>
-            <IngredintButtonWave />
+            <div className={cx(css`& { transform: translate3d(0, 0, 0) }`)}>
+                <IngredintButtonWave />
+            </div>
         </div>
         <div style={{
             color: "#ffffffff",

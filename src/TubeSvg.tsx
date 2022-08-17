@@ -114,20 +114,19 @@ function pourDownAnimationCss({ i, now, start, duration }: {
     return css`
         & #slot${i}_content {
             animation: ${keyframes`
-                0% { transform: translate(0, -400px); }
-                50% { transform: translate(0, 10px); }
+                0%, 30% { transform: translate(0, -400px); }
+                60% { transform: translate(0, 10px); }
                 100% { transform: translate(0, 0); }
 
-                0% { opacity: 0; }
-                15%, 100% { opacity: 1; }
+                0%, 30% { opacity: 0; }
+                45%, 100% { opacity: 1; }
             `} ${duration}ms ${start - now}ms linear both;
         }
         & #slot${i}_content_ {
             animation: ${keyframes`
-                0% { transform: scale(1, 1); }
-                50% { transform: scale(1, 1); }
-                60% { transform: scale(1.1, 0.8); }
-                78% { transform: scale(0.8, 1.3); }
+                0%, 60% { transform: scale(1, 1); }
+                70% { transform: scale(1.1, 0.8); }
+                88% { transform: scale(0.8, 1.3); }
                 100% { transform: scale(1, 1); }
             `} ${duration}ms ${start - now}ms linear both;
         }
@@ -144,17 +143,17 @@ function pourUpAnimationCss({ i, now, start, duration }: {
         & #prev_slot${i}_content {
             animation: ${keyframes`
                 0% { transform: translate(0, 0); }
-                100% { transform: translate(0, -400px); }
+                50%, 100% { transform: translate(0, -400px); }
 
-                0%, 85% { opacity: 1; }
-                100% { opacity: 0; }
+                0%, 40% { opacity: 1; }
+                50%, 100% { opacity: 0; }
             `} ${duration}ms ${start - now}ms linear both;
         }
         & #prev_slot${i}_content_ {
             animation: ${keyframes`
                 0% { transform: scale(1, 1); }
-                20% { transform: scale(0.9, 1.05); }
-                100% { transform: scale(0.7, 1.2); }
+                10% { transform: scale(0.9, 1.05); }
+                50%, 100% { transform: scale(0.7, 1.2); }
             `} ${duration}ms ${start - now}ms linear both;
         }
     `;
@@ -165,12 +164,22 @@ function cleanAnimationCss({ i, now, start, duration }: {
     start: number,
     duration: number,
 }) {
+    const [x, y] = getBBoxCoords(bBoxes[3], [0.5, 0.6]);
     return css`
     & #prev_slot${i}_content_ {
+        transform-origin: ${x}px ${y}px;
         animation: ${keyframes`
             0% { transform: scale(1, 1); }
-            40% { transform: scale(2, 0.3); }
-            100% { transform: scale(3, 0.1); opacity: 0;}
+            25% { transform: scale(1, 1); }
+            35% { transform: scale(0.5, 1); }
+            70% { transform: scale(1.5, 0.5); }
+            100% { transform: scale(2, 0); }
+        `} ${duration}ms ${start - now}ms linear both;
+    }
+    & #prev_slot${i}_number {
+        animation: ${keyframes`
+            0%, 22% { opacity: 1; }
+            25%, 100% { opacity: 0; }
         `} ${duration}ms ${start - now}ms linear both;
     }
 `;

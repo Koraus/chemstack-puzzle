@@ -1,17 +1,14 @@
 import { useRecoilValue } from 'recoil';
 import * as flex from "./utils/flex";
 import * as _ from "lodash";
-import { CraftingAction, SubstanceId } from './crafting';
+import { CraftingAction } from './crafting';
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { CraftingTargets } from "./CraftingTargets";
 import { isWinRecoil } from "./Win";
-import { levelPresetRecoil } from "./LevelList";
 import { buttonCss } from "./buttonCss";
-import { CraftingIngredientButton } from "./CraftingIngredientButton";
 import { CraftingTube } from "./CraftingTube";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import { css, cx } from "@emotion/css";
-import { JSX } from "preact";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Close } from '@emotion-icons/material-rounded/Close';
@@ -19,49 +16,8 @@ import { craftingActionsRecoil, craftingStateInTimeRecoil, getCraftingState } fr
 import { tutorialRecoil } from './tutorialRecoil';
 import { CraftingSecondaryTubes } from './CraftingSecondaryTubes';
 import { GlobalBackground } from './GlobalBackground';
+import { CraftingIngredientPanel } from './CraftingIngredientPanel';
 
-function CraftingIngredientPanel({
-    style, className,
-}: {
-    style?: JSX.CSSProperties;
-    className?: string;
-}) {
-    const tutorial = useRecoilValue(tutorialRecoil);
-    const needHint = (sid: SubstanceId) => tutorial.some(t =>
-        t.kind === "addIngredient"
-        && t.ingredientId === sid);
-
-    const { ingredientCount } = useRecoilValue(levelPresetRecoil);
-    const ingredients = Array.from({ length: ingredientCount }, (_, i) => i);
-
-    const touchAppAnimationCss = css`& {
-        position: absolute;
-        left: 32px;
-        bottom: 10px;
-    }`;
-
-    return <div
-        className={cx(className)}
-        style={{ ...flex.rowS, ...style }}
-    >
-        <div style={{ ...flex.rowS, flex: 1 }}>
-            {ingredients
-                .filter((_, i) => !(i > 2))
-                .map(sid => <div style={{ position: "relative", }}>
-                    <CraftingIngredientButton sid={sid} />
-                    {needHint(sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
-                </div>)}
-        </div>
-        <div style={{ ...flex.rowRevS, flex: 1 }}>
-            {ingredients
-                .filter((_, i) => (i > 2))
-                .map(sid => <div style={{ position: "relative", }}>
-                    <CraftingIngredientButton sid={sid} mirrored />
-                    {needHint(sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
-                </div>)}
-        </div>
-    </div>
-}
 
 export function CraftingTable() {
     const craftingActions = useRecoilValue(craftingActionsRecoil);
