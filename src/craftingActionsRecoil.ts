@@ -1,6 +1,6 @@
 import { atom, selector } from "recoil";
 import { CraftingAction, craftingReduce, CraftingState, SubstanceId } from "./crafting";
-import { craftingTargetsRecoil } from "./CraftingTargets";
+import { craftingTargetsRecoil } from "./craftingTargetsRecoil";
 import { reactionsLibraryRecoil } from "./ReactionsLibrary";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { useRecoilValue } from "recoil";
