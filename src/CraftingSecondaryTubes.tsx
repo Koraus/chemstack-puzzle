@@ -47,8 +47,6 @@ function Tube({ i, ...props }: {
                 desc: (() => {
                     if (craftingState.id === "craftingAct") {
                         switch (craftingState.diffCustom.action) {
-                            case "trashTube":
-                                return { id: "prev" };
                             case "pourFromMainIntoSecondary":
                                 if (i === 0) {
                                     return { id: "pourDown" };
@@ -63,12 +61,11 @@ function Tube({ i, ...props }: {
                         return { id: "react", reaction };
                     }
                     if (craftingState.id === "craftingCleanup") {
-                        return { id: "clean" };
+                        if (craftingState.diffCustom.findIndex(x => x[0] === (i + 1)) >= 0) {
+                            return { id: "clean" };
+                        }
                     }
-                    if (craftingState.id === "craftingGiveaway") {
-                        return { id: "prev" };
-                    }
-                    return { id: "idle" };
+                    return { id: "prev" };
                 })(),
             }}
             now={now}
@@ -116,11 +113,6 @@ export function CraftingSecondaryTubes({
     const tubes = craftingState.state.tubes;
     const prevTubes = craftingState.prevState.tubes;
 
-    const renderTubes =
-        craftingState.id === "craftingAct" && craftingState.diffCustom.action === "trashTube"
-            ? prevTubes
-            : tubes;
-
     return <div
         {...props}
         className={cx(flex.rowRev, css`& {
@@ -130,7 +122,7 @@ export function CraftingSecondaryTubes({
             transform-style: preserve-3d;
         }`, className)}
     >
-        {renderTubes.slice(1).map((t, i) => {
+        {prevTubes.slice(1).map((t, i) => {
             const _dz = (i: number) =>
                 i === -1 ? 39 : (i === 0 ? 0 : -(Math.pow((i - 1), 0.4) * 20 + 40));
             const _dx = (i: number) =>
@@ -171,11 +163,11 @@ export function CraftingSecondaryTubes({
                             animation: ${keyframes`
                             35% { transform: translate3d(${dx}px, 0, ${dz}px); }
                             100% { transform: translate3d(${prevDx}px, 0, ${prevDz}px); }
-                                `} ${duration}ms ${start - now}ms both linear;
+                        `} ${duration}ms ${start - now}ms both linear;
                         } 
                     `,
                     craftingState.id === 'craftingGiveaway'
-                    && i + 1 === craftingState.diffCustom   
+                    && i + 1 === craftingState.diffCustom
                     && css`
                         & {
                             transform-origin: bottom;
