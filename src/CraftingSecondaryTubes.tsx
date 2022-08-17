@@ -123,66 +123,63 @@ export function CraftingSecondaryTubes({
             const _dx = (i: number) =>
                 i === -1 ? 43 : (i === 0 ? 0 : -(i * 23 - 8));
 
-            const prevDx = _dx(i - 1);
-            const prevDy = _dy(i - 1);
-            const prevDz = _dz(i - 1);
-            const dx = _dx(i);
-            const dy = _dy(i);
-            const dz = _dz(i);
+            const x = _dx(i);
+            const y = _dy(i);
+            const z = _dz(i);
+            const dx = _dx(i - 1) - x;
+            const dy = _dy(i - 1) - y;
+            const dz = _dz(i - 1) - z;
 
             const revI = arr.length - 1 - i;
 
-            return <Tube
+            return <div
                 key={revI}
-                revI={revI}
-                className={cx(
-                    css`& {
-                        position: absolute;
-                        transform: translate3d(${dx}px, 0, ${dz}px);
-                    }`,
-                    craftingState.id === 'craftingAct'
-                    && craftingState.diffCustom.action === 'addTube'
-                    && css`& {
+                className={cx(css`& {
+                    position: absolute;
+                    transform: translate3d(${x}px, ${y}px, ${z}px);
+                    transform-style: preserve-3d;
+                }`)}
+            >
+                <Tube
+                    revI={revI}
+                    className={cx(
+                        craftingState.id === 'craftingAct'
+                        && craftingState.diffCustom.action === 'addTube'
+                        && css`& {
                         animation: ${keyframes`
-                            0% { transform: translate3d(${prevDx}px, ${prevDy}px, ${prevDz}px); }
-                            100% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
-                        `} ${duration}ms ${start - now}ms both linear;
-                    }`,
-                    craftingState.id === 'craftingAct'
-                    && craftingState.diffCustom.action === 'trashTube'
-                    && css`& {
-                        animation: ${keyframes`
-                            0% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
-                            100% { transform: translate3d(${prevDx}px, ${prevDy}px, ${prevDz}px); }
-                        `} ${duration}ms ${start - now}ms both linear;
-                    }`,
-                    craftingState.id === 'craftingGiveaway'
-                    && css`
-                        & {
-                            transform-origin: bottom;
+                                0% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
+                            `} ${duration}ms ${start - now}ms both linear;
+                        }`,
+                        craftingState.id === 'craftingAct'
+                        && craftingState.diffCustom.action === 'trashTube'
+                        && css`& {
                             animation: ${keyframes`
-                            35% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
-                            100% { transform: translate3d(${prevDx}px, ${prevDy}px, ${prevDz}px); }
-                        `} ${duration}ms ${start - now}ms both linear;
-                        } 
-                    `,
-                    craftingState.id === 'craftingGiveaway'
-                    && i + 1 === craftingState.diffCustom
-                    && css`
-                        & {
-                            transform-origin: bottom;
+                                100% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
+                            `} ${duration}ms ${start - now}ms both linear;
+                        }`,
+                        craftingState.id === 'craftingGiveaway'
+                        && i >= craftingState.diffCustom
+                        && css`& {
+                            animation: ${keyframes`
+                                50% { transform: translate3d(0px, 0px, 0px); }
+                                100% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
+                            `} ${duration}ms ${start - now}ms both linear;
+                        } `,
+                        craftingState.id === 'craftingGiveaway'
+                        && i + 1 === craftingState.diffCustom
+                        && css`& {
                             animation: ${keyframes`
                                 0%, 3 { transform: translateY(0); }
-                                10% { transform: translateY(-6%); }
-                                15%, 58% { transform: translateY(-5%); opacity: 1; }
-                                60% { transform: translateY(-4%); }
-                                62% { transform: translateY(-5%); }
+                                10% { transform: translateY(-12%); }
+                                15%, 58% { transform: translateY(-10%); opacity: 1; }
+                                60% { transform: translateY(-8%); }
+                                62% { transform: translateY(-10%); }
                                 100% { transform: translateY(-25%); opacity: 0; }
                             `} ${duration}ms ${start - now}ms both linear;
-                        } 
-                    `,
-                )}
-            />;
+                        }`,
+                    )}
+                />
+            </div>;
         })}
     </div>;
 }
