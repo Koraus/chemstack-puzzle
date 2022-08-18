@@ -18,7 +18,9 @@ export function App() {
     const landscapeWidth = 922;
     const portraitWidth = 414;
 
-    const isLandscape = useMatchMedia(`(orientation: landscape)`);
+    const isLandscape = useMatchMedia(`(orientation: landscape)`
+        + ` and (min-width: ${landscapeWidth}px)`
+        + ` and (min-height: 500px)`);
 
     const main = useMemo(() => <>
         <ReactionsLibrary />
@@ -28,9 +30,6 @@ export function App() {
     return <div className={cx(css`& {
         font-family: 'Bahnschrift', sans-serif;
         display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
         position: fixed;
         inset: 0;
         overflow: auto;
@@ -39,6 +38,7 @@ export function App() {
             flex-grow: 1;
             max-width: ${isLandscape ? landscapeWidth : portraitWidth}px;
             position: relative;
+            margin: auto;
         }`)}>
             <WinFireworks className={cx(css`& {
                 overflow: hidden;
