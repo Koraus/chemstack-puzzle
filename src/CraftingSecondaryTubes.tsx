@@ -85,7 +85,7 @@ function Tube({ revI, ...props }: {
                 left: "47%",
                 width: "100%",
                 bottom: "-5px",
-                background: "#00000040",
+                background: "#00000030",
                 borderBottomLeftRadius: "999px",
                 borderBottomRightRadius: "999px",
             }}></div>

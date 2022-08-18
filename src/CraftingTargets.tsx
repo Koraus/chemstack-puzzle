@@ -96,7 +96,7 @@ function Tube({ revI, ...props }: {
                 right: "47%",
                 width: "100%",
                 bottom: "-5px",
-                background: "#00000040",
+                background: "#00000030",
                 borderBottomLeftRadius: "999px",
                 borderBottomRightRadius: "999px",
             }}></div>
@@ -232,7 +232,7 @@ export function CraftingTargets({ style, className }: {
                 left: "-47%",
                 right: "47%",
                 bottom: "-5px",
-                background: "#00000060",
+                background: "#00000030",
                 borderBottomLeftRadius: "999px",
                 borderBottomRightRadius: "999px",
             }}></div>}
