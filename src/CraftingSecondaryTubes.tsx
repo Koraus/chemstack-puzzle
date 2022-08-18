@@ -1,9 +1,10 @@
 import * as flex from "./utils/flex";
 import { css, cx, keyframes } from "@emotion/css";
 import { JSX } from "preact";
-import { useCraftingState } from "./craftingActionsRecoil";
+import { craftingStateInTimeRecoil, useCraftingState } from "./craftingActionsRecoil";
 import { PourFromSecondaryIntoMainButton } from "./PourFromSecondaryIntoMainButton";
 import { TubeSvg } from "./TubeSvg";
+import { useRecoilValue } from "recoil";
 
 
 function Tube({ revI, ...props }: {
@@ -11,6 +12,9 @@ function Tube({ revI, ...props }: {
     className?: string;
     style?: JSX.CSSProperties;
 }) {
+    const finalState = useRecoilValue(craftingStateInTimeRecoil).state;
+    const finalTube = [...finalState.tubes].reverse()[revI];
+    
     const craftingStateInTime = useCraftingState();
     const now = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
@@ -60,12 +64,12 @@ function Tube({ revI, ...props }: {
             now={now}
         />
         {isSecondaryAvailable
-            && i == 1 && tube.length > 0
+            && i == 1 && finalTube.length > 0
             && <PourFromSecondaryIntoMainButton
                 style={{
                     position: "absolute",
                     right: "-10px",
-                    top: ["64%", "42%", "19%"][tube.length - 1],
+                    top: ["70%", "44%", "19%"][finalTube.length - 1],
                 }}
             />}
         {i > 1 && <div className={cx(css`& {
