@@ -48,7 +48,10 @@ export function App() {
             }`)} />
 
             {isLandscape && <div className={cx(flex.row)}>
-                <div className={cx(flex.col)}>
+                <div className={cx(
+                    css`& { width: ${(1 - portraitWidth / landscapeWidth) / 2 * 100}%; }`,
+                    flex.col,
+                )}>
                     <div className={cx(flex.row, css`& { padding: 14px 0 10px 0; }`)} >
                         <LevelListHeaderButton className={css`& { flex: 1; }`} />
                         <HeaderTitle isHorizontal className={css`& { flex-grow: 999; }`} />
@@ -60,7 +63,10 @@ export function App() {
                     flex.col,
                 )}>{main}</div>
 
-                <div className={cx(flex.col)}>
+                <div className={cx(
+                    css`& { width: ${(1 - portraitWidth / landscapeWidth) / 2 * 100}%; }`,
+                    flex.col,
+                )}>
                     <div className={cx(flex.rowRev, css`& { padding: 14px 0 10px 0; }`)} >
                         <ResetLevelHeaderButton className={css`& { flex: 1; }`} />
                         <div className={cx(css`& { flex-grow: 999; }`)}></div>
