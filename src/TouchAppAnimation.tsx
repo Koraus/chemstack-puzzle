@@ -1,6 +1,7 @@
 import { TouchApp } from '@emotion-icons/material-rounded/TouchApp';
 import { JSX } from "preact";
 import { css, cx, keyframes } from '@emotion/css';
+import { useEffect, useState } from "preact/hooks";
 
 
 export function TouchAppAnimation({
@@ -9,6 +10,9 @@ export function TouchAppAnimation({
     style?: JSX.CSSProperties;
     className?: string;
 }) {
+    const [now, setNow] = useState(0);
+    useEffect(() => setNow(performance.now()), []);
+
     return <div
         className={cx(css`
             & {
@@ -30,24 +34,12 @@ export function TouchAppAnimation({
         }}>
             <TouchApp className={css`& {
                 transform-origin: 48% 23%;
-                animation-name: ${keyframes`
-                    0% {
-                        transform: scale(1);
-                    }
-                    10% {
-                        transform: scale(0.6);
-                    }
-                    30% {
-                        transform: scale(1);
-                    }
-                    100% {
-                        transform: scale(1);
-                    }
-                `};
-                animation-duration: 1300ms;
-                animation-fill-mode: both;
-                animation-iteration-count: infinite;
-                animation-timing-function: linear;
+                animation: ${keyframes`
+                    0% { transform: scale(1); }
+                    10% { transform: scale(0.6); }
+                    30% { transform: scale(1); }
+                    100% { transform: scale(1); }
+                `} 1300ms ${-now}ms both infinite linear;
             }`} />
         </div>
     </div>;

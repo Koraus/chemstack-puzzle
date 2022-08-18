@@ -114,29 +114,18 @@ export function CraftingTargets({ style, className }: {
     const { start, duration } = craftingState;
 
     const tutorial = useRecoilValue(tutorialRecoil);
-    const hintNext = tutorial.some(t => t.kind === "next");
+    const hintNext = tutorial.some(t => t.kind === "next") 
+        && craftingState.id === "craftingIdle";
 
     const tubes = craftingState.state.targets;
     const prevTubes = craftingState.prevState.targets;
 
     const stubTubes = Array.from({ length: Math.max(tubes.length, prevTubes.length) });
 
-    // todo bring hints back!!!
-    // function TubeAt({ i }: { i: number }) {
-    //     const isHinted = (slotIndex: number) =>
-    //         i === 0
-    //         && tutorial.some(t =>
-    //             t.kind === "target"
-    //             && t.slotIndex === slotIndex);
-
-    //             <TubeSlot
-    //                 isHinted={isHinted(0)}
-    //                 isBottom />
-    //             <TubeSlot
-    //                 isHinted={isHinted(1)}
-    //             <TubeSlot
-    //                 isHinted={isHinted(2)}
-    // }
+    const isHinted = (slotIndex: number) =>
+        tutorial.some(t =>
+            t.kind === "target"
+            && t.slotIndex === slotIndex);
 
     const _dz = (i: number) =>
         i === -1 ? 41 : (i === 0 ? 0 : -(Math.pow((i - 1), 0.4) * 20 + 40));
@@ -241,5 +230,56 @@ export function CraftingTargets({ style, className }: {
             position: absolute;
             transform: translate(20px, 120px);
         }`} />}
+        {isHinted(0) && <div className={css`& {
+            z-index: 1;
+            position: absolute;
+            bottom: 12px;
+            left: 7px;
+            width: 20px;
+            height: 37px;
+            border: 2px solid #ffffffa0;
+            border-radius: 3px;
+            animation: ${keyframes`
+                0% { transform: scale(1, 1); }
+                10% { transform: scale(1.5, 1.5); }
+                30% { transform: scale(1, 1); }
+                100% { transform: scale(1, 1); }
+                # ${now}
+            `} 1300ms ${-now}ms infinite both linear;
+        }`}></div>}
+        {isHinted(1) && <div className={css`& {
+            z-index: 1;
+            position: absolute;
+            bottom: 56px;
+            left: 7px;
+            width: 20px;
+            height: 37px;
+            border: 2px solid #ffffffa0;
+            border-radius: 3px;
+            animation: ${keyframes`
+                0% { transform: scale(1, 1); }
+                10% { transform: scale(1.5, 1.5); }
+                30% { transform: scale(1, 1); }
+                100% { transform: scale(1, 1); }
+                # ${now}
+            `} 1300ms ${-now}ms infinite both linear;
+        }`}></div>}
+        {isHinted(2) && <div className={css`& {
+            z-index: 1;
+            position: absolute;
+            bottom: 101px;
+            left: 7px;
+            width: 20px;
+            height: 37px;
+            border: 2px solid #ffffffa0;
+            border-radius: 3px;
+            animation: ${keyframes`
+                0% { transform: scale(1, 1); }
+                10% { transform: scale(1.5, 1.5); }
+                30% { transform: scale(1, 1); }
+                100% { transform: scale(1, 1); }
+                # ${now}
+            `} 1300ms ${-now}ms infinite both linear;
+        }`}></div>}
     </div>;
 }

@@ -5,7 +5,7 @@ import { substanceColors } from './substanceColors';
 import { Reaction } from './crafting';
 import { KeyboardArrowUp } from '@emotion-icons/material-rounded/KeyboardArrowUp';
 import { generateReactionsLibrary } from './generateReactionsLibrary';
-import { getCraftingState, craftingStateInTimeRecoil } from './craftingActionsRecoil';
+import { getCraftingState, craftingStateInTimeRecoil, useCraftingState } from './craftingActionsRecoil';
 import { tutorialRecoil } from './tutorialRecoil';
 import { css, cx, keyframes } from '@emotion/css';
 type CSSProperties = import("preact").JSX.CSSProperties;
@@ -22,12 +22,13 @@ export const reactionsLibraryRecoil = selector({
 })
 
 export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
-    const { tubes } =
-        getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
+    const craftingStateInTime = useCraftingState();
+    const { tubes } = craftingStateInTime.currentState.state;
     const mainTube = tubes[0];
     const currentSubstance = mainTube[mainTube.length - 1];
     const reactions = useRecoilValue(reactionsLibraryRecoil);
     const tutorial = useRecoilValue(tutorialRecoil);
+    const now = craftingStateInTime.currentTime;
 
     function IngredientSlot({ sid }: { sid?: number }) {
         return <div className={cx(css`& {
@@ -98,7 +99,7 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                     10% { transform: scale(0.8, 1.2); }
                     30% { transform: scale(1, 1); }
                     100% { transform: scale(1, 1); }
-                `} 1300ms infinite both linear;
+                `} 1300ms ${-now}ms infinite both linear;
             }`}> </div>}
         </div>;
     }
