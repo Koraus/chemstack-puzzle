@@ -1,11 +1,11 @@
 import { atom, selector } from "recoil";
-import { CraftingAction, craftingReduce, SubstanceId } from "./crafting";
-import { craftingTargetsRecoil } from "./CraftingTargets";
+import { CraftingAction, craftingReduce, CraftingState, SubstanceId } from "./crafting";
+import { craftingTargetsRecoil } from "./craftingTargetsRecoil";
 import { reactionsLibraryRecoil } from "./ReactionsLibrary";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { useRecoilValue } from "recoil";
 import { useEffect, useState } from "preact/hooks";
-
+import { CompositeKeyWeekMap } from "./utils/CompositeKeyWeekMap";
 
 export const craftingActionsRecoil = atom({
     key: "craftingActions",
@@ -17,20 +17,31 @@ export const useCraftingAct = () => {
     return (action: CraftingAction) => upd({ $push: [action] });
 }
 
-type CraftingStateInTime = 
+type CraftingStateInTime =
     ReturnType<typeof craftingReduce>
     | { state: Parameters<typeof craftingReduce>[2]; };
 
+const craftingStateInTimeCache = new CompositeKeyWeekMap<CraftingState>();
 export const craftingStateInTimeRecoil = selector({
     key: "appliedCraftingActions",
     get: ({ get }) => {
+        const cache = craftingStateInTimeCache;
+
         const actions = get(craftingActionsRecoil);
         const reactions = get(reactionsLibraryRecoil);
         const targets = get(craftingTargetsRecoil);
 
-        return actions.reduce(
-            (prev, action) => craftingReduce({ reactions }, action, prev.state), 
-            { state: { tubes: [[]], targets } } as CraftingStateInTime);
+        const prevAction = actions[actions.length - 2];
+        const action = actions[actions.length - 1];
+
+        const cachedState = prevAction && cache.get([prevAction, targets, reactions]);
+        const s =
+            (cachedState && craftingReduce({ reactions }, action, cachedState))
+            ?? actions.reduce(
+                (prev, action) => craftingReduce({ reactions }, action, prev.state),
+                { state: { tubes: [[]], targets } } as CraftingStateInTime);
+        action && cache.set([action, targets, reactions], s.state);
+        return s;
     }
 });
 

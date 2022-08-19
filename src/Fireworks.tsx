@@ -12,10 +12,9 @@ const particlesFadeout = Array.from(
     () => `0 0 #fff`).join(",");
 
 const gravity = keyframes`
-    to {
-        transform: translateY(200px);
-        opacity: 0;
-    }
+    0% { transform: translateY(0px); opacity: 0; }
+    2% { transform: translateY(0px); opacity: 1; }
+    100% { transform: translateY(200px); opacity: 0; }
 `;
 
 function randNormal(): number {

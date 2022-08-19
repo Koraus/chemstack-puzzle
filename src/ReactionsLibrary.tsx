@@ -5,7 +5,7 @@ import { substanceColors } from './substanceColors';
 import { Reaction } from './crafting';
 import { KeyboardArrowUp } from '@emotion-icons/material-rounded/KeyboardArrowUp';
 import { generateReactionsLibrary } from './generateReactionsLibrary';
-import { getCraftingState, craftingStateInTimeRecoil } from './craftingActionsRecoil';
+import { getCraftingState, craftingStateInTimeRecoil, useCraftingState } from './craftingActionsRecoil';
 import { tutorialRecoil } from './tutorialRecoil';
 import { css, cx, keyframes } from '@emotion/css';
 type CSSProperties = import("preact").JSX.CSSProperties;
@@ -22,25 +22,26 @@ export const reactionsLibraryRecoil = selector({
 })
 
 export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
-    const { tubes } = 
-        getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
+    const craftingStateInTime = useCraftingState();
+    const { tubes } = craftingStateInTime.currentState.state;
     const mainTube = tubes[0];
     const currentSubstance = mainTube[mainTube.length - 1];
     const reactions = useRecoilValue(reactionsLibraryRecoil);
     const tutorial = useRecoilValue(tutorialRecoil);
+    const now = craftingStateInTime.currentTime;
 
     function IngredientSlot({ sid }: { sid?: number }) {
         return <div className={cx(css`& {
             background-color: ${sid === undefined ? "#ffffff08" : substanceColors[sid]};
         }`)} style={{
-            color: sid === undefined ? "#ffffff10" : "#ffffffff",
-            borderRadius: "3px",
-            margin: "1px",
-            width: "18px",
-            height: "18px",
-            fontSize: "14px",
-            lineHeight: "20px",
-        }}>{sid ?? <>&nbsp;</>}</div>
+                color: sid === undefined ? "#ffffff10" : "#ffffffff",
+                borderRadius: "3px",
+                margin: "1px",
+                width: "18px",
+                height: "18px",
+                fontSize: "14px",
+                lineHeight: "20px",
+            }}>{sid ?? <>&nbsp;</>}</div>
     }
 
     function Reaction({ reaction }: { reaction: Reaction }) {
@@ -77,55 +78,29 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                 <IngredientSlot sid={reaction.reagents[0]} />
             </div>
             {isApplicable && <div style={{
-                zIndex: 1,
                 position: "absolute",
-                top: "1px",
-                left: "1px",
-                bottom: "1px",
-                right: "1px",
+                inset: "1px",
                 border: "2px solid white",
                 borderRadius: "3px",
             }}></div>}
-            {isPending && <div
-                style={{
-                    zIndex: 1,
-                    position: "absolute",
-                    top: "1px",
-                    left: "1px",
-                    bottom: "1px",
-                    right: "1px",
-                    border: "2px solid yellow",
-                    borderRadius: "3px",
-                }}> </div>}
-            {isHinted && <div
-                className={css`& {
-                    z-index: 1;
-                    position: absolute;
-                    top: 1px;
-                    left: 1px;
-                    bottom: 1px;
-                    right: 1px;
-                    border: 2px solid #ffffffa0;
-                    border-radius: 3px;
-                    animation-name: ${keyframes`
-                        0% {
-                            transform: scale(1, 1);
-                        }
-                        10% {
-                            transform: scale(0.8, 1.2);
-                        }
-                        30% {
-                            transform: scale(1, 1);
-                        }
-                        100% {
-                            transform: scale(1, 1);
-                        }
-                    `};
-                    animation-duration: 1300ms;
-                    animation-fill-mode: both;
-                    animation-iteration-count: infinite;
-                    animation-timing-function: linear;
-                }`}> </div>}
+            {isPending && <div style={{
+                inset: "1px",
+                position: "absolute",
+                border: "2px solid yellow",
+                borderRadius: "3px",
+            }}> </div>}
+            {isHinted && <div className={css`& {
+                position: absolute;
+                inset: 1px;
+                border: 2px solid #ffffffa0;
+                border-radius: 3px;
+                animation: ${keyframes`
+                    0% { transform: scale(1, 1); }
+                    10% { transform: scale(0.8, 1.2); }
+                    30% { transform: scale(1, 1); }
+                    100% { transform: scale(1, 1); }
+                `} 1300ms ${-now}ms infinite both linear;
+            }`}> </div>}
         </div>;
     }
 

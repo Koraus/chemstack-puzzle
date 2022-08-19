@@ -3,8 +3,9 @@ import { JSX } from "preact";
 import { cx } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
-import { craftingActionsRecoil } from "./craftingActionsRecoil";
+import { craftingActionsRecoil, craftingStateInTimeRecoil } from "./craftingActionsRecoil";
 import { ArrowRight } from "@emotion-icons/material-rounded/ArrowRight";
+import { useRecoilValue } from "recoil";
 
 
 export function PourFromSecondaryIntoMainButton({ style, className }: {
@@ -14,7 +15,10 @@ export function PourFromSecondaryIntoMainButton({ style, className }: {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
+    const isWin = useRecoilValue(craftingStateInTimeRecoil).state.targets.length === 0;
+
     return <button
+    disabled={isWin}
         className={cx(buttonCss, className)}
         style={{
             display: "flex",

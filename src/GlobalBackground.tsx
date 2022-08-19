@@ -38,7 +38,7 @@ export function GlobalBackground({
         }`)} ref={refParent}>
             <div className={cx(css`& {
                 perspective: 400px;
-                perspective-origin: center 120px;
+                perspective-origin: center 170px;
                 transform-style: preserve-3d;
                 position: fixed;
                 width: 33vmax;
@@ -49,8 +49,8 @@ export function GlobalBackground({
                     position: absolute;
                     inset: 0;
                     transform-origin: center;
-                    background: linear-gradient(black, #000e22 34%, #142a4a 55%);
-                    transform: scale(26) translate3d(0, 0, -2000px);
+                    background: linear-gradient(black, #000e22 34%, #142a4a 55%, #e5f1f4);
+                    transform: scale(40, 26) translate3d(0, 0, -2000px);
                 }`)}>
                 </div>
                 <div className={cx(css`& {
@@ -61,14 +61,14 @@ export function GlobalBackground({
                 }`)}>
                     <div className={cx(css`& {
                         background: radial-gradient(closest-side, 
-                            #ffffffff 1%, 
-                            #ffffffe0 2%, 
-                            #ffffffc0 4%, 
-                            #ffffffa0 8%, 
-                            #ffffff80 16%, 
-                            #ffffff40 32%, 
-                            #ffffff20 64%, 
-                            #ffffff00);
+                            #add5def0 1%, 
+                            #add5dee0 2%, 
+                            #add5dec0 4%, 
+                            #add5dea0 8%, 
+                            #add5de80 16%, 
+                            #add5de40 32%, 
+                            #add5de20 64%, 
+                            #add5de00);
                         transform-origin: center;
                         transform: scale(4);
                         width: 100%;

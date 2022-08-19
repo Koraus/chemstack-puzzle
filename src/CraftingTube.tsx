@@ -1,21 +1,23 @@
 import { craftingGiveaway, Reaction, SubstanceId } from "./crafting";
 import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
-import { useCraftingState } from "./craftingActionsRecoil";
+import { craftingStateInTimeRecoil, useCraftingState } from "./craftingActionsRecoil";
 import { PourFromMainIntoSecondaryButton } from "./PourFromMainIntoSecondaryButton";
 import { TubeSvg } from "./TubeSvg";
+import { useRecoilValue } from "recoil";
 
 
 export function CraftingTube({ style }: {
     style?: JSX.CSSProperties;
 }) {
+    const finalState = useRecoilValue(craftingStateInTimeRecoil).state;
+    const finalTube = finalState.tubes[0];
+    const isSecondaryAvailable = finalState.tubes.length > 1;
+
     const craftingStateInTime = useCraftingState();
     const time = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
-
-    const tube = craftingState.state.tubes[0];
-    const prevTube = craftingState.prevState.tubes[0];
-    const isSecondaryAvailable = craftingState.state.tubes.length > 1;
+    
 
     const reaction =
         craftingState.id === "craftingReact"
@@ -76,8 +78,7 @@ export function CraftingTube({ style }: {
                     if (craftingState.id === "craftingAct") {
                         switch (craftingState.diffCustom.action) {
                             case "addIngredient": return { id: "pourDown" };
-                            case "addTube": return { id: "idle" };
-                            case "trashTube": return { id: "prev" };
+                            case "addTube": return { id: "next" };
                             case "pourFromMainIntoSecondary": return { id: "pourUp" };
                             case "pourFromSecondaryIntoMain": return { id: "pourDown" };
                         }
@@ -91,16 +92,16 @@ export function CraftingTube({ style }: {
                     if (craftingState.id === "craftingGiveaway") {
                         return { id: "prev" };
                     }
-                    return { id: "idle" };
+                    return { id: "prev" };
                 })(),
             }}
             now={time}
         />
-        {isSecondaryAvailable && tube.length > 0 && <PourFromMainIntoSecondaryButton
+        {isSecondaryAvailable && finalTube.length > 0 && <PourFromMainIntoSecondaryButton
             style={{
                 position: "absolute",
                 left: "-10px",
-                top: ["64%", "42%", "19%"][tube.length - 1],
+                top: ["71%", "47%", "24%"][finalTube.length - 1],
             }}
         />}
     </div>;

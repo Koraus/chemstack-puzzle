@@ -18,7 +18,9 @@ export function App() {
     const landscapeWidth = 922;
     const portraitWidth = 414;
 
-    const isLandscape = useMatchMedia(`(orientation: landscape)`);
+    const isLandscape = useMatchMedia(`(orientation: landscape)`
+        + ` and (min-width: ${landscapeWidth}px)`
+        + ` and (min-height: 500px)`);
 
     const main = useMemo(() => <>
         <ReactionsLibrary />
@@ -28,9 +30,6 @@ export function App() {
     return <div className={cx(css`& {
         font-family: 'Bahnschrift', sans-serif;
         display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
         position: fixed;
         inset: 0;
         overflow: auto;
@@ -39,6 +38,7 @@ export function App() {
             flex-grow: 1;
             max-width: ${isLandscape ? landscapeWidth : portraitWidth}px;
             position: relative;
+            margin: auto;
         }`)}>
             <WinFireworks className={cx(css`& {
                 overflow: hidden;
@@ -48,7 +48,10 @@ export function App() {
             }`)} />
 
             {isLandscape && <div className={cx(flex.row)}>
-                <div className={cx(flex.col)}>
+                <div className={cx(
+                    css`& { width: ${(1 - portraitWidth / landscapeWidth) / 2 * 100}%; }`,
+                    flex.col,
+                )}>
                     <div className={cx(flex.row, css`& { padding: 14px 0 10px 0; }`)} >
                         <LevelListHeaderButton className={css`& { flex: 1; }`} />
                         <HeaderTitle isHorizontal className={css`& { flex-grow: 999; }`} />
@@ -60,7 +63,10 @@ export function App() {
                     flex.col,
                 )}>{main}</div>
 
-                <div className={cx(flex.col)}>
+                <div className={cx(
+                    css`& { width: ${(1 - portraitWidth / landscapeWidth) / 2 * 100}%; }`,
+                    flex.col,
+                )}>
                     <div className={cx(flex.rowRev, css`& { padding: 14px 0 10px 0; }`)} >
                         <ResetLevelHeaderButton className={css`& { flex: 1; }`} />
                         <div className={cx(css`& { flex-grow: 999; }`)}></div>

@@ -4,6 +4,7 @@ import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
 import { ReactComponent as TubeSvgRaw } from "./tube.svg";
 import { StateTransition } from "./StateTransition";
+import { memo } from "preact/compat";
 
 const secondaryColor = (hexColor: string) => {
     const { h, s, l } = rgbToHsl(hexColorToRgb(hexColor));
@@ -27,9 +28,9 @@ const bBoxes = [
 ];
 
 const slotTransformOriginsCss = slotIndices.map(i => {
-    const p = getBBoxCoords(bBoxes[i], [0.5, 1]);
+    const [x, y] = getBBoxCoords(bBoxes[i], [0.5, 1]);
     return css`& #prev_slot${i}_content_, & #slot${i}_content_ { 
-        transform-origin: ${p[0]}px ${p[1]}px;
+        transform-origin: ${x}px ${y}px;
     }`;
 });
 
@@ -47,7 +48,7 @@ const textCss = slotIndices.map(i => css`
 function SlotGradients({ svgIdPrefix, i, prev }: {
     svgIdPrefix: string, i: number, prev?: boolean
 }) {
-    const _prev = prev ? "prev_" : "";
+    const _prev = prev ? "_prev" : "";
     return <>
         <linearGradient
             id={`_${svgIdPrefix}${_prev}_slot${i}_content_back_gradient`}
@@ -73,19 +74,15 @@ function SlotGradients({ svgIdPrefix, i, prev }: {
 }
 
 export function getBBoxCoords(
-    bBox: { x: number, y: number, width: number, height: number },
+    { x, y, width, height }: { x: number, y: number, width: number, height: number },
     anchor: [number, number] = [0.5, 0.5],
 ) {
-    const origin = [
-        bBox.x + bBox.width * (anchor[0] ?? 0.5),
-        bBox.y + bBox.height * (anchor[1] ?? 0.5),
-    ] as [number, number];
-    return origin;
+    return [x + width * anchor[0], y + height * anchor[1]] as [number, number];
 }
 
 const transparentTopCompansationCss = css`& { 
     margin-top: -562%; 
-    margin-bottom: -29%;
+    margin-bottom: -41%;
     margin-left: -50%;
     margin-right: -50%;
 }`;
@@ -99,7 +96,7 @@ const prevCss = (count: number) => slotIndices.map(i => css`
     }
 `);
 
-const idleCss = (count: number) => slotIndices.map(i => css`
+const nextCss = (count: number) => slotIndices.map(i => css`
     & #prev_slot${i}_content {
         display: none;
     }
@@ -117,20 +114,19 @@ function pourDownAnimationCss({ i, now, start, duration }: {
     return css`
         & #slot${i}_content {
             animation: ${keyframes`
-                0% { transform: translate(0, -400px); }
-                50% { transform: translate(0, 10px); }
+                0%, 30% { transform: translate(0, -400px); }
+                60% { transform: translate(0, 10px); }
                 100% { transform: translate(0, 0); }
 
-                0% { opacity: 0; }
-                15%, 100% { opacity: 1; }
+                0%, 30% { opacity: 0; }
+                45%, 100% { opacity: 1; }
             `} ${duration}ms ${start - now}ms linear both;
         }
         & #slot${i}_content_ {
             animation: ${keyframes`
-                0% { transform: scale(1, 1); }
-                50% { transform: scale(1, 1); }
-                60% { transform: scale(1.1, 0.8); }
-                78% { transform: scale(0.8, 1.3); }
+                0%, 60% { transform: scale(1, 1); }
+                70% { transform: scale(1.1, 0.8); }
+                88% { transform: scale(0.8, 1.3); }
                 100% { transform: scale(1, 1); }
             `} ${duration}ms ${start - now}ms linear both;
         }
@@ -147,17 +143,17 @@ function pourUpAnimationCss({ i, now, start, duration }: {
         & #prev_slot${i}_content {
             animation: ${keyframes`
                 0% { transform: translate(0, 0); }
-                100% { transform: translate(0, -400px); }
+                50%, 100% { transform: translate(0, -400px); }
 
-                0%, 85% { opacity: 1; }
-                100% { opacity: 0; }
+                0%, 40% { opacity: 1; }
+                50%, 100% { opacity: 0; }
             `} ${duration}ms ${start - now}ms linear both;
         }
         & #prev_slot${i}_content_ {
             animation: ${keyframes`
                 0% { transform: scale(1, 1); }
-                20% { transform: scale(0.9, 1.05); }
-                100% { transform: scale(0.7, 1.2); }
+                10% { transform: scale(0.9, 1.05); }
+                50%, 100% { transform: scale(0.7, 1.2); }
             `} ${duration}ms ${start - now}ms linear both;
         }
     `;
@@ -168,12 +164,22 @@ function cleanAnimationCss({ i, now, start, duration }: {
     start: number,
     duration: number,
 }) {
+    const [x, y] = getBBoxCoords(bBoxes[3], [0.5, 0.6]);
     return css`
     & #prev_slot${i}_content_ {
+        transform-origin: ${x}px ${y}px;
         animation: ${keyframes`
             0% { transform: scale(1, 1); }
-            40% { transform: scale(2, 0.3); }
-            100% { transform: scale(3, 0.1); opacity: 0;}
+            25% { transform: scale(1, 1); }
+            35% { transform: scale(0.5, 1); }
+            70% { transform: scale(1.5, 0.5); }
+            100% { transform: scale(2, 0); }
+        `} ${duration}ms ${start - now}ms linear both;
+    }
+    & #prev_slot${i}_number {
+        animation: ${keyframes`
+            0%, 22% { opacity: 1; }
+            25%, 100% { opacity: 0; }
         `} ${duration}ms ${start - now}ms linear both;
     }
 `;
@@ -219,31 +225,14 @@ function reactAnimationCss({
     ]
 }
 
-
-export function TubeSvg({
-    tubeTransition: {
-        prevState: prevTube,
-        state: tube,
-        desc,
-        duration,
-        start,
-    },
-    now,
-    noBorder,
-    svgIdPrefix,
-    ...props
-}: {
-    tubeTransition: StateTransition<
-        SubstanceId[],
-        { id: "idle" | "prev" | "pourDown" | "pourUp" | "clean" }
-        | { id: "react", reaction: Reaction }
-    >;
-    now: number;
-    noBorder?: boolean;
+function TubeSvgRawWithContent({ tube, prevTube, svgIdPrefix, noAdd, className }: {
+    tube: SubstanceId[];
+    prevTube: SubstanceId[];
     svgIdPrefix: string;
+    noAdd: boolean;
     className?: string;
-    style?: JSX.CSSProperties;
 }) {
+    console.log("inside TubeSvgRawWithContent", svgIdPrefix);
     const tubeContentGradientsCss = slotIndices.map(i => {
         const prevColor = substanceColors[prevTube[i]] ?? "#00000000";
         const color = substanceColors[tube[i]] ?? "#00000000";
@@ -298,50 +287,24 @@ export function TubeSvg({
 
     return <>
         <TubeSvgRaw
-            {...props}
             className={cx(
                 slotTransformOriginsCss,
                 textCss,
                 transparentTopCompansationCss,
                 tubeContentCss,
-                "idle" === desc.id && idleCss(tube.length),
-                "prev" === desc.id && prevCss(prevTube.length),
-                "pourDown" === desc.id && [
-                    idleCss(tube.length),
-                    pourDownAnimationCss({
-                        i: tube.length - 1,
-                        duration, start, now
-                    })],
-                "pourUp" === desc.id && [
-                    prevCss(prevTube.length),
-                    pourUpAnimationCss({
-                        i: prevTube.length - 1,
-                        duration, start, now
-                    })],
-                "clean" === desc.id && [
-                    prevCss(prevTube.length),
-                    ...[3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
-                ],
-                "react" === desc.id && reactAnimationCss({
-                    tube,
-                    prevTube,
-                    reaction: desc.reaction,
-                    duration, start, now
-                }),
-                noBorder && [
-                    css`& #border { display: none; }`,
-                    ...slotIndices.map(i => css`& #slot${i}_add { display: none; }`),
-                ],
-                props.className)}
+                noAdd && slotIndices.map(i => css`& #slot${i}_add { display: none; }`),
+                prevCss(prevTube.length),
+                className,
+            )}
             slots={{
                 ...tubeContentSlots,
             }} />
         <svg className={cx(
             tubeContentGradientsCss,
             css`& {
-                position: absolute; 
-                height: 0;
-            }`,
+            position: absolute; 
+            height: 0;
+        }`,
         )}>
             <defs>
                 {slotIndices.map(i => <>
@@ -350,5 +313,64 @@ export function TubeSvg({
                 </>)}
             </defs>
         </svg>
-    </>;
+    </>
+}
+
+const MemoedTubeSvgRawWithContent = memo(TubeSvgRawWithContent);
+
+
+export function TubeSvg({
+    tubeTransition: {
+        prevState: prevTube,
+        state: tube,
+        desc,
+        duration,
+        start,
+    },
+    now,
+    noBorder,
+    svgIdPrefix,
+    ...props
+}: {
+    tubeTransition: StateTransition<
+        SubstanceId[],
+        { id: "next" | "prev" | "pourDown" | "pourUp" | "clean" }
+        | { id: "react", reaction: Reaction }
+    >;
+    now: number;
+    noBorder?: boolean;
+    svgIdPrefix: string;
+    className?: string;
+    style?: JSX.CSSProperties;
+}) {
+    return <MemoedTubeSvgRawWithContent
+        {...props}
+        prevTube={prevTube}
+        tube={tube}
+        svgIdPrefix={svgIdPrefix}
+        noAdd={noBorder ?? false}
+        className={cx(
+            "next" === desc.id && nextCss(tube.length),
+            "pourDown" === desc.id && [
+                nextCss(tube.length),
+                pourDownAnimationCss({
+                    i: tube.length - 1,
+                    duration, start, now
+                })],
+            "pourUp" === desc.id && [
+                pourUpAnimationCss({
+                    i: prevTube.length - 1,
+                    duration, start, now
+                })],
+            "clean" === desc.id
+            && prevTube.length !== tube.length
+            && [3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
+            "react" === desc.id && reactAnimationCss({
+                tube,
+                prevTube,
+                reaction: desc.reaction,
+                duration, start, now
+            }),
+            props.className)}
+    />;
 }
