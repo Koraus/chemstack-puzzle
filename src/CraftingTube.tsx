@@ -41,6 +41,17 @@ export function CraftingTube({ style }: {
                         `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                     }
                 `,
+                craftingState.id === "craftingAct"
+                && craftingState.diffCustom.action === "swapTubes"
+                && css`
+                    & {
+                        transform-origin: bottom;
+                        animation: ${keyframes`
+                            0% { transform: scale(0); }
+                            100% { transform: scale(1); }
+                        `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
+                    }
+                `,
                 craftingState.id === 'craftingAct'
                 && craftingState.diffCustom.action === 'trashTube'
                 && css`

@@ -60,6 +60,8 @@ export function CraftingTable() {
                 ...flex.rowS,
                 justifyContent: "space-between",
             }}>
+                <button style={{position: "absolute", left: "0"}} 
+                         onClick={() => act({ action: "swapTubes", time: performance.now() })}> swapTubes </button>
                 <button
                     className={buttonCss}
                     style={{
