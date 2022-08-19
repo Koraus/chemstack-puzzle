@@ -29,25 +29,20 @@ export function Footer({
                 padding: 8px 14px;
             }`,
         className)}>
-                    <div style={{ position: "relative", display: "flex", justifyContent: "flex-end",  }}> 
-        {isHorizontal
-            && isTeamShown
+                   
+        {isHorizontal && <div style={{ position: "relative", display: "flex", justifyContent: "flex-end", }} > 
+            { 
+            isTeamShown
             && <AboutTeam
                 style={{
                     position: "absolute",
                     bottom: "50px",
-                    right: "0",
-                    backgroundColor: "#5B6D80",
-                    padding: "10px 15px",
-                    whiteSpace: "nowrap",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                    width: "fit-contnt",
-                    color: "white",
-                }} />}
-        <button onClick={() => { isTeamShown ? setIsTeamShown(false) : setIsTeamShown(true) }} style={{margin: "6px 0"}}> <Groups style={{ height: 30, width: 30,  }} /> </button>
-        </div>  
+                    right: "0"
+                }}
+                 />}
+        <button onClick={() => { setIsTeamShown(!isTeamShown) }} style={{margin: "6px 0"}}> <Groups style={{ height: 30, width: 30,  }} /> </button>
+        </div> }
+
         <a
             style={{
                 flex: 1,
@@ -62,9 +57,24 @@ export function Footer({
             {!isHorizontal && <OpenInNew style={{ height: 20, marginRight: 5 }} />}
             GKZR
             {isHorizontal && <OpenInNew style={{ height: 20, marginLeft: 5 }} />}
-        </a>       
+        </a>     
+        {!isHorizontal && <div style={{ position: "relative", flex: "1 1 0%", display: "flex", justifyContent: "center" }} > 
+            { 
+            isTeamShown
+            && <AboutTeam
+                style={{
+                    position: "absolute",
+                    bottom: "50px",
+                    translate: "36%",
+                    right: "0",
+                    alignItems: "center",
+                }}
+                 />}
+        <button  onClick={() => { setIsTeamShown(!isTeamShown) }} style={{margin: "6px 0", }}> <Groups style={{ height: 30, width: 30,  }} /> </button>
+        </div> }  
         <a
             style={{
+                whiteSpace: "nowrap",
                 flex: 1,
                 display: "block",
                 fontSize: "16px",
