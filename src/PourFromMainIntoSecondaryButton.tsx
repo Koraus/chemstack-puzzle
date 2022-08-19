@@ -4,7 +4,7 @@ import { css, cx } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
-import { craftingActionsRecoil, craftingStateInTimeRecoil } from "./craftingActionsRecoil";
+import { craftingActionsRecoil, craftingStateInTimeRecoil, useCraftingState } from "./craftingActionsRecoil";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import { tutorialRecoil } from "./tutorialRecoil";
 import { useRecoilValue } from "recoil";
@@ -20,6 +20,9 @@ export function PourFromMainIntoSecondaryButton({ style, className }: {
 
     const tutorial = useRecoilValue(tutorialRecoil);
     const isHinted = tutorial.some(t => t.kind === "pourFromMainIntoSecondary");
+    
+    const craftingStateInTime = useCraftingState();
+    const isCraftingIdle = craftingStateInTime.currentState.id === "craftingIdle";
 
     return <button
         disabled={isWin}
@@ -36,7 +39,7 @@ export function PourFromMainIntoSecondaryButton({ style, className }: {
         onClick={() => act({ action: "pourFromMainIntoSecondary", time: performance.now() })}
     >
         <ArrowLeft style={{ height: 80, margin: -20 }} />
-        {(isHinted) && <TouchAppAnimation className={css`& {
+        {(isHinted && isCraftingIdle) && <TouchAppAnimation className={css`& {
             position: absolute;
             transform: translate(12px, 22px);
         }`} />}

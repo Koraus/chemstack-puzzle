@@ -6,6 +6,8 @@ import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { useRecoilValue } from "recoil";
 import { useEffect, useState } from "preact/hooks";
 import { CompositeKeyWeekMap } from "./utils/CompositeKeyWeekMap";
+import { levelPresetRecoil } from "./LevelList";
+import { levelPresets } from "./levelPresets";
 
 export const craftingActionsRecoil = atom({
     key: "craftingActions",
@@ -45,7 +47,11 @@ export const craftingStateInTimeRecoil = selector({
     }
 });
 
-export const getCraftingState = (stateInTime: CraftingStateInTime, time: number = Infinity) => {
+const getCraftingState = (
+    stateInTime: CraftingStateInTime, 
+    time: number,
+    animationDurationFactor: number,
+) => {
     if (!("prevState" in stateInTime)) {
         return {
             id: "craftingIdle" as const,
@@ -58,11 +64,13 @@ export const getCraftingState = (stateInTime: CraftingStateInTime, time: number 
     }
     let t = stateInTime.action.time;
     for (const s of stateInTime.children) {
-        t += s.duration;
+        const factoredDuration = s.duration * animationDurationFactor;
+        t += factoredDuration;
         if (time < t) {
             return {
                 ...s,
-                start: t - s.duration,
+                duration: factoredDuration,
+                start: t - factoredDuration,
             };
         }
     }
@@ -78,6 +86,10 @@ export const getCraftingState = (stateInTime: CraftingStateInTime, time: number 
 
 export function useCraftingState() {
     const craftingStateInTime = useRecoilValue(craftingStateInTimeRecoil);
+    
+    const currentLevelPreset = useRecoilValue(levelPresetRecoil);
+    const levelPresetIndex = levelPresets.findIndex(x => x.name === currentLevelPreset.name);
+    const animationDurationFactor = 1 + 1 / (levelPresetIndex / 2 + 1);
 
     const [time, setTime] = useState(0);
     useEffect(() => {
@@ -87,7 +99,8 @@ export function useCraftingState() {
         const handles = [] as ReturnType<typeof setTimeout>[];
         let t = craftingStateInTime.action.time;
         for (const s of craftingStateInTime.children) {
-            t += s.duration;
+            const factoredDuration = s.duration * animationDurationFactor;
+            t += factoredDuration;
             if (timeLocal < t) {
                 const h = setTimeout(
                     () => setTime(performance.now()),
@@ -100,7 +113,7 @@ export function useCraftingState() {
 
     return {
         ...craftingStateInTime,
-        currentState: getCraftingState(craftingStateInTime, time),
+        currentState: getCraftingState(craftingStateInTime, time, animationDurationFactor),
         currentTime: time,
     };
 }

@@ -7,6 +7,7 @@ import { levelPresetRecoil } from "./LevelList";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import * as flex from "./utils/flex";
 import { css, cx } from "@emotion/css";
+import { useCraftingState } from "./craftingActionsRecoil";
 
 
 export function CraftingIngredientPanel({
@@ -28,6 +29,9 @@ export function CraftingIngredientPanel({
         left: 32px;
         bottom: 10px;
     }`;
+    
+    const craftingStateInTime = useCraftingState();
+    const isCraftingIdle = craftingStateInTime.currentState.id === "craftingIdle";
 
     return <div
         className={cx(
@@ -41,7 +45,7 @@ export function CraftingIngredientPanel({
                 .filter((_, i) => !(i > 2))
                 .map(sid => <div style={{ position: "relative", }}>
                     <CraftingIngredientButton sid={sid} />
-                    {needHint(sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
+                    {isCraftingIdle && needHint(sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
                 </div>)}
         </div>
         <div style={{ ...flex.rowRevS, flex: 1 }}>
@@ -49,7 +53,7 @@ export function CraftingIngredientPanel({
                 .filter((_, i) => (i > 2))
                 .map(sid => <div style={{ position: "relative", }}>
                     <CraftingIngredientButton sid={sid} mirrored />
-                    {needHint(sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
+                    {isCraftingIdle && needHint(sid) && <TouchAppAnimation className={touchAppAnimationCss} />}
                 </div>)}
         </div>
     </div>

@@ -12,7 +12,7 @@ import { css, cx } from "@emotion/css";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Close } from '@emotion-icons/material-rounded/Close';
-import { craftingActionsRecoil, craftingStateInTimeRecoil, getCraftingState } from "./craftingActionsRecoil";
+import { craftingActionsRecoil, craftingStateInTimeRecoil, useCraftingState } from "./craftingActionsRecoil";
 import { tutorialRecoil } from './tutorialRecoil';
 import { CraftingSecondaryTubes } from './CraftingSecondaryTubes';
 import { GlobalBackground } from './GlobalBackground';
@@ -24,13 +24,15 @@ export function CraftingTable() {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
-    const { tubes } =
-        getCraftingState(useRecoilValue(craftingStateInTimeRecoil)).state;
+    const  { tubes } = useRecoilValue(craftingStateInTimeRecoil).state;
     const isWin = useRecoilValue(isWinRecoil);
 
     const tutorial = useRecoilValue(tutorialRecoil);
     const hintReset = tutorial.some(t => t.kind === "reset");
     const hintAddTube = tutorial.some(t => t.kind === "addTube");
+    
+    const craftingStateInTime = useCraftingState();
+    const isCraftingIdle = craftingStateInTime.currentState.id === "craftingIdle";
 
     return <div style={{
         padding: "16px 16px",
@@ -75,7 +77,7 @@ export function CraftingTable() {
                         margin: "0 0 0 -6px",
                         zIndex: 1,
                     }} />
-                    {(hintAddTube) && <TouchAppAnimation className={css`& {
+                    {(isCraftingIdle && hintAddTube) && <TouchAppAnimation className={css`& {
                         position: absolute;
                         transform: translate(24px, 21px);
                     }`} />}
@@ -128,7 +130,7 @@ export function CraftingTable() {
                         height: "100%",
                         margin: "0px -4px",
                     }} />
-                    {(hintReset) && <TouchAppAnimation className={css`& {
+                    {(isCraftingIdle && hintReset) && <TouchAppAnimation className={css`& {
                         position: absolute;
                         transform: translate(20px, 33px);
                     }`} />}
