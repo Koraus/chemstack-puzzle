@@ -225,14 +225,17 @@ function reactAnimationCss({
     ]
 }
 
-function TubeSvgRawWithContent({ tube, prevTube, svgIdPrefix, noAdd, className }: {
+function TubeSvgRawWithContent({ 
+    tube, prevTube, svgIdPrefix, noAdd, className, inactive
+}: {
     tube: SubstanceId[];
     prevTube: SubstanceId[];
     svgIdPrefix: string;
     noAdd: boolean;
+    inactive?: boolean;
     className?: string;
 }) {
-    console.log("inside TubeSvgRawWithContent", svgIdPrefix);
+    import.meta.env.DEV && console.log("inside TubeSvgRawWithContent", svgIdPrefix);
     const tubeContentGradientsCss = slotIndices.map(i => {
         const prevColor = substanceColors[prevTube[i]] ?? "#00000000";
         const color = substanceColors[tube[i]] ?? "#00000000";
@@ -293,6 +296,10 @@ function TubeSvgRawWithContent({ tube, prevTube, svgIdPrefix, noAdd, className }
                 transparentTopCompansationCss,
                 tubeContentCss,
                 noAdd && slotIndices.map(i => css`& #slot${i}_add { display: none; }`),
+                inactive && css`
+                    & #background { opacity: 1; }
+                    & #foreground { opacity: 0; }
+                `,
                 prevCss(prevTube.length),
                 className,
             )}
@@ -339,6 +346,7 @@ export function TubeSvg({
     >;
     now: number;
     noBorder?: boolean;
+    inactive?: boolean;
     svgIdPrefix: string;
     className?: string;
     style?: JSX.CSSProperties;
