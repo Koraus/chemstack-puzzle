@@ -8,7 +8,7 @@ import { injectSlots, prefixIds } from "./svgr-utils";
 
 export default defineConfig({
     build: {
-        minify: false,
+        // minify: false,
     },
     plugins: [
         preact({ 
