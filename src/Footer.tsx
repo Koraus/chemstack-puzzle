@@ -5,6 +5,7 @@ import { JSX } from "preact";
 import { AboutTeam } from "./AboutTeam";
 import { useState } from "preact/hooks";
 import { Groups } from '@emotion-icons/material-rounded/Groups';
+import { buttonCss } from "./buttonCss";
 
 
 export function Footer({
@@ -15,34 +16,40 @@ export function Footer({
     style?: JSX.CSSProperties;
 }) {
     const [isTeamShown, setIsTeamShown] = useState(false);
+
+    const aboutTeam = <button
+        className={cx(buttonCss, css`& { width: 35px; position: relative; }`)}
+        onClick={() => setIsTeamShown(!isTeamShown)}
+    >
+        {isTeamShown && <AboutTeam className={cx(
+            css`& { position: absolute; bottom: 130%; }`,
+            isHorizontal
+                ? css`& { right: 0; }`
+                : css`& { left: 50%; translate: -50%; align-items: center; }`,
+        )} />}
+        <Groups style={{ height: "100%" }} />
+    </button>;
+
     return <div {...props} className={cx(
         isHorizontal
             ? css`& {
+                display: flex;
+                align-items: end;
                 flex-direction: column;
                 justify-content: right;
-                padding: 0 8px;
+                padding: 0 24px;
             }` : css`& {
                 display: flex;
                 flex: row;
                 justify-content: center;
                 align-items: center;
-                padding: 8px 14px;
+                padding: 8px 24px;
             }`,
         className)}>
-                   
-        {isHorizontal && <div style={{ position: "relative", display: "flex", justifyContent: "flex-end", }} > 
-            { 
-            isTeamShown
-            && <AboutTeam
-                style={{
-                    position: "absolute",
-                    bottom: "50px",
-                    right: "0"
-                }}
-                 />}
-        <button onClick={() => { setIsTeamShown(!isTeamShown) }} style={{margin: "6px 0"}}> <Groups style={{ height: 30, width: 30,  }} /> </button>
-        </div> }
-
+        {isHorizontal && <>
+            {aboutTeam}
+            <div className={cx(css`& { height: 6px; }`)}></div>
+        </>}
         <a
             style={{
                 flex: 1,
@@ -57,27 +64,14 @@ export function Footer({
             {!isHorizontal && <OpenInNew style={{ height: 20, marginRight: 5 }} />}
             GKZR
             {isHorizontal && <OpenInNew style={{ height: 20, marginLeft: 5 }} />}
-        </a>     
-        {!isHorizontal && <div style={{ position: "relative", flex: "1 1 0%", display: "flex", justifyContent: "center" }} > 
-            { 
-            isTeamShown
-            && <AboutTeam
-                style={{
-                    position: "absolute",
-                    bottom: "50px",
-                    translate: "36%",
-                    right: "0",
-                    alignItems: "center",
-                }}
-                 />}
-        <button  onClick={() => { setIsTeamShown(!isTeamShown) }} style={{margin: "6px 0", }}> <Groups style={{ height: 30, width: 30,  }} /> </button>
-        </div> }  
+        </a>
+        {!isHorizontal && aboutTeam}
         <a
             style={{
                 whiteSpace: "nowrap",
                 flex: 1,
                 display: "block",
-                fontSize: "16px",
+                fontSize: "14px",
                 lineHeight: "28px",
                 color: "white",
                 textAlign: "right",

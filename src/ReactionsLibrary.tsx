@@ -5,7 +5,7 @@ import { substanceColors } from './substanceColors';
 import { Reaction } from './crafting';
 import { KeyboardArrowUp } from '@emotion-icons/material-rounded/KeyboardArrowUp';
 import { generateReactionsLibrary } from './generateReactionsLibrary';
-import { getCraftingState, craftingStateInTimeRecoil, useCraftingState } from './craftingActionsRecoil';
+import { useCraftingState } from './craftingActionsRecoil';
 import { tutorialRecoil } from './tutorialRecoil';
 import { css, cx, keyframes } from '@emotion/css';
 type CSSProperties = import("preact").JSX.CSSProperties;

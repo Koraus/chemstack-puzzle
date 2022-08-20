@@ -8,6 +8,8 @@
         "moduleResolution": "Node",
         "isolatedModules": true,
         "allowSyntheticDefaultImports": true,
+        "noEmit": true,
+        "skipLibCheck": true,
     },
     "files": [
         "./node_modules/vite/client.d.ts", 

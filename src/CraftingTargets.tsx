@@ -11,7 +11,7 @@ import { tutorialRecoil } from "./tutorialRecoil";
 import { JSX } from "preact";
 import { TubeSvg } from "./TubeSvg";
 
-function NextLevelButton({ ...props }: { disabled?: boolean }) {
+const useSetNextLevel = () => {
     const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
         set(levelPresetRecoil, lp)
         set(craftingActionsRecoil, []);
@@ -24,26 +24,7 @@ function NextLevelButton({ ...props }: { disabled?: boolean }) {
     }
     const nextLevelIndex = (currentLevelIndex + 1) % levelPresets.length;
     const setNextLevel = () => setLevelPreset(levelPresets[nextLevelIndex]);
-
-    return <button
-        className={cx(buttonCss)}
-        style={{
-            margin: `-2px 7px 7px 7px`,
-            width: `18px`,
-            height: `125px`,
-            border: "2px dashed #ffffff50",
-            borderColor: "transparent",
-            borderTopLeftRadius: "3px 6px",
-            borderTopRightRadius: "3px 6px",
-            borderBottomLeftRadius: "9px",
-            borderBottomRightRadius: "9px",
-        }}
-        onClick={setNextLevel}
-        {...props}
-    ><DoubleArrow style={{
-        margin: "0 -10px 0 -12px",
-    }} />
-    </button>
+    return setNextLevel;
 }
 
 function Tube({ revI, ...props }: {
@@ -51,12 +32,18 @@ function Tube({ revI, ...props }: {
     className?: string;
     style?: JSX.CSSProperties;
 }) {
+    const setNextLevel = useSetNextLevel();
+
     const craftingStateInTime = useCraftingState();
     const now = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
 
-    const prevTube = [...craftingState.prevState.targets].reverse()[revI];
-    const tube = [...craftingState.state.targets].reverse()[revI];
+    const fake = revI < 0;
+
+    const prevTube =
+        fake ? [] : [...craftingState.prevState.targets].reverse()[revI];
+    const tube =
+        fake ? [] : [...craftingState.state.targets].reverse()[revI];
     const i = craftingState.prevState.targets.length - 1 - revI;
 
     return <div
@@ -82,10 +69,25 @@ function Tube({ revI, ...props }: {
                 desc: { id: "prev" },
             }}
             now={now}
+            inactive
         />
+        {fake && <button
+            disabled={craftingState.prevState.targets.length > 0}
+            onClick={setNextLevel}
+            className={cx(buttonCss, css`& {
+                display: block;
+                position: absolute;
+                inset: 13% 22% 3%;
+                border: 2px dashed transparent;
+                border-top-left-radius: 3px 6px;
+                border-top-right-radius: 3px 6px;
+                border-bottom-left-radius: 9px;
+                border-bottom-right-radius: 9px;
+            }`)}
+        ><DoubleArrow style={{ margin: "0 -10px 0 -12px" }} /></button>}
         {i > 0 && <div className={cx(css`& {
             position: absolute;
-            inset: 0 0 0 0;
+            inset: 0;
             border-bottom-left-radius: 999px;
             border-bottom-right-radius: 999px;
             overflow: hidden;
@@ -114,13 +116,13 @@ export function CraftingTargets({ style, className }: {
     const { start, duration } = craftingState;
 
     const tutorial = useRecoilValue(tutorialRecoil);
-    const hintNext = tutorial.some(t => t.kind === "next") 
+    const hintNext = tutorial.some(t => t.kind === "next")
         && craftingState.id === "craftingIdle";
 
     const tubes = craftingState.state.targets;
     const prevTubes = craftingState.prevState.targets;
 
-    const stubTubes = Array.from({ length: Math.max(tubes.length, prevTubes.length) });
+    const stubTubes = Array.from({ length: Math.max(tubes.length, prevTubes.length) + 1 });
 
     const isHinted = (slotIndex: number) =>
         tutorial.some(t =>
@@ -154,7 +156,7 @@ export function CraftingTargets({ style, className }: {
             const dy = _dy(i - 1) - y;
             const dz = _dz(i - 1) - z;
 
-            const revI = arr.length - 1 - i;
+            const revI = arr.length - 1 - i - 1;
             return <div
                 key={revI}
                 className={cx(css`& {
@@ -190,42 +192,6 @@ export function CraftingTargets({ style, className }: {
                 />
             </div>;
         })}
-        <div
-            style={{
-                ...flex.colRevS,
-
-                height: `155px`,
-                background: "#4E6076",
-                borderBottomLeftRadius: "999px",
-                borderBottomRightRadius: "999px",
-                overflow: "hidden",
-            }}
-            className={cx(
-                css`& {
-                    position: absolute;
-                    transform: translate3d(${-_dx(stubTubes.length)}px, 0, ${_dz(stubTubes.length)}px);
-                }`,
-                craftingState.id === 'craftingGiveaway'
-                && css`& {
-                    animation: ${keyframes`
-                        50% { transform: translate3d(${-_dx(stubTubes.length)}px, 0, ${_dz(stubTubes.length)}px); }
-                        100% { transform: translate3d(${-_dx(stubTubes.length - 1)}px, 0, ${_dz(stubTubes.length - 1)}px); }
-                    `} ${duration}ms ${start - now}ms both linear;
-                } `,
-            )}
-        >
-            <NextLevelButton disabled={stubTubes.length > 0} />
-            {stubTubes.length > 0 && <div style={{
-                position: "absolute",
-                top: 0,
-                left: "-47%",
-                right: "47%",
-                bottom: "-5px",
-                background: "#00000030",
-                borderBottomLeftRadius: "999px",
-                borderBottomRightRadius: "999px",
-            }}></div>}
-        </div>
         {(hintNext) && <TouchAppAnimation className={css`& {
             position: absolute;
             transform: translate(20px, 120px);
