@@ -6,14 +6,6 @@
                 fill: url(#slot2_content_back1_gradient);
             }
 
-            .cls-1,
-            .cls-2,
-            .cls-3,
-            .cls-4,
-            .cls-5 {
-                mix-blend-mode: screen;
-            }
-
             .cls-6 {
                 fill: url(#slot0_content_back_gradient);
             }

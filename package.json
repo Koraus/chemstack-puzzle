@@ -1,21 +1,25 @@
 {
   "name": "chemstack-puzzle",
   "scripts": {
-    "start": "vite",
-    "host": "vite --host",
-    "build": "vite build"
+    "start": "vite --config ./vite.config/vite.config.ts",
+    "host": "vite --config ./vite.config/vite.config.ts --host",
+    "build": "vite --config ./vite.config/vite.config.ts build"
   },
   "devDependencies": {
     "@amplitude/analytics-browser": "^1.0.3",
+    "@babel/types": "^7.18.10",
     "@emotion-icons/bootstrap": "^3.27.0",
     "@emotion-icons/material-rounded": "^3.14.0",
     "@emotion/babel-plugin": "^11.10.0",
     "@emotion/css": "^11.9.0",
     "@preact/compat": "^17.1.1",
     "@preact/preset-vite": "^2.2.0",
+    "@types/babel__template": "^7.4.1",
     "@types/crypto-js": "^4.1.1",
+    "@types/css": "^0.0.33",
     "@types/lodash": "^4.14.182",
     "crypto-js": "^4.1.1",
+    "css": "^3.0.0",
     "emotion-icons": "^3.27.0",
     "gl-matrix": "^3.4.3",
     "immutability-helper": "^3.1.1",

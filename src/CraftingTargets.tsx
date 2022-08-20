@@ -10,6 +10,7 @@ import { craftingActionsRecoil, useCraftingState } from "./craftingActionsRecoil
 import { tutorialRecoil } from "./tutorialRecoil";
 import { JSX } from "preact";
 import { TubeSvg } from "./TubeSvg";
+import { SubstanceId } from "./crafting";
 
 const useSetNextLevel = () => {
     const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
@@ -27,6 +28,7 @@ const useSetNextLevel = () => {
     return setNextLevel;
 }
 
+const fakeEmptyTube = [] as SubstanceId[];
 function Tube({ revI, ...props }: {
     revI: number;
     className?: string;
@@ -41,9 +43,9 @@ function Tube({ revI, ...props }: {
     const fake = revI < 0;
 
     const prevTube =
-        fake ? [] : [...craftingState.prevState.targets].reverse()[revI];
+        fake ? fakeEmptyTube : [...craftingState.prevState.targets].reverse()[revI];
     const tube =
-        fake ? [] : [...craftingState.state.targets].reverse()[revI];
+        fake ? fakeEmptyTube : [...craftingState.state.targets].reverse()[revI];
     const i = craftingState.prevState.targets.length - 1 - revI;
 
     return <div

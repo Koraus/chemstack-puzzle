@@ -27,16 +27,16 @@ const bBoxes = [
     { x: 72.625, y: 385.427, width: 62.195, height: 113.645 },
 ];
 
-const slotTransformOriginsCss = slotIndices.map(i => {
+const slotTransformOriginsCss = (svgIdPrefix: string) => slotIndices.map(i => {
     const [x, y] = getBBoxCoords(bBoxes[i], [0.5, 1]);
-    return css`& #prev_slot${i}_content_, & #slot${i}_content_ { 
+    return css`#${svgIdPrefix}_svg& .prev_slot${i}_content_, #${svgIdPrefix}_svg& .slot${i}_content_ { 
         transform-origin: ${x}px ${y}px;
     }`;
 });
 
-const textCss = slotIndices.map(i => css`
-    & #prev_slot${i}_number, 
-    & #slot${i}_number {
+const textCss = (svgIdPrefix: string) => slotIndices.map(i => css`
+    #${svgIdPrefix}_svg& .prev_slot${i}_number, 
+    #${svgIdPrefix}_svg& .slot${i}_number {
         font-family: 'Bahnschrift', sans-serif;
         text-anchor: middle;
         dominant-baseline: central;
@@ -52,14 +52,14 @@ function SlotGradients({ svgIdPrefix, i, prev }: {
     return <>
         <linearGradient
             id={`_${svgIdPrefix}${_prev}_slot${i}_content_back_gradient`}
-            href={`#slot${i}_content_back_gradient`}
+            href={`#${svgIdPrefix}_svg_slot${i}_content_back_gradient`}
         >
             <stop offset="0" stop-color="#ff4b33" />
             <stop offset="1" stop-color="#ffab03" />
         </linearGradient>
         <radialGradient
             id={`_${svgIdPrefix}${_prev}_slot${i}_content_back1_gradient`}
-            href={`#slot${i}_content_back1_gradient`}
+            href={`#${svgIdPrefix}_svg_slot${i}_content_back1_gradient`}
         >
             <stop offset="0" stop-color="#ffab03" />
             <stop offset=".08938" stop-color="#ffab03" stop-opacity=".86889" />
@@ -80,39 +80,40 @@ export function getBBoxCoords(
     return [x + width * anchor[0], y + height * anchor[1]] as [number, number];
 }
 
-const transparentTopCompansationCss = css`& { 
+const transparentTopCompansationCss = (svgIdPrefix: string) => css`#${svgIdPrefix}_svg& { 
     margin-top: -562%; 
     margin-bottom: -41%;
     margin-left: -50%;
     margin-right: -50%;
 }`;
 
-const prevCss = (count: number) => slotIndices.map(i => css`
-    & #prev_slot${i}_content {
+const prevCss = (count: number) => (svgIdPrefix: string) => slotIndices.map(i => css`
+    #${svgIdPrefix}_svg& .prev_slot${i}_content {
         display: ${count <= i ? 'none' : 'unset'};
     }
-    & #slot${i}_content {
+    #${svgIdPrefix}_svg& .slot${i}_content {
         display: none;
     }
 `);
 
-const nextCss = (count: number) => slotIndices.map(i => css`
-    & #prev_slot${i}_content {
+const nextCss = (count: number) => (svgIdPrefix: string) => slotIndices.map(i => css`
+    #${svgIdPrefix}_svg& .prev_slot${i}_content {
         display: none;
     }
-    & #slot${i}_content {
+    #${svgIdPrefix}_svg& .slot${i}_content {
         display: ${count <= i ? 'none' : 'unset'};
     }
 `);
 
-function pourDownAnimationCss({ i, now, start, duration }: {
+function pourDownAnimationCss({ i, now, start, duration, svgIdPrefix }: {
     i: number,
     now: number,
     start: number,
     duration: number,
+    svgIdPrefix: string,
 }) {
     return css`
-        & #slot${i}_content {
+        #${svgIdPrefix}_svg& .slot${i}_content {
             animation: ${keyframes`
                 0%, 30% { transform: translate(0, -400px); }
                 60% { transform: translate(0, 10px); }
@@ -122,7 +123,7 @@ function pourDownAnimationCss({ i, now, start, duration }: {
                 45%, 100% { opacity: 1; }
             `} ${duration}ms ${start - now}ms linear both;
         }
-        & #slot${i}_content_ {
+        #${svgIdPrefix}_svg& .slot${i}_content_ {
             animation: ${keyframes`
                 0%, 60% { transform: scale(1, 1); }
                 70% { transform: scale(1.1, 0.8); }
@@ -133,14 +134,15 @@ function pourDownAnimationCss({ i, now, start, duration }: {
     `;
 }
 
-function pourUpAnimationCss({ i, now, start, duration }: {
+function pourUpAnimationCss({ i, now, start, duration, svgIdPrefix }: {
     i: number,
     now: number,
     start: number,
     duration: number,
+    svgIdPrefix: string,
 }) {
     return css`
-        & #prev_slot${i}_content {
+        #${svgIdPrefix}_svg& .prev_slot${i}_content {
             animation: ${keyframes`
                 0% { transform: translate(0, 0); }
                 50%, 100% { transform: translate(0, -400px); }
@@ -149,7 +151,7 @@ function pourUpAnimationCss({ i, now, start, duration }: {
                 50%, 100% { opacity: 0; }
             `} ${duration}ms ${start - now}ms linear both;
         }
-        & #prev_slot${i}_content_ {
+        #${svgIdPrefix}_svg& .prev_slot${i}_content_ {
             animation: ${keyframes`
                 0% { transform: scale(1, 1); }
                 10% { transform: scale(0.9, 1.05); }
@@ -158,15 +160,16 @@ function pourUpAnimationCss({ i, now, start, duration }: {
         }
     `;
 }
-function cleanAnimationCss({ i, now, start, duration }: {
+function cleanAnimationCss({ i, now, start, duration, svgIdPrefix }: {
     i: number,
     now: number,
     start: number,
     duration: number,
+    svgIdPrefix: string,
 }) {
     const [x, y] = getBBoxCoords(bBoxes[3], [0.5, 0.6]);
     return css`
-    & #prev_slot${i}_content_ {
+    #${svgIdPrefix}_svg& .prev_slot${i}_content_ {
         transform-origin: ${x}px ${y}px;
         animation: ${keyframes`
             0% { transform: scale(1, 1); }
@@ -176,7 +179,7 @@ function cleanAnimationCss({ i, now, start, duration }: {
             100% { transform: scale(2, 0); }
         `} ${duration}ms ${start - now}ms linear both;
     }
-    & #prev_slot${i}_number {
+    #${svgIdPrefix}_svg& .prev_slot${i}_number {
         animation: ${keyframes`
             0%, 22% { opacity: 1; }
             25%, 100% { opacity: 0; }
@@ -190,7 +193,8 @@ function reactAnimationCss({
     prevTube,
     tube,
     reaction,
-    now, start, duration
+    now, start, duration,
+    svgIdPrefix,
 }: {
     prevTube: SubstanceId[],
     tube: SubstanceId[],
@@ -198,25 +202,26 @@ function reactAnimationCss({
     now: number,
     start: number,
     duration: number,
+    svgIdPrefix: string,
 }) {
     return [
         ...slotIndices.map(i => css`
-            & #prev_slot${i}_content {
+            #${svgIdPrefix}_svg& .prev_slot${i}_content {
                 display: ${prevTube.length <= i ? 'none' : 'unset'};
             }
-            & #slot${i}_content {
+            #${svgIdPrefix}_svg& .slot${i}_content {
                 display: ${tube.length <= i ? 'none' : 'unset'};
             }
         `),
         ...reaction.reagents.map((_, i, arr) => css`
-            & #prev_slot${prevTube.length - arr.length + i}_content_ {
+            #${svgIdPrefix}_svg& .prev_slot${prevTube.length - arr.length + i}_content_ {
                 animation: ${keyframes`
                     0% { transform: scale(1); }
                     50%, 100% { transform: scale(0); }
                 `} ${duration}ms ${start - now}ms linear both;
             }`),
         ...reaction.products.map((_, i, arr) => css`
-            & #slot${tube.length - arr.length + i}_content_ {
+            #${svgIdPrefix}_svg& .slot${tube.length - arr.length + i}_content_ {
                 animation: ${keyframes`
                     0%, 50% { transform: scale(0); }
                     100% { transform: scale(1); }
@@ -240,23 +245,23 @@ function TubeSvgRawWithContent({
         const prevColor = substanceColors[prevTube[i]] ?? "#00000000";
         const color = substanceColors[tube[i]] ?? "#00000000";
         return css`
-            & #_${svgIdPrefix}_prev_slot${i}_content_back1_gradient * {
+            #_${svgIdPrefix}_prev_slot${i}_content_back1_gradient * {
                 stop-color: ${prevColor};
             }
-            & #_${svgIdPrefix}_prev_slot${i}_content_back_gradient :nth-child(1) {
+            #_${svgIdPrefix}_prev_slot${i}_content_back_gradient :nth-child(1) {
                 stop-color: ${secondaryColor(prevColor)};
             }
-            & #_${svgIdPrefix}_prev_slot${i}_content_back_gradient :nth-child(2) {
+            #_${svgIdPrefix}_prev_slot${i}_content_back_gradient :nth-child(2) {
                 stop-color: ${prevColor};
             }
 
-            & #_${svgIdPrefix}_slot${i}_content_back1_gradient * {
+            #_${svgIdPrefix}_slot${i}_content_back1_gradient * {
                 stop-color: ${color};
             }
-            & #_${svgIdPrefix}_slot${i}_content_back_gradient :nth-child(1) {
+            #_${svgIdPrefix}_slot${i}_content_back_gradient :nth-child(1) {
                 stop-color: ${secondaryColor(color)};
             }
-            & #_${svgIdPrefix}_slot${i}_content_back_gradient :nth-child(2) {
+            #_${svgIdPrefix}_slot${i}_content_back_gradient :nth-child(2) {
                 stop-color: ${color};
             }
         `;
@@ -264,21 +269,21 @@ function TubeSvgRawWithContent({
     const tubeContentCss = slotIndices.map(i => {
         const isNext = tube.length === i;
         return css`
-            & #prev_slot${i}_content_back {
+            #${svgIdPrefix}_svg& .prev_slot${i}_content_back {
                 fill: url(#_${svgIdPrefix}_prev_slot${i}_content_back_gradient);
             }
-            & #prev_slot${i}_content_back1 {
+            #${svgIdPrefix}_svg& .prev_slot${i}_content_back1 {
                 fill: url(#_${svgIdPrefix}_prev_slot${i}_content_back1_gradient);
             }
 
-            & #slot${i}_content_back {
+            #${svgIdPrefix}_svg& .slot${i}_content_back {
                 fill: url(#_${svgIdPrefix}_slot${i}_content_back_gradient);
             }
-            & #slot${i}_content_back1 {
+            #${svgIdPrefix}_svg& .slot${i}_content_back1 {
                 fill: url(#_${svgIdPrefix}_slot${i}_content_back1_gradient);
             }
 
-            & #slot${i}_add {
+            #${svgIdPrefix}_svg& .slot${i}_add {
                 display: ${isNext ? "unset" : "none"};
             }
         `;
@@ -290,17 +295,18 @@ function TubeSvgRawWithContent({
 
     return <>
         <TubeSvgRaw
+            id={svgIdPrefix + "_svg"}
             className={cx(
-                slotTransformOriginsCss,
-                textCss,
-                transparentTopCompansationCss,
+                slotTransformOriginsCss(svgIdPrefix),
+                textCss(svgIdPrefix),
+                transparentTopCompansationCss(svgIdPrefix),
                 tubeContentCss,
-                noAdd && slotIndices.map(i => css`& #slot${i}_add { display: none; }`),
+                noAdd && slotIndices.map(i => css`#${svgIdPrefix}_svg& .slot${i}_add { display: none; }`),
                 inactive && css`
-                    & #background { opacity: 1; }
-                    & #foreground { opacity: 0; }
+                    #${svgIdPrefix}_svg& .background { opacity: 1; }
+                    #${svgIdPrefix}_svg& .foreground { opacity: 0; }
                 `,
-                prevCss(prevTube.length),
+                prevCss(prevTube.length)(svgIdPrefix),
                 className,
             )}
             slots={{
@@ -358,26 +364,32 @@ export function TubeSvg({
         svgIdPrefix={svgIdPrefix}
         noAdd={noBorder ?? false}
         className={cx(
-            "next" === desc.id && nextCss(tube.length),
+            "next" === desc.id && nextCss(tube.length)(svgIdPrefix),
             "pourDown" === desc.id && [
-                nextCss(tube.length),
+                nextCss(tube.length)(svgIdPrefix),
                 pourDownAnimationCss({
                     i: tube.length - 1,
-                    duration, start, now
+                    duration, start, now,
+                    svgIdPrefix,
                 })],
             "pourUp" === desc.id && [
                 pourUpAnimationCss({
                     i: prevTube.length - 1,
-                    duration, start, now
+                    duration, start, now,
+                    svgIdPrefix,
                 })],
             "clean" === desc.id
             && prevTube.length !== tube.length
-            && [3, 4].map(i => cleanAnimationCss({ i, duration, start, now })),
+            && [3, 4].map(i => cleanAnimationCss({ 
+                i, duration, start, now ,
+                svgIdPrefix,
+            })),
             "react" === desc.id && reactAnimationCss({
                 tube,
                 prevTube,
                 reaction: desc.reaction,
-                duration, start, now
+                duration, start, now,
+                svgIdPrefix,
             }),
             props.className)}
     />;
