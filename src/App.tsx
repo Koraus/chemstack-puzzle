@@ -20,7 +20,7 @@ export function App() {
 
     const isLandscape = useMatchMedia(`(orientation: landscape)`
         + ` and (min-width: ${landscapeWidth}px)`
-        + ` and (min-height: 500px)`);
+        + ` and (min-height: 487px)`);
 
     const main = useMemo(() => <>
         <ReactionsLibrary />
