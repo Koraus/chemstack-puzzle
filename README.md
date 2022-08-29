@@ -3,7 +3,7 @@
 ![An icon on top of game screen](./cover.png "Cover")
 
 ## Play and comment [ChemStack Puzzle](https://ndry.itch.io/chemstack-puzzle) on itch.io
-## Play [development build](https://ndry.github.io/chemstack-puzzle/dist/) on GitHub Pages
+## Play [development build](https://ndry.github.io/chemstack-puzzle/) on GitHub Pages
 
 ## Build
 
