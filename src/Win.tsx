@@ -14,7 +14,8 @@ export const isWinRecoil = selector({
 });
 
 export function WinEffect() {
-    const isWin = useRecoilValue(isWinRecoil);
+    const craftingStateInTime = useRecoilValue(craftingStateInTimeRecoil);
+    const isWin = craftingStateInTime.state.targets.length === 0;
     const level = useRecoilValue(levelPresetRecoil);
     const updGameProgress = useUpdRecoilState(gameProgressState);
     useEffect(() => {

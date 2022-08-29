@@ -12,6 +12,7 @@
     "@emotion-icons/material-rounded": "^3.14.0",
     "@emotion/babel-plugin": "^11.10.0",
     "@emotion/css": "^11.9.0",
+    "@observablehq/plot": "^0.5.2",
     "@preact/compat": "^17.1.1",
     "@preact/preset-vite": "^2.2.0",
     "@types/babel__template": "^7.4.1",

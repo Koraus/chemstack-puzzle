@@ -13,6 +13,7 @@ import { Footer } from "./Footer";
 import { useMemo } from "preact/hooks";
 import { WinFireworks } from "./WinFireworks";
 import { useMatchMedia } from "./utils/useMatchMedia";
+import { Statistics } from "./Statistics";
 
 export function App() {
     const landscapeWidth = 922;
@@ -71,6 +72,7 @@ export function App() {
                         <ResetLevelHeaderButton className={css`& { flex: 1; }`} />
                         <div className={cx(css`& { flex-grow: 999; }`)}></div>
                     </div>
+                    <Statistics />
                     <div className={cx(css`& { flex-grow: 999; }`)}></div>
                     <Footer isHorizontal />
                 </div>
@@ -84,6 +86,8 @@ export function App() {
                 </div>
 
                 {main}
+
+                <Statistics />
 
                 <Footer />
             </div>}
