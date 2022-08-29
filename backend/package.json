@@ -1,0 +1,12 @@
+{
+  "name": "chemstack-puzzle-backend",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^3.14.1",
+    "@types/itty-router-extras": "^0.4.0",
+    "itty-router": "^2.6.1",
+    "itty-router-extras": "^0.4.2"
+  }
+}
