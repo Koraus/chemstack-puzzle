@@ -1,64 +1,102 @@
 import { useRecoilValue } from 'recoil';
-import { craftingActionsRecoil } from './craftingActionsRecoil';
-import { levelPresetRecoil } from "./LevelList";
-import { SubstanceId } from "./crafting";
-import { substanceColors } from './substanceColors';
-type CSSProperties = import("preact").JSX.CSSProperties;
+import { JSX } from "preact";
+import { useState, useEffect } from "preact/hooks";
+import { craftingActionsRecoil, useCraftingState } from './craftingActionsRecoil';
+import { css, cx } from '@emotion/css';
+import { levelPresetRecoil } from './LevelList';
+import { StatsData, getStats, postSolution } from './statsClient';
 
-export function Ingredient({ id: sid }: { id: SubstanceId }) {
-    return <div style={{
-        fontFamily: "Courier",
-        padding: "4px 5px 2px",
-        border: "1px solid",
-        backgroundColor: substanceColors[sid],
-        color: "#ffffffff",
-    }}>{sid}</div>;
+// @ts-ignore no typings
+import * as Plot from "@observablehq/plot";
+
+
+function Chart({ currentValue, data }: {
+    currentValue: number,
+    data: Record<number, {
+        all: number,
+        unique: number,
+    }>
+}) {
+    const x = Plot.plot({
+        width: 200,
+        height: 200,
+        style: {
+            background: "transparent",
+        },
+        marks: [
+            Plot.barY(Object.entries(data), {
+                x: (d: [string, {
+                    all: number,
+                    unique: number,
+                }]) => +d[0],
+                y: (d: [string, {
+                    all: number,
+                    unique: number,
+                }]) => d[1].all,
+            }),
+            // Plot.barY(Object.entries(data), {
+            //     x: (d: [string, {
+            //         all: number,
+            //         unique: number,
+            //     }]) => +d[0],
+            //     y: (d: [string, {
+            //         all: number,
+            //         unique: number,
+            //     }]) => d[1].unique,
+            // }),
+            Plot.ruleX([currentValue], { stroke: "red", strokeWidth: 3, }),
+        ]
+    });
+
+    return <div dangerouslySetInnerHTML={{ __html: x.outerHTML }}></div>;
 }
 
-
-export function Statistics({ style }: { style?: CSSProperties }) {
+export function Statistics({
+    className,
+    ...props
+}: {
+    className?: string;
+    style?: JSX.CSSProperties;
+}) {
+    const levelPreset = useRecoilValue(levelPresetRecoil);
     const actions = useRecoilValue(craftingActionsRecoil);
-    return <div style={{
-        marginTop: "20px",
-        backgroundColor: "#ffffff20",
-        color: "white",
-        ...style,
-    }}>
-        <h3 style={{
-            margin: "0px",
-            backgroundColor: "#ffffff50",
-            paddingLeft: "20px",
-        }}>Statistics</h3>
-        <div style={{
-            paddingLeft: "20px",
-            paddingRight: "20px",
-            paddingBottom: "20px",
-        }}>
-            <div>
-                Action count: {actions.length}
-            </div>
-            <div>
-                Ingredients used:
-                {Object.entries(
-                    actions
-                        .reduce(
-                            (acc, a) => {
-                                if (a.action !== "addIngredient") { return acc; }
-                                return a
-                                    ? { ...acc, [a.ingredientId]: (acc[a.ingredientId] ?? 0) + 1 }
-                                    : acc;
-                            },
-                            {} as Record<SubstanceId, number>)
-                ).map(([id, count]) => <div style={{
-                    display: "flex",
-                    flexDirection: "row-reverse",
-                }}>
-                    <Ingredient id={Number(id)} />{count}&nbsp;x&nbsp;
-                </div>)}
-            </div>
-            <div>
-                Max tubes in use: TBD
-            </div>
+    const craftingStateInTime = useCraftingState();
+    const [remoteStats, setRemoteStats] = useState<StatsData>();
+    const isWin = craftingStateInTime.state.targets.length === 0;
+    useEffect(() => {
+        let isCancelled = false;
+        (async () => {
+            const remoteStats = await getStats(levelPreset);
+            if (isCancelled) { return; }
+            setRemoteStats(remoteStats);
+        })();
+        () => isCancelled = true;
+    }, [levelPreset]);
+    useEffect(() => {
+        if (!isWin) { return; }
+        let isCancelled = false;
+        (async () => {
+            const res = await postSolution(levelPreset, actions);
+            if (isCancelled) { return; }
+            setRemoteStats(res.data);
+        })();
+        () => isCancelled = true;
+    }, [isWin]);
+    return <div
+        className={cx(
+            css`&{ color: white; }`,
+            className,
+        )}
+        {...props}
+    >
+        <div>
+            Action count: {actions.length}
+
+        </div>
+        <div>
+            {remoteStats
+                ? <Chart currentValue={actions.length} data={remoteStats.actionCount} />
+                : "loading..."}
         </div>
     </div>;
 }

@@ -1,0 +1,17 @@
+name = "chemstack-puzzle-backend"
+main = "./src/index.ts"
+
+compatibility_date = "2022-07-29"
+
+account_id = "<fill in>"
+route = "<fill in>"
+workers_dev = false
+
+node_compat = true
+
+[durable_objects]
+bindings = [{name = "STATS", class_name = "Stats"}]
+
+[[migrations]]
+tag = "v1" # Should be unique for each entry
+new_classes = ["Stats"]
