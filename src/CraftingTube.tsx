@@ -41,6 +41,17 @@ export function CraftingTube({ style }: {
                         `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                     }
                 `,
+                craftingState.id === "craftingAct"
+                && craftingState.diffCustom.action === "swapTubes"
+                && css`
+                    & {
+                        transform-origin: bottom;
+                        animation: ${keyframes`
+                            0% { transform: scale(1);  translate(0, 0)}
+                            100% { transform: scale(0.65) translate(-110px, -25px) ;}
+                        `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
+                    }
+                `,
                 craftingState.id === 'craftingAct'
                 && craftingState.diffCustom.action === 'trashTube'
                 && css`
@@ -80,7 +91,7 @@ export function CraftingTube({ style }: {
                             case "addIngredient": return { id: "pourDown" };
                             case "addTube": return { id: "next" };
                             case "pourFromMainIntoSecondary": return { id: "pourUp" };
-                            case "pourFromSecondaryIntoMain": return { id: "pourDown" };
+                            case "pourFromSecondaryIntoMain": return { id: "pourDown" };           
                         }
                     }
                     if (craftingState.id === "craftingReact" && reaction) {

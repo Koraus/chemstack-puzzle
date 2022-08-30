@@ -26,6 +26,9 @@ export type CraftingAction = {
 } | {
     action: "pourFromMainIntoSecondary",
     time: number,
+} | {
+    action: "swapTubes",
+    time: number,
 };
 
 export type CraftingState = {
@@ -60,6 +63,12 @@ export function craftingAct(
                     1: { $splice: [[state.tubes[1].length - 1]] },
                 }
             };
+            case "swapTubes": return {
+                tubes:{
+                     0: { $set: state.tubes[1] },
+                     1: { $set: state.tubes[0] } 
+                    }
+            }
         }
     })(state);
     return {
