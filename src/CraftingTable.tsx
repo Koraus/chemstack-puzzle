@@ -17,6 +17,7 @@ import { tutorialRecoil } from './tutorialRecoil';
 import { CraftingSecondaryTubes } from './CraftingSecondaryTubes';
 import { GlobalBackground } from './GlobalBackground';
 import { CraftingIngredientPanel } from './CraftingIngredientPanel';
+import { SwapHoriz } from '@emotion-icons/material-rounded/SwapHoriz';
 
 
 export function CraftingTable() {
@@ -24,13 +25,13 @@ export function CraftingTable() {
     const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
     const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
 
-    const  { tubes } = useRecoilValue(craftingStateInTimeRecoil).state;
+    const { tubes } = useRecoilValue(craftingStateInTimeRecoil).state;
     const isWin = useRecoilValue(isWinRecoil);
 
     const tutorial = useRecoilValue(tutorialRecoil);
     const hintReset = tutorial.some(t => t.kind === "reset");
     const hintAddTube = tutorial.some(t => t.kind === "addTube");
-    
+
     const craftingStateInTime = useCraftingState();
     const isCraftingIdle = craftingStateInTime.currentState.id === "craftingIdle";
 
@@ -62,8 +63,19 @@ export function CraftingTable() {
                 ...flex.rowS,
                 justifyContent: "space-between",
             }}>
-                <button style={{position: "absolute", left: "0"}} 
-                         onClick={() => act({ action: "swapTubes", time: performance.now() })}> swapTubes </button>
+                <button className={buttonCss}
+                    style={{
+                        ...flex.rowS,
+                        alignItems: "center",
+                        position: "absolute", left: "15%"
+                    }}
+                    disabled={tubes.length === 1}
+                    onClick={() => act({ action: "swapTubes", time: performance.now() })}>
+                    <SwapHoriz style={{
+                        height: "33px",
+                        color: "gray",
+                    }} />
+                </button>
                 <button
                     className={buttonCss}
                     style={{
