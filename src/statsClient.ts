@@ -9,10 +9,11 @@ export type StatsData = {
     }>;
 }
 
+const useProdBackIndev = true;
 const backUrl =
-    import.meta.env.DEV
-        ? "http://127.0.0.1:8787/"
-        : "https://chems.x-pl.art/";
+    (useProdBackIndev || !import.meta.env.DEV)
+        ? "https://chems.x-pl.art/"
+        : "http://127.0.0.1:8787/";
 
 type LevelPreset = Omit<typeof levelPresets[0], "name">;
 

@@ -1,13 +1,13 @@
 import { atom, selector } from "recoil";
 import { CraftingAction, craftingReduce, CraftingState, SubstanceId } from "./crafting";
-import { craftingTargetsRecoil } from "./craftingTargetsRecoil";
-import { reactionsLibraryRecoil } from "./ReactionsLibrary";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { useRecoilValue } from "recoil";
 import { useEffect, useState } from "preact/hooks";
 import { CompositeKeyWeekMap } from "./utils/CompositeKeyWeekMap";
 import { levelPresetRecoil } from "./LevelList";
 import { levelPresets } from "./levelPresets";
+import { getProblemReactions } from "./puzzle/reactions";
+import { getProblemTargets } from "./puzzle/targets";
 
 export const craftingActionsRecoil = atom({
     key: "craftingActions",
@@ -30,8 +30,8 @@ export const craftingStateInTimeRecoil = selector({
         const cache = craftingStateInTimeCache;
 
         const actions = get(craftingActionsRecoil);
-        const reactions = get(reactionsLibraryRecoil);
-        const targets = get(craftingTargetsRecoil);
+        const reactions = getProblemReactions(get(levelPresetRecoil));
+        const targets = getProblemTargets(get(levelPresetRecoil));
 
         const prevAction = actions[actions.length - 2];
         const action = actions[actions.length - 1];
@@ -41,7 +41,7 @@ export const craftingStateInTimeRecoil = selector({
             (cachedState && craftingReduce({ reactions }, action, cachedState))
             ?? actions.reduce(
                 (prev, action) => craftingReduce({ reactions }, action, prev.state),
-                { state: { tubes: [[]], targets } } as CraftingStateInTime);
+                { state: { tubes: [[]], targets, isSolved: false } } as CraftingStateInTime);
         action && cache.set([action, targets, reactions], s.state);
         return s;
     }

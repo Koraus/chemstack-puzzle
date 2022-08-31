@@ -2,31 +2,23 @@ import { selector, useRecoilValue } from 'recoil';
 import * as flex from './utils/flex';
 import { levelPresetRecoil } from './LevelList';
 import { substanceColors } from './substanceColors';
-import { Reaction } from './crafting';
 import { KeyboardArrowUp } from '@emotion-icons/material-rounded/KeyboardArrowUp';
-import { generateReactionsLibrary } from './generateReactionsLibrary';
+import { getProblemReactions } from './puzzle/reactions';
 import { useCraftingState } from './craftingActionsRecoil';
 import { tutorialRecoil } from './tutorialRecoil';
 import { css, cx, keyframes } from '@emotion/css';
+import { Reaction } from './puzzle/reactions';
 type CSSProperties = import("preact").JSX.CSSProperties;
 
-export const reactionsLibraryRecoil = selector({
-    key: "reactionsLibrary",
-    get: ({ get }) => {
-        const levelPreset = get(levelPresetRecoil);
-        return generateReactionsLibrary(levelPreset)
-            .sort((r1, r2) => r1.reagents[0] - r2.reagents[0])
-            .filter(r => [...r.reagents, ...r.products]
-                .every(sid => sid < levelPreset.substanceCount));
-    }
-})
 
 export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
+    const levelPreset = useRecoilValue(levelPresetRecoil);
+    const reactions =  getProblemReactions(levelPreset);
+
     const craftingStateInTime = useCraftingState();
     const { tubes } = craftingStateInTime.currentState.state;
     const mainTube = tubes[0];
     const currentSubstance = mainTube[mainTube.length - 1];
-    const reactions = useRecoilValue(reactionsLibraryRecoil);
     const tutorial = useRecoilValue(tutorialRecoil);
     const now = craftingStateInTime.currentTime;
 
@@ -64,16 +56,11 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                 <IngredientSlot sid={reaction.products[2]} />
                 <IngredientSlot sid={reaction.products[1]} />
                 <IngredientSlot sid={reaction.products[0]} />
-                <KeyboardArrowUp
-                    style={{
-                        color:
-                            isPending
-                                ? "yellow"
-                                : isApplicable ? "white" : "#ffffff30",
-                        fontSize: "19px",
-                        height: "18px",
-                    }}
-                />
+                <KeyboardArrowUp className={css`& {
+                    color: ${ isPending ? "yellow" : isApplicable ? "white" : "#ffffff30"};
+                    font-size: 19px;
+                    height: 18px;
+                }`} />
                 <IngredientSlot sid={reaction.reagents[1]} />
                 <IngredientSlot sid={reaction.reagents[0]} />
             </div>

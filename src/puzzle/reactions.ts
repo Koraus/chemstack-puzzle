@@ -1,13 +1,25 @@
-import { Reaction, SubstanceId } from './crafting';
-import { createRand } from './utils/createRand';
-import { apipe } from './utils/apipe';
-import * as it from "./utils/it";
+import { SubstanceId } from '../crafting';
+import { createRand } from '../utils/createRand';
+import { apipe } from '../utils/apipe';
+import * as it from "../utils/it";
+import memoize from "memoizee";
 
+export type Reaction = {
+    reagents:
+    [SubstanceId, SubstanceId],
+    products:
+    [SubstanceId]
+    | [SubstanceId, SubstanceId]
+    | [SubstanceId, SubstanceId, SubstanceId],
+};
 
-export function generateReactionsLibrary({ seed, substanceMaxCount }: {
-    seed: string;
-    substanceMaxCount: number;
-}) {
+export const getAllReactions = memoize(({
+    seed,
+    substanceMaxCount,
+}: {
+    seed: string,
+    substanceMaxCount: number,
+}) => {
     const f1p = <T>(all: T[], sub: T[]) => all
         .filter(x => sub.indexOf(x) < 0)
         .map(r => [...sub, r]);
@@ -118,5 +130,28 @@ export function generateReactionsLibrary({ seed, substanceMaxCount }: {
         return sidRevMap1;
     })();
 
-    return remapSids(reactions, sidRevMap);
-}
+    return remapSids(reactions, sidRevMap)
+        .sort((r1, r2) => r1.reagents[0] - r2.reagents[0]);
+}, {
+    max: 1,
+    normalizer: ([{ seed, substanceMaxCount }]) =>
+        JSON.stringify({ seed, substanceMaxCount }),
+});
+
+export const getProblemReactions = memoize(({
+    seed,
+    substanceMaxCount,
+    substanceCount,
+}: {
+    seed: string,
+    substanceMaxCount: number,
+    substanceCount: number,
+}) => {
+    import.meta.env.DEV && console.log("call", "getProblemReactions");
+    return getAllReactions({ seed, substanceMaxCount })
+        .filter(r => [...r.reagents, ...r.products].every(sid => sid < substanceCount));
+}, {
+    max: 1,
+    normalizer: ([{ seed, substanceMaxCount, substanceCount }]) =>
+        JSON.stringify({ seed, substanceMaxCount, substanceCount }),
+});

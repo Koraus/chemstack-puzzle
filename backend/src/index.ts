@@ -2,8 +2,8 @@ import { Router } from 'itty-router';
 import { json, error, withContent, status } from 'itty-router-extras';
 import { CraftingAction, craftingReduce } from "../../src/crafting";
 import { levelPresets } from "../../src/levelPresets";
-import { generateReactionsLibrary } from '../../src/generateReactionsLibrary';
-import { generateCraftingTargets } from "../../src/generateCraftingTargets";
+import { getProblemReactions } from '../../src/puzzle/reactions';
+import { getProblemTargets } from "../../src/puzzle/targets";
 import { clientifyStatsStub } from './Stats';
 import { Env } from './Env';
 import SHA256 from "crypto-js/sha256";
@@ -81,16 +81,13 @@ const router = Router()
             solution: CraftingAction[],
         };
 
-        const reactions = generateReactionsLibrary(levelPreset)
-            .sort((r1, r2) => r1.reagents[0] - r2.reagents[0])
-            .filter(r => [...r.reagents, ...r.products]
-                .every(sid => sid < levelPreset.substanceCount));
-        const targets = generateCraftingTargets({ ...levelPreset, reactions });
+        const reactions = getProblemReactions(levelPreset);
+        const targets = getProblemTargets(levelPreset);
         const finalState = solution.reduce(
             (prev, action) => craftingReduce({ reactions }, action, prev.state),
-            { state: { tubes: [[]], targets } } as CraftingStateInTime);
+            { state: { tubes: [[]], targets, isSolved: false } } as CraftingStateInTime);
 
-        if (finalState.state.targets.length > 0) {
+        if (!finalState.state.isSolved) {
             throw new Error("the solution in not complete");
         }
 

@@ -17,6 +17,8 @@ function Chart({ currentValue, data }: {
         unique: number,
     }>
 }) {
+    const max = Math.max(...Object.keys(data).map(Number));
+    const data1 = Array.from({ length: max + 2 }, (_, i) => [i, data[i]]);
     const x = Plot.plot({
         width: 200,
         height: 200,
@@ -24,17 +26,17 @@ function Chart({ currentValue, data }: {
             background: "transparent",
         },
         marks: [
-            Plot.barY(Object.entries(data), {
+            Plot.barY(data1, {
                 x: (d: [string, {
                     all: number,
                     unique: number,
-                }]) => +d[0],
+                }]) => d[0],
                 y: (d: [string, {
                     all: number,
                     unique: number,
-                }]) => d[1].all,
+                }]) => d[1]?.all ?? 0,
             }),
-            // Plot.barY(Object.entries(data), {
+            // Plot.barY(data1, {
             //     x: (d: [string, {
             //         all: number,
             //         unique: number,
@@ -42,7 +44,7 @@ function Chart({ currentValue, data }: {
             //     y: (d: [string, {
             //         all: number,
             //         unique: number,
-            //     }]) => d[1].unique,
+            //     }]) => d[1]?.unique ?? 0,
             // }),
             Plot.ruleX([currentValue], { stroke: "red", strokeWidth: 3, }),
         ]

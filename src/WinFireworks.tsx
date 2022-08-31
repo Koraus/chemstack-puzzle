@@ -10,10 +10,8 @@ export function WinFireworks({
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const craftingStateInTime = useCraftingState();
-    const craftingState = craftingStateInTime.currentState;
-    const currentIsWin = craftingState.state.targets.length === 0;
-    return <>{currentIsWin && <Fireworks {...props} className={cx(css`& {
+    const { isSolved } = useCraftingState().currentState.state;
+    return <>{isSolved && <Fireworks {...props} className={cx(css`& {
         pointer-events: none;
     }`, className)} />}</>;
 }

@@ -1,14 +1,7 @@
 import update, { Spec } from 'immutability-helper';
+import { Reaction } from './puzzle/reactions';
 
 export type SubstanceId = number;
-export type Reaction = {
-    reagents:
-    [SubstanceId, SubstanceId],
-    products:
-    [SubstanceId]
-    | [SubstanceId, SubstanceId]
-    | [SubstanceId, SubstanceId, SubstanceId],
-}
 
 export type CraftingAction = {
     action: "addIngredient",
@@ -34,6 +27,7 @@ export type CraftingAction = {
 export type CraftingState = {
     tubes: SubstanceId[][],
     targets: SubstanceId[][],
+    isSolved: boolean,
 }
 
 export function craftingAct(
@@ -64,10 +58,10 @@ export function craftingAct(
                 }
             };
             case "swapTubes": return {
-                tubes:{
-                     0: { $set: state.tubes[1] },
-                     1: { $set: state.tubes[0] } 
-                    }
+                tubes: {
+                    0: { $set: state.tubes[1] },
+                    1: { $set: state.tubes[0] }
+                }
             }
         }
     })(state);
@@ -91,7 +85,7 @@ export function craftingReact(
             && r.reagents[0] === tube[tube.length - 2])] as const)
         .filter((x): x is [number, Reaction] => x[1] !== undefined);
 
-    const diff =  {
+    const diff = {
         tubes: {
             ...(Object.fromEntries(applicableReactions.map(([i, r]) => ([i, {
                 $splice: [[state.tubes[i].length - 2, 2, ...r.products]]
@@ -149,6 +143,7 @@ export function craftingGiveaway(
                     ? { $splice: [[tubeToGiveAwayIndex, 1]] }
                     : { 0: { $set: [] } },
                 targets: { $splice: [[0, 1]] },
+                isSolved: { $set: state.targets.length === 1 },
             } : {};
     return {
         id: "craftingGiveaway" as const,

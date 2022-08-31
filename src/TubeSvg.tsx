@@ -1,10 +1,11 @@
-import { Reaction, SubstanceId } from "./crafting";
+import { SubstanceId } from "./crafting";
 import { hexColorToRgb, rgbToHsl, substanceColors } from "./substanceColors";
 import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
 import { ReactComponent as TubeSvgRaw } from "./tube.svg";
 import { StateTransition } from "./StateTransition";
 import { memo } from "preact/compat";
+import { Reaction } from "./puzzle/reactions";
 
 const secondaryColor = (hexColor: string) => {
     const { h, s, l } = rgbToHsl(hexColorToRgb(hexColor));

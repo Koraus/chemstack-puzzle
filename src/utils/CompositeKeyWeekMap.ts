@@ -1,9 +1,5 @@
-type CompositeKeyWeekMapEntry<V> = {
-    map?: CompositeKeyWeekMap<V>;
-    value?: V;
-}
 export class CompositeKeyWeekMap<V> {
-    map = new WeakMap<object, CompositeKeyWeekMapEntry<V>>();
+    map = new WeakMap<object, { map?: CompositeKeyWeekMap<V>; value?: V; }>();
     get([firstKey, ...restKeys]: object[]): V | undefined {
         const entry = this.map.get(firstKey);
         return restKeys.length === 0
