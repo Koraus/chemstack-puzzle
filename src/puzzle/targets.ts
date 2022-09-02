@@ -11,7 +11,6 @@ export const getProblemTargets = memoize(({
     substanceMaxCount: number,
     substanceCount: number,
 }) => {
-    import.meta.env.DEV && console.log("call", "getProblemTargets");
     const reactions = getProblemReactions({ seed, substanceMaxCount, substanceCount });
     return targets.map(targetSeed => {
         const checkReactivity = true;

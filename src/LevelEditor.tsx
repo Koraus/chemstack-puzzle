@@ -1,14 +1,12 @@
-import { useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import update from "immutability-helper";
-import { craftingActionsRecoil } from './craftingActionsRecoil';
-import { levelPresetRecoil } from './LevelList';
+import { solutionRecoil, useSetProblem } from './craftingActionsRecoil';
 import { buttonCss } from './buttonCss';
 import { cx, css } from '@emotion/css';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Remove } from '@emotion-icons/material-rounded/Remove';
 import * as flex from "./utils/flex";
 import { Dice } from '@emotion-icons/ionicons-outline/Dice';
-
 
 
 type CSSProperties = import("preact").JSX.CSSProperties;
@@ -40,11 +38,8 @@ function NumberInput({ value, onValueChange }: {
 }
 
 export function LevelEditor({ style }: { style?: CSSProperties }) {
-    const levelPreset = useRecoilValue(levelPresetRecoil);
-    const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
-        set(levelPresetRecoil, lp);
-        set(craftingActionsRecoil, []);
-    });
+    const levelPreset = useRecoilValue(solutionRecoil).problem;
+    const setLevelPreset = useSetProblem();
 
     return <div style={{
         color: "white",

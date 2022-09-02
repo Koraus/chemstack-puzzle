@@ -1,4 +1,4 @@
-import { SubstanceId } from "./crafting";
+import { SubstanceId } from "./puzzle/state";
 import { hexColorToRgb, rgbToHsl, substanceColors } from "./substanceColors";
 import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";

@@ -1,10 +1,9 @@
-import { selector, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import * as flex from './utils/flex';
-import { levelPresetRecoil } from './LevelList';
 import { substanceColors } from './substanceColors';
 import { KeyboardArrowUp } from '@emotion-icons/material-rounded/KeyboardArrowUp';
 import { getProblemReactions } from './puzzle/reactions';
-import { useCraftingState } from './craftingActionsRecoil';
+import { solutionRecoil, useCraftingState } from './craftingActionsRecoil';
 import { tutorialRecoil } from './tutorialRecoil';
 import { css, cx, keyframes } from '@emotion/css';
 import { Reaction } from './puzzle/reactions';
@@ -12,8 +11,8 @@ type CSSProperties = import("preact").JSX.CSSProperties;
 
 
 export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
-    const levelPreset = useRecoilValue(levelPresetRecoil);
-    const reactions =  getProblemReactions(levelPreset);
+    const problem = useRecoilValue(solutionRecoil).problem;
+    const reactions =  getProblemReactions(problem);
 
     const craftingStateInTime = useCraftingState();
     const { tubes } = craftingStateInTime.currentState.state;

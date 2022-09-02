@@ -1,15 +1,14 @@
 import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
-import { craftingStateInTimeRecoil, useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingState } from "./craftingActionsRecoil";
 import { PourFromMainIntoSecondaryButton } from "./PourFromMainIntoSecondaryButton";
 import { TubeSvg } from "./TubeSvg";
-import { useRecoilValue } from "recoil";
 
 
 export function CraftingTube({ style }: {
     style?: JSX.CSSProperties;
 }) {
-    const finalState = useRecoilValue(craftingStateInTimeRecoil).state;
+    const finalState = useCraftingState().state;
     const finalTube = finalState.tubes[0];
     const isSecondaryAvailable = finalState.tubes.length > 1;
 
@@ -19,7 +18,7 @@ export function CraftingTube({ style }: {
     
 
     const reaction =
-        craftingState.id === "craftingReact"
+        craftingState.id === "react"
         && craftingState.diffCustom.find(d => d[0] === 0)?.[1];
 
     return <div className={cx(css`& {
@@ -29,7 +28,7 @@ export function CraftingTube({ style }: {
         <TubeSvg
             svgIdPrefix="CraftingTube"
             className={cx(
-                craftingState.id === "craftingAct"
+                craftingState.id === "act"
                 && craftingState.diffCustom.action === "addTube"
                 && css`
                     & {
@@ -40,7 +39,7 @@ export function CraftingTube({ style }: {
                         `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                     }
                 `,
-                craftingState.id === "craftingAct"
+                craftingState.id === "act"
                 && craftingState.diffCustom.action === "swapTubes"
                 && css`
                     & {
@@ -51,7 +50,7 @@ export function CraftingTube({ style }: {
                         `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                     }
                 `,
-                craftingState.id === 'craftingAct'
+                craftingState.id === 'act'
                 && craftingState.diffCustom.action === 'trashTube'
                 && css`
                     & {
@@ -62,7 +61,7 @@ export function CraftingTube({ style }: {
                         `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                         } 
                     `,
-                craftingState.id === 'craftingGiveaway'
+                craftingState.id === 'giveaway'
                 && craftingState.diffCustom === 0
                 && css`
                     & {
@@ -85,7 +84,7 @@ export function CraftingTube({ style }: {
                 start: craftingState.start,
                 duration: craftingState.duration,
                 desc: (() => {
-                    if (craftingState.id === "craftingAct") {
+                    if (craftingState.id === "act") {
                         switch (craftingState.diffCustom.action) {
                             case "addIngredient": return { id: "pourDown" };
                             case "addTube": return { id: "next" };
@@ -93,13 +92,13 @@ export function CraftingTube({ style }: {
                             case "pourFromSecondaryIntoMain": return { id: "pourDown" };           
                         }
                     }
-                    if (craftingState.id === "craftingReact" && reaction) {
+                    if (craftingState.id === "react" && reaction) {
                         return { id: "react", reaction };
                     }
-                    if (craftingState.id === "craftingCleanup") {
+                    if (craftingState.id === "cleanup") {
                         return { id: "clean" };
                     }
-                    if (craftingState.id === "craftingGiveaway") {
+                    if (craftingState.id === "giveaway") {
                         return { id: "prev" };
                     }
                     return { id: "prev" };

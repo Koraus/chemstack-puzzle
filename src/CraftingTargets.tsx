@@ -1,32 +1,14 @@
 import { css, cx, keyframes } from "@emotion/css";
-import { useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from "recoil";
+import { useRecoilValue } from "recoil";
 import { buttonCss } from "./buttonCss";
-import { levelPresetRecoil } from "./LevelList";
 import * as flex from "./utils/flex";
 import { DoubleArrow } from '@emotion-icons/material-rounded/DoubleArrow';
-import { levelPresets } from "./levelPresets";
 import { TouchAppAnimation } from "./TouchAppAnimation";
-import { craftingActionsRecoil, useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingState, useSetNextProblem } from "./craftingActionsRecoil";
 import { tutorialRecoil } from "./tutorialRecoil";
 import { JSX } from "preact";
 import { TubeSvg } from "./TubeSvg";
-import { SubstanceId } from "./crafting";
-
-const useSetNextLevel = () => {
-    const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
-        set(levelPresetRecoil, lp)
-        set(craftingActionsRecoil, []);
-    });
-    const [levelPreset] = useRecoilState(levelPresetRecoil);
-    let currentLevelIndex = levelPresets
-        .findIndex(lp => lp.name === levelPreset.name);
-    if (currentLevelIndex < 0) {
-        currentLevelIndex = 0;
-    }
-    const nextLevelIndex = (currentLevelIndex + 1) % levelPresets.length;
-    const setNextLevel = () => setLevelPreset(levelPresets[nextLevelIndex]);
-    return setNextLevel;
-}
+import { SubstanceId } from "./puzzle/state";
 
 const fakeEmptyTube = [] as SubstanceId[];
 function Tube({ revI, ...props }: {
@@ -34,7 +16,7 @@ function Tube({ revI, ...props }: {
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const setNextLevel = useSetNextLevel();
+    const setNextLevel = useSetNextProblem();
 
     const craftingStateInTime = useCraftingState();
     const now = craftingStateInTime.currentTime;
@@ -119,7 +101,7 @@ export function CraftingTargets({ style, className }: {
 
     const tutorial = useRecoilValue(tutorialRecoil);
     const hintNext = tutorial.some(t => t.kind === "next")
-        && craftingState.id === "craftingIdle";
+        && craftingState.id === "idle";
 
     const tubes = craftingState.state.targets;
     const prevTubes = craftingState.prevState.targets;
@@ -170,7 +152,7 @@ export function CraftingTargets({ style, className }: {
                 <Tube
                     revI={revI}
                     className={cx(
-                        craftingState.id === 'craftingGiveaway'
+                        craftingState.id === 'giveaway'
                         && i > 0
                         && css`& {
                             animation: ${keyframes`
@@ -178,7 +160,7 @@ export function CraftingTargets({ style, className }: {
                                 100% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
                             `} ${duration}ms ${start - now}ms both linear;
                         } `,
-                        craftingState.id === 'craftingGiveaway'
+                        craftingState.id === 'giveaway'
                         && i === 0
                         && css`& {
                             animation: ${keyframes`

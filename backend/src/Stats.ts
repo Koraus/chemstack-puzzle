@@ -1,5 +1,6 @@
 import { Router } from 'itty-router';
 import { error, json } from 'itty-router-extras';
+import { State } from '../../src/puzzle/state';
 import { Env } from './Env';
 
 type StatsData = {
@@ -39,9 +40,7 @@ export class Stats {
         }
     })();
 
-    async add(solutionId: string, solutionStats: {
-        actionCount: number,
-    }) {
+    async add(solutionId: string, solutionStats: State["stats"]) {
         const [isSolutionRegisteredForActionCount, data] = await Promise.all([
             this.isSolutionRegistered.get(solutionId, "actionCount"),
             this.data.get(),

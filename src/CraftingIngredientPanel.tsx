@@ -1,13 +1,12 @@
-import { SubstanceId } from "./crafting";
+import { SubstanceId } from "./puzzle/state";
 import { CraftingIngredientButton } from "./CraftingIngredientButton";
 import { JSX } from "preact";
 import { useRecoilValue } from "recoil";
 import { tutorialRecoil } from "./tutorialRecoil";
-import { levelPresetRecoil } from "./LevelList";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import * as flex from "./utils/flex";
 import { css, cx } from "@emotion/css";
-import { useCraftingState } from "./craftingActionsRecoil";
+import { solutionRecoil, useCraftingState } from "./craftingActionsRecoil";
 
 
 export function CraftingIngredientPanel({
@@ -21,7 +20,7 @@ export function CraftingIngredientPanel({
         t.kind === "addIngredient"
         && t.ingredientId === sid);
 
-    const { ingredientCount } = useRecoilValue(levelPresetRecoil);
+    const { ingredientCount } = useRecoilValue(solutionRecoil).problem;
     const ingredients = Array.from({ length: ingredientCount }, (_, i) => i);
 
     const touchAppAnimationCss = css`& {
@@ -31,7 +30,7 @@ export function CraftingIngredientPanel({
     }`;
     
     const craftingStateInTime = useCraftingState();
-    const isCraftingIdle = craftingStateInTime.currentState.id === "craftingIdle";
+    const isCraftingIdle = craftingStateInTime.currentState.id === "idle";
 
     return <div
         className={cx(

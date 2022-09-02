@@ -1,8 +1,7 @@
-import { useRecoilTransaction_UNSTABLE } from 'recoil';
 import { css, cx } from "@emotion/css";
 import { JSX } from "preact";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
-import { craftingActionsRecoil } from './craftingActionsRecoil';
+import { useCraftingReset } from './craftingActionsRecoil';
 
 
 export function ResetLevelHeaderButton({
@@ -11,9 +10,7 @@ export function ResetLevelHeaderButton({
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const reset = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        set(craftingActionsRecoil, []);
-    });
+    const reset = useCraftingReset();
 
     return <div {...props} className={cx(css`& {
         
@@ -28,7 +25,6 @@ export function ResetLevelHeaderButton({
             }`}
             href="#"
             onClick={() => reset()}
-        > <Refresh style={{ height: "100%" }} />
-        </a>
+        ><Refresh style={{ height: "100%" }} /></a>
     </div>;
 }

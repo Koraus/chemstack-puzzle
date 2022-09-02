@@ -6,6 +6,7 @@
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "rootDir": "../",
+    "noEmit": true,
     "types": ["@cloudflare/workers-types"]
   },
   "files": ["src/index.ts"]

@@ -1,9 +1,8 @@
 import { useRecoilValue } from 'recoil';
 import { JSX } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import { craftingActionsRecoil, useCraftingState } from './craftingActionsRecoil';
+import { solutionRecoil, useCraftingState } from './craftingActionsRecoil';
 import { css, cx } from '@emotion/css';
-import { levelPresetRecoil } from './LevelList';
 import { StatsData, getStats, postSolution } from './statsClient';
 
 // @ts-ignore no typings
@@ -60,25 +59,24 @@ export function Statistics({
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const levelPreset = useRecoilValue(levelPresetRecoil);
-    const actions = useRecoilValue(craftingActionsRecoil);
+    const { actions, problem } = useRecoilValue(solutionRecoil);
     const craftingStateInTime = useCraftingState();
     const [remoteStats, setRemoteStats] = useState<StatsData>();
     const isWin = craftingStateInTime.state.targets.length === 0;
     useEffect(() => {
         let isCancelled = false;
         (async () => {
-            const remoteStats = await getStats(levelPreset);
+            const remoteStats = await getStats(problem);
             if (isCancelled) { return; }
             setRemoteStats(remoteStats);
         })();
         () => isCancelled = true;
-    }, [levelPreset]);
+    }, [problem]);
     useEffect(() => {
         if (!isWin) { return; }
         let isCancelled = false;
         (async () => {
-            const res = await postSolution(levelPreset, actions);
+            const res = await postSolution(problem, actions);
             if (isCancelled) { return; }
             setRemoteStats(res.data);
         })();
@@ -92,7 +90,7 @@ export function Statistics({
         {...props}
     >
         <div>
-            Action count: {actions.length}
+            {JSON.stringify(craftingStateInTime.currentState.state.stats)}
 
         </div>
         <div>

@@ -1,12 +1,10 @@
 import { GetRecoilValue, selector } from "recoil";
-import { craftingStateInTimeRecoil } from "./craftingActionsRecoil";
-import { levelPresetRecoil } from "./LevelList";
-import { levelPresets } from "./levelPresets";
+import { solutionRecoil, useCraftingState } from "./craftingActionsRecoil";
+import { problems } from "./puzzle/problems";
 
 const tutorialMap = {
-    [levelPresets[0].name]: function* (get: GetRecoilValue) {
-        const craftingStateInTime = get(craftingStateInTimeRecoil);
-        const { tubes, targets } = craftingStateInTime.state;
+    [problems[0].name]: function* (get: GetRecoilValue) {
+        const { tubes, targets } = useCraftingState().state;
 
         if (targets.length === 0) {
             yield { kind: "next" as const };
@@ -29,9 +27,8 @@ const tutorialMap = {
             slotIndex: tube.length,
         }];
     },
-    [levelPresets[1].name]: function* (get: GetRecoilValue) {
-        const craftingStateInTime = get(craftingStateInTimeRecoil);
-        const { tubes, targets } = craftingStateInTime.state;
+    [problems[1].name]: function* (get: GetRecoilValue) {
+        const { tubes, targets } = useCraftingState().state;
 
         if (targets.length === 0) {
             yield { kind: "next" as const };
@@ -92,9 +89,8 @@ const tutorialMap = {
             slotIndex: tube.length,
         }];
     },
-    [levelPresets[3].name]: function* (get: GetRecoilValue) {
-        const craftingStateInTime = get(craftingStateInTimeRecoil);
-        const { tubes, targets } = craftingStateInTime.state;
+    [problems[3].name]: function* (get: GetRecoilValue) {
+        const { tubes, targets } = useCraftingState().state;
 
         if (targets.length === 0) {
             yield { kind: "next" as const };
@@ -172,8 +168,8 @@ const tutorialMap = {
 export const tutorialRecoil = selector({
     key: "tutrial",
     get: ({ get }) => {
-        const levelPreset = get(levelPresetRecoil);
-        const tutrialGenerator = tutorialMap[levelPreset.name];
+        const { problem } = get(solutionRecoil);
+        const tutrialGenerator = tutorialMap[problem.name];
         return tutrialGenerator
             ? [...tutrialGenerator(get)]
             : [];

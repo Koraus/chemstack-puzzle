@@ -1,29 +1,23 @@
-import { selector, useRecoilValue } from 'recoil';
-import { gameProgressState, levelPresetRecoil } from "./LevelList";
+import { useRecoilValue } from 'recoil';
+import { gameProgressState } from "./LevelList";
 import { useEffect } from "preact/hooks";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import * as amplitude from "@amplitude/analytics-browser";
-import { craftingStateInTimeRecoil } from './craftingActionsRecoil';
-
-export const isWinRecoil = selector({
-    key: "isWin",
-    get: ({ get }) => {
-        const { state } = get(craftingStateInTimeRecoil);
-        return state.targets.length === 0;
-    }
-});
+import { solutionRecoil, useCraftingState } from './craftingActionsRecoil';
+import { isSolved } from './puzzle/actions';
 
 export function WinEffect() {
-    const craftingStateInTime = useRecoilValue(craftingStateInTimeRecoil);
-    const isWin = craftingStateInTime.state.targets.length === 0;
-    const level = useRecoilValue(levelPresetRecoil);
+    const finalState = useCraftingState().state;
+    const isWin = isSolved(finalState);
+    
+    const problem = useRecoilValue(solutionRecoil).problem;
     const updGameProgress = useUpdRecoilState(gameProgressState);
     useEffect(() => {
         if (!isWin) { return; }
-        amplitude.track("isWin", level);
+        amplitude.track("isWin", problem);
         updGameProgress({
-            [level.name]: { $set: true },
+            [problem.name]: { $set: true },
         });
-    }, [isWin, level, updGameProgress]);
+    }, [isWin, problem, updGameProgress]);
     return null;
 };

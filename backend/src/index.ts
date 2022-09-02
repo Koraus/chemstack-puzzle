@@ -1,37 +1,16 @@
 import { Router } from 'itty-router';
 import { json, error, withContent, status } from 'itty-router-extras';
-import { CraftingAction, craftingReduce } from "../../src/crafting";
-import { levelPresets } from "../../src/levelPresets";
-import { getProblemReactions } from '../../src/puzzle/reactions';
-import { getProblemTargets } from "../../src/puzzle/targets";
+import { isSolved } from "../../src/puzzle/actions";
+import { evaluate, Solution } from "../../src/puzzle/evaluate";
+import { puzzleId } from "../../src/puzzle/puzzleId";
+import { Problem, getProblemCmp } from "../../src/puzzle/problem";
 import { clientifyStatsStub } from './Stats';
 import { Env } from './Env';
 import SHA256 from "crypto-js/sha256";
 import Hex from "crypto-js/enc-hex";
 export { Stats } from './Stats';
 
-
-type LevelPreset = Omit<typeof levelPresets[0], "name">;
-type CraftingStateInTime =
-    ReturnType<typeof craftingReduce>
-    | { state: Parameters<typeof craftingReduce>[2]; };
-
-export const getLevelPresetId = ({
-    seed,
-    substanceMaxCount,
-    substanceCount,
-    ingredientCount,
-    targets,
-}: LevelPreset) => JSON.stringify({
-    // order matters
-    seed,
-    substanceMaxCount,
-    substanceCount,
-    ingredientCount,
-    targets,
-});
-
-export const getSolutionId = (actions: CraftingAction[]) => {
+export const getSolutionId = (actions: action[]) => {
     const cleanedAnsSorted = actions.map(action => {
         if (action.action === 'addIngredient') {
             return {
@@ -57,44 +36,34 @@ export function getStatsStub(
     return clientifyStatsStub(stub);
 }
 
+function _throw(message: string) { throw new Error(message); }
+
 const router = Router()
     .options('*', () => status(204))
     .get('/', async (req, env: Env) => {
         const q = new URL(req.url).searchParams;
-        const levelPreset = {
+        const problem = {
+            puzzleId: q.get("puzzleId")!,
             seed: q.get("seed")!,
             substanceMaxCount: +(q.get("substanceMaxCount")!),
             substanceCount: +(q.get("substanceCount")!),
             ingredientCount: +(q.get("ingredientCount")!),
             targets: q.getAll("targets"),
         };
-        const stats = getStatsStub(getLevelPresetId(levelPreset), env.STATS);
+        const stats = getStatsStub(getProblemCmp(problem), env.STATS);
         return json(await stats.getData());
     })
     .post('/', withContent, async (req, env: Env) => {
-        const content = (req as any).content;
-        const {
-            levelPreset,
-            solution,
-        } = content as {
-            levelPreset: LevelPreset,
-            solution: CraftingAction[],
-        };
-
-        const reactions = getProblemReactions(levelPreset);
-        const targets = getProblemTargets(levelPreset);
-        const finalState = solution.reduce(
-            (prev, action) => craftingReduce({ reactions }, action, prev.state),
-            { state: { tubes: [[]], targets, isSolved: false } } as CraftingStateInTime);
-
-        if (!finalState.state.isSolved) {
+        const soultion = (req as any).content as Solution;
+        (soultion.problem.puzzleId === puzzleId)
+            || _throw(`puzzleId ${soultion.problem.puzzleId} is not supprted`);
+        const finalState = evaluate(soultion);
+        if (!isSolved(finalState.state)) {
             throw new Error("the solution in not complete");
         }
 
-        const stats = getStatsStub(getLevelPresetId(levelPreset), env.STATS);
-        return json(await stats.add(getSolutionId(solution), {
-            actionCount: solution.length,
-        }));
+        const stubStats = getStatsStub(getProblemCmp(solution.problem), env.STATS);
+        return json(await stubStats.add(getSolutionId(solution), finalState.state.stats));
     });
 
 export default {

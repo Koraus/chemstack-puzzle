@@ -1,8 +1,6 @@
-const mapCharCodes = (f: (c: number) => number) => 
-    (s: string) => String.fromCharCode(...[...s].map(c => f(c.charCodeAt(0))));
-const e = mapCharCodes(c => c + 57);
+import { puzzleId } from "./puzzleId";
 
-export const levelPresets = [
+export const problems = [
     {
         name: "Level 1",
         substanceCount: 3,
@@ -15,7 +13,7 @@ export const levelPresets = [
         [".*.", "-.-"],
         ["@#@"],
         ["$"],
-        [ "!!", "$.$"],
+        ["!!", "$.$"],
         ["-.-", "%"],
     ].map((targets, i) => ({
         name: `Level 2-${i + 1}`,
@@ -28,7 +26,7 @@ export const levelPresets = [
         substanceCount: 5,
         ingredientCount: 3,
         targets: [[
-            ['&&&5,>&'],
+            ['5,>'],
             ['*(70;(3', '6-'],
             [';/,', '-9,,', '>693+'],
             ['>033', '56;', '-(33'],
@@ -58,23 +56,16 @@ export const levelPresets = [
     }].flatMap((p, i) => p.targets.flatMap((t1, j) => t1.map((targets, k) => ({
         substanceCount: p.substanceCount,
         ingredientCount: p.ingredientCount - j,
-        targets: targets.map(e),
+        targets,
         name: `Level ${2 + i + 1}-${j + 1}-${k + 1}`,
     })))),
 
-    ...[{
-        substanceCount: 7,
-        ingredientCount: 4,
-    }, {
-        substanceCount: 8,
-        ingredientCount: 5,
-    }, {
-        substanceCount: 9,
-        ingredientCount: 5,
-    }, {
-        substanceCount: 9,
-        ingredientCount: 6,
-    }].flatMap((p, i) => {
+    ...[
+        { substanceCount: 7, ingredientCount: 4, },
+        { substanceCount: 8, ingredientCount: 5, },
+        { substanceCount: 9, ingredientCount: 5, },
+        { substanceCount: 9, ingredientCount: 6, },
+    ].flatMap((p, i) => {
         const a = (x: number) => Array.from({ length: x }, (_, i) => i);
         return a(p.ingredientCount - 3 + 1).flatMap((_, j) => a(7).map((_, k) => ({
             substanceCount: p.substanceCount,
@@ -84,8 +75,9 @@ export const levelPresets = [
         })));
     }),
 
-].map((levelPreset, i) => ({
+].map((problemPreset) => ({
+    puzzleId,
     seed: "4242",
     substanceMaxCount: 10,
-    ...levelPreset,
+    ...problemPreset,
 }));

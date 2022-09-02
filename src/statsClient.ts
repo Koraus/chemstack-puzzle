@@ -1,5 +1,5 @@
-import { CraftingAction } from './crafting';
-import { levelPresets } from './levelPresets';
+import { Action } from './puzzle/actions';
+import { Problem } from './puzzle/problem';
 
 
 export type StatsData = {
@@ -15,15 +15,14 @@ const backUrl =
         ? "https://chems.x-pl.art/"
         : "http://127.0.0.1:8787/";
 
-type LevelPreset = Omit<typeof levelPresets[0], "name">;
-
-export const getStats = async (levelPreset: LevelPreset) => {
+export const getStats = async (problem: Problem) => {
     const url = new URL(backUrl);
-    url.searchParams.append("seed", levelPreset.seed);
-    url.searchParams.append("substanceMaxCount", levelPreset.substanceMaxCount.toString());
-    url.searchParams.append("substanceCount", levelPreset.substanceCount.toString());
-    url.searchParams.append("ingredientCount", levelPreset.ingredientCount.toString());
-    for (const target of levelPreset.targets) {
+    url.searchParams.append("puzzleId", problem.puzzleId);
+    url.searchParams.append("seed", problem.seed);
+    url.searchParams.append("substanceMaxCount", problem.substanceMaxCount.toString());
+    url.searchParams.append("substanceCount", problem.substanceCount.toString());
+    url.searchParams.append("ingredientCount", problem.ingredientCount.toString());
+    for (const target of problem.targets) {
         url.searchParams.append("targets", target);
     }
     const res = await fetch(url);
@@ -32,8 +31,8 @@ export const getStats = async (levelPreset: LevelPreset) => {
 }
 
 export const postSolution = async (
-    levelPreset: LevelPreset,
-    solution: CraftingAction[]
+    levelPreset: Problem,
+    solution: Action[]
 ) => {
     const res = await fetch(backUrl, {
         method: "POST",

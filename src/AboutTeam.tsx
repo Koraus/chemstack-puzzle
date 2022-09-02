@@ -21,17 +21,20 @@ export function AboutTeam({
     className?: string;
 }) {
     return <div
-        className={cx(flex.col,
+        className={cx(
+            flex.col,
             css`& {
-            color: white;
-            padding: 10px 30px;
-            justify-content: center;
-            background-color: #5B6D80;
-            padding: 10px 15px;
-            white-space: nowrap;
-            align-items: flex-end;
-            z-index: 100;
-        }`, className)}
+                color: white;
+                padding: 10px 30px;
+                justify-content: center;
+                background-color: #5B6D80;
+                padding: 10px 15px;
+                white-space: nowrap;
+                align-items: flex-end;
+                z-index: 100;
+            }`, 
+            className,
+        )}
         {...props}
     >
         <Groups style={{ height: 30, width: 30 }} />

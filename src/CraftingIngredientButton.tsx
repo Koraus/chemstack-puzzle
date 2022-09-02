@@ -1,17 +1,16 @@
 import { css, cx } from "@emotion/css";
-import { useRecoilValue } from 'recoil';
-import { SubstanceId } from "./crafting";
+import { SubstanceId } from "./puzzle/state";
 import { substanceColors } from "./substanceColors";
-import { isWinRecoil } from "./Win";
 import { buttonCss } from "./buttonCss";
-import { useCraftingAct } from "./craftingActionsRecoil";
+import { useCraftingAct, useCraftingState } from "./craftingActionsRecoil";
+import { isSolved } from "./puzzle/actions";
 
 export function CraftingIngredientButton({ sid, mirrored = false }: {
     sid: SubstanceId;
     mirrored?: boolean;
 }) {
     const act = useCraftingAct();
-    const isWin = useRecoilValue(isWinRecoil);
+    const isWin = isSolved(useCraftingState().state);
 
     function IngredintButtonWave() {
         return <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54.87 96">
@@ -24,7 +23,7 @@ export function CraftingIngredientButton({ sid, mirrored = false }: {
     return <button
         className={buttonCss}
         disabled={isWin}
-        onClick={() => act({ action: "addIngredient", ingredientId: sid, time: performance.now() })}
+        onClick={() => act({ action: "addIngredient", args: [sid] })}
         style={{
             margin: 5,
             transformOrigin: "50% 70%",

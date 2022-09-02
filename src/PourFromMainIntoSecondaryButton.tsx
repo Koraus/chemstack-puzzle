@@ -1,31 +1,28 @@
-import { CraftingAction } from "./crafting";
 import { JSX } from "preact";
 import { css, cx } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
-import { useUpdRecoilState } from "./utils/useUpdRecoilState";
-import { craftingActionsRecoil, craftingStateInTimeRecoil, useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingAct, useCraftingState } from "./craftingActionsRecoil";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import { tutorialRecoil } from "./tutorialRecoil";
 import { useRecoilValue } from "recoil";
+import { actions } from "./puzzle/actions";
 
 export function PourFromMainIntoSecondaryButton({ style, className }: {
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
-    const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
-
-    const isWin = useRecoilValue(craftingStateInTimeRecoil).state.targets.length === 0;
-
+    const act = useCraftingAct();
+    
     const tutorial = useRecoilValue(tutorialRecoil);
     const isHinted = tutorial.some(t => t.kind === "pourFromMainIntoSecondary");
     
     const craftingStateInTime = useCraftingState();
-    const isCraftingIdle = craftingStateInTime.currentState.id === "craftingIdle";
+    const isCraftingIdle = craftingStateInTime.currentState.id === "idle";
+    const canAct = actions.pourFromMainIntoSecondary().canAct(craftingStateInTime.state);
 
     return <button
-        disabled={isWin}
+        disabled={!canAct}
         className={cx(buttonCss, className)}
         style={{
             display: "flex",
@@ -36,7 +33,7 @@ export function PourFromMainIntoSecondaryButton({ style, className }: {
             height: "40px",
             ...style,
         }}
-        onClick={() => act({ action: "pourFromMainIntoSecondary", time: performance.now() })}
+        onClick={() => act({ action: "pourFromMainIntoSecondary", args: [] })}
     >
         <ArrowLeft style={{ height: 80, margin: -20 }} />
         {(isHinted && isCraftingIdle) && <TouchAppAnimation className={css`& {

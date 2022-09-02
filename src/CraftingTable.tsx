@@ -1,10 +1,7 @@
 import { useRecoilValue } from 'recoil';
 import * as flex from "./utils/flex";
 import * as _ from "lodash";
-import { CraftingAction } from './crafting';
-import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { CraftingTargets } from "./CraftingTargets";
-import { isWinRecoil } from "./Win";
 import { buttonCss } from "./buttonCss";
 import { CraftingTube } from "./CraftingTube";
 import { TouchAppAnimation } from "./TouchAppAnimation";
@@ -12,7 +9,7 @@ import { css, cx } from "@emotion/css";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Close } from '@emotion-icons/material-rounded/Close';
-import { craftingActionsRecoil, craftingStateInTimeRecoil, useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingAct, useCraftingCanReset, useCraftingReset, useCraftingState } from "./craftingActionsRecoil";
 import { tutorialRecoil } from './tutorialRecoil';
 import { CraftingSecondaryTubes } from './CraftingSecondaryTubes';
 import { GlobalBackground } from './GlobalBackground';
@@ -21,19 +18,19 @@ import { SwapHoriz } from '@emotion-icons/material-rounded/SwapHoriz';
 
 
 export function CraftingTable() {
-    const craftingActions = useRecoilValue(craftingActionsRecoil);
-    const updCraftingActions = useUpdRecoilState(craftingActionsRecoil);
-    const act = (action: CraftingAction) => updCraftingActions({ $push: [action] });
+    const canReset = useCraftingCanReset();
+    const reset = useCraftingReset();
+    const act = useCraftingAct();
 
-    const { tubes } = useRecoilValue(craftingStateInTimeRecoil).state;
-    const isWin = useRecoilValue(isWinRecoil);
+    const { tubes, isSolved } = useCraftingState().state;
+    const isWin = isSolved;
 
     const tutorial = useRecoilValue(tutorialRecoil);
     const hintReset = tutorial.some(t => t.kind === "reset");
     const hintAddTube = tutorial.some(t => t.kind === "addTube");
 
     const craftingStateInTime = useCraftingState();
-    const isCraftingIdle = craftingStateInTime.currentState.id === "craftingIdle";
+    const isCraftingIdle = craftingStateInTime.currentState.id === "idle";
 
     return <div style={{
         padding: "16px 16px",
@@ -70,7 +67,7 @@ export function CraftingTable() {
                         position: "absolute", left: "15%"
                     }}
                     disabled={tubes.length === 1}
-                    onClick={() => act({ action: "swapTubes", time: performance.now() })}>
+                    onClick={() => act({ action: "swapTubes", args: [] })}>
                     <SwapHoriz style={{
                         height: "33px",
                         color: "gray",
@@ -84,7 +81,7 @@ export function CraftingTable() {
                         zIndex: 1,
                     }}
                     disabled={isWin || tubes.length > 6}
-                    onClick={() => act({ action: "addTube", time: performance.now() })}
+                    onClick={() => act({ action: "addTube", args: [] })}
                 >
                     <Add style={{
                         height: "30px",
@@ -111,7 +108,7 @@ export function CraftingTable() {
                         zIndex: 1,
                     }}
                     disabled={isWin || tubes.length <= 1}
-                    onClick={() => act({ action: "trashTube", time: performance.now() })}
+                    onClick={() => act({ action: "trashTube", args: [] })}
                 >
                     <Close style={{
                         height: "30px",
@@ -137,8 +134,8 @@ export function CraftingTable() {
                         color: "#ff7070",
                         position: "relative",
                     }}
-                    disabled={isWin || craftingActions.length === 0}
-                    onClick={() => updCraftingActions({ $set: [] })}
+                    disabled={!canReset}
+                    onClick={() => reset()}
                 >
                     <Refresh style={{
                         height: "100%",

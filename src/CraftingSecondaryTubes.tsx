@@ -1,10 +1,9 @@
 import * as flex from "./utils/flex";
 import { css, cx, keyframes } from "@emotion/css";
 import { JSX } from "preact";
-import { craftingStateInTimeRecoil, useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingState } from "./craftingActionsRecoil";
 import { PourFromSecondaryIntoMainButton } from "./PourFromSecondaryIntoMainButton";
 import { TubeSvg } from "./TubeSvg";
-import { useRecoilValue } from "recoil";
 
 
 function Tube({ revI, ...props }: {
@@ -12,7 +11,7 @@ function Tube({ revI, ...props }: {
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const finalState = useRecoilValue(craftingStateInTimeRecoil).state;
+    const finalState = useCraftingState().state;
     const finalTube = [...finalState.tubes].reverse()[revI];
     
     const craftingStateInTime = useCraftingState();
@@ -25,7 +24,7 @@ function Tube({ revI, ...props }: {
     const i = craftingState.prevState.tubes.length - 1 - revI;
 
     const reaction =
-        craftingState.id === "craftingReact"
+        craftingState.id === "react"
         && craftingState.diffCustom.find(d => d[0] === i)?.[1];
 
     return <div
@@ -50,15 +49,15 @@ function Tube({ revI, ...props }: {
                 duration: craftingState.duration,
                 desc: (() => {
                     const s = craftingState.id;
-                    if (i === 1 && s === "craftingAct") {
+                    if (i === 1 && s === "act") {
                         const { action } = craftingState.diffCustom;
                         switch (action) {
                             case "pourFromMainIntoSecondary": return { id: "pourDown" };
                             case "pourFromSecondaryIntoMain": return { id: "pourUp" };
                         }
                     }
-                    if (s === "craftingReact" && reaction) { return { id: "react", reaction }; }
-                    if (s === "craftingCleanup") { return { id: "clean" }; }
+                    if (s === "react" && reaction) { return { id: "react", reaction }; }
+                    if (s === "cleanup") { return { id: "clean" }; }
                 })() ?? { id: "prev" },
             }}
             now={now}
@@ -146,28 +145,28 @@ export function CraftingSecondaryTubes({
                 <Tube
                     revI={revI}
                     className={cx(
-                        craftingState.id === 'craftingAct'
+                        craftingState.id === 'act'
                         && craftingState.diffCustom.action === 'addTube'
                         && css`& {
                         animation: ${keyframes`
                                 0% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
                             `} ${duration}ms ${start - now}ms both linear;
                         }`,
-                        craftingState.id === 'craftingAct'
+                        craftingState.id === 'act'
                         && craftingState.diffCustom.action === "swapTubes"
                         && css`& {
                         animation: ${keyframes`
                                 100% { transform: translate3d(${dx+7}px, ${dy+14}px, ${dz-15}px); }
                             `} ${duration}ms ${start - now}ms both linear;
                         }`,
-                        craftingState.id === 'craftingAct'
+                        craftingState.id === 'act'
                         && craftingState.diffCustom.action === 'trashTube'
                         && css`& {
                             animation: ${keyframes`
                                 100% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
                             `} ${duration}ms ${start - now}ms both linear;
                         }`,
-                        craftingState.id === 'craftingGiveaway'
+                        craftingState.id === 'giveaway'
                         && i >= craftingState.diffCustom
                         && css`& {
                             animation: ${keyframes`
@@ -175,7 +174,7 @@ export function CraftingSecondaryTubes({
                                 100% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
                             `} ${duration}ms ${start - now}ms both linear;
                         } `,
-                        craftingState.id === 'craftingGiveaway'
+                        craftingState.id === 'giveaway'
                         && i + 1 === craftingState.diffCustom
                         && css`& {
                             animation: ${keyframes`

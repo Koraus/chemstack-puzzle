@@ -1,4 +1,4 @@
-import { SubstanceId } from '../crafting';
+import { SubstanceId } from './state';
 import { createRand } from '../utils/createRand';
 import { apipe } from '../utils/apipe';
 import * as it from "../utils/it";
@@ -147,7 +147,6 @@ export const getProblemReactions = memoize(({
     substanceMaxCount: number,
     substanceCount: number,
 }) => {
-    import.meta.env.DEV && console.log("call", "getProblemReactions");
     return getAllReactions({ seed, substanceMaxCount })
         .filter(r => [...r.reagents, ...r.products].every(sid => sid < substanceCount));
 }, {

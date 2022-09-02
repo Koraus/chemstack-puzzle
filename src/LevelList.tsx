@@ -2,24 +2,14 @@ import { atom, useRecoilTransaction_UNSTABLE, useRecoilValue } from "recoil";
 import { apipe } from "./utils/apipe";
 import * as it from "./utils/it";
 import { useEffect, useRef } from "preact/hooks";
-import { levelPresets } from "./levelPresets";
+import { problems } from "./puzzle/problems";
 import { buttonCss } from "./buttonCss";
 import * as flex from "./utils/flex";
 import { css, cx } from "@emotion/css";
 type CSSProperties = import("preact").JSX.CSSProperties;
-import * as amplitude from "@amplitude/analytics-browser";
 import { Done } from '@emotion-icons/material-rounded/Done';
 import { RemoveDone } from '@emotion-icons/material-rounded/RemoveDone';
-import { craftingActionsRecoil } from "./craftingActionsRecoil";
-
-
-export const levelPresetRecoil = atom({
-    key: "levelPreset",
-    default: levelPresets[0],
-    effects: [({ node, onSet }) => {
-        onSet((newValue) => amplitude.track(`${node.key}.onSet`, newValue));
-    }]
-});
+import { solutionRecoil, useSetProblem } from "./craftingActionsRecoil";
 
 export const gameProgressState = atom({
     key: "gameProgress",
@@ -31,7 +21,7 @@ export const gameProgressState = atom({
             const __DEBUG_setAllLevels = false && import.meta.env.DEV;
 
             if (__DEBUG_setAllLevels) {
-                setSelf(Object.fromEntries(apipe(levelPresets,
+                setSelf(Object.fromEntries(apipe(problems,
                     it.map(p => [p.name, true] as const),
                 )));
             } else {
@@ -50,18 +40,15 @@ export const gameProgressState = atom({
 
 export function LoadHighestLevelEffect() {
     const gameProgress = useRecoilValue(gameProgressState);
-    const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPresets[0]) => {
-        set(levelPresetRecoil, lp);
-        set(craftingActionsRecoil, []);
-    });
+    const setLevelPreset = useSetProblem();
 
     useEffect(() => {
         const highestProgressedIndex = Object.keys(gameProgress)
-            .map(name => levelPresets.findIndex(x => x.name === name))
+            .map(name => problems.findIndex(x => x.name === name))
             .sort((a, b) => b - a)[0] ?? -1;
-        setLevelPreset(levelPresets[Math.min(
+        setLevelPreset(problems[Math.min(
             highestProgressedIndex + 1,
-            levelPresets.length - 1)]);
+            problems.length - 1)]);
     }, []);
 
     return <></>;
@@ -69,15 +56,16 @@ export function LoadHighestLevelEffect() {
 
 export function LevelList({ style }: { style?: CSSProperties }) {
     const gameProgress = useRecoilValue(gameProgressState);
-    const currentLevelPreset = useRecoilValue(levelPresetRecoil);
-    const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof currentLevelPreset) => {
-        set(levelPresetRecoil, lp);
-        set(craftingActionsRecoil, []);
-    });
-    const resetLevel = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        set(levelPresetRecoil, levelPresets[0]);
+    const currentLevelPreset = useRecoilValue(solutionRecoil).problem;
+    const setLevelPreset = useSetProblem();
+    const resetLevelProgress = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
+        set(solutionRecoil, {
+            problem: problems[0],
+            actions: [],
+            actionTime: 0,
+            currentTime: 0,
+        });
         set(gameProgressState, {});
-        set(craftingActionsRecoil, []);
     });
 
     const scrollToRef = useRef<HTMLAnchorElement>(null);
@@ -88,16 +76,16 @@ export function LevelList({ style }: { style?: CSSProperties }) {
     function Entry({
         levelPreset
     }: {
-        levelPreset: typeof levelPresets[0]
+        levelPreset: typeof problems[0]
     }) {
-        const levelPresetIndex = levelPresets.findIndex(x => x.name === levelPreset.name);
+        const levelPresetIndex = problems.findIndex(x => x.name === levelPreset.name);
         const isCurrent = levelPreset.name === currentLevelPreset.name;
         const isComplete =
             (levelPresetIndex >= 0)
-            && (levelPresets[levelPresetIndex].name in gameProgress);
+            && (problems[levelPresetIndex].name in gameProgress);
         const isOpen =
             levelPresetIndex === 0
-            || (levelPresetIndex > 0 && (levelPresets[levelPresetIndex - 1].name in gameProgress));
+            || (levelPresetIndex > 0 && (problems[levelPresetIndex - 1].name in gameProgress));
         const __DEBUG_allowAnyLevel = true && import.meta.env.DEV;
         return <a
             style={{
@@ -150,7 +138,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         <div style={{
             overflowY: "scroll",
             height: "100%",
-        }}>{levelPresets.map(levelPreset => <Entry {...{ levelPreset }} />)}</div>
+        }}>{problems.map(levelPreset => <Entry {...{ levelPreset }} />)}</div>
 
         <button
             className={buttonCss}
@@ -164,7 +152,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
             }}
             onClick={() =>
                 confirm('Progress will be lost! Click "Ok" to confirm')
-                && resetLevel()
+                && resetLevelProgress()
             }
         >
             <RemoveDone style={{ height: "100%" }} />

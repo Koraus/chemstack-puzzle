@@ -1,12 +1,11 @@
-import { useRecoilState, useRecoilTransaction_UNSTABLE, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import { css, cx } from "@emotion/css";
-import { isWinRecoil } from "./Win";
-import { levelPresetRecoil } from "./LevelList";
-import { levelPresets } from "./levelPresets";
 import { buttonCss } from "./buttonCss";
 import { JSX } from "preact";
-import { craftingActionsRecoil } from './craftingActionsRecoil';
+import { solutionRecoil, useCraftingState, useSetNextProblem } from './craftingActionsRecoil';
 import { ArrowRight } from "@emotion-icons/material-rounded/ArrowRight";
+import { isSolved } from './puzzle/actions';
+
 
 
 export function HeaderTitle({
@@ -16,22 +15,10 @@ export function HeaderTitle({
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const setLevelPreset = useRecoilTransaction_UNSTABLE(({ get, set }) => (lp: typeof levelPreset) => {
-        set(levelPresetRecoil, lp);
-        set(craftingActionsRecoil, []);
-    });
-
-    const [levelPreset] = useRecoilState(levelPresetRecoil);
-    let currentLevelIndex = levelPresets
-        .findIndex(lp => lp.name === levelPreset.name);
-    if (currentLevelIndex < 0) {
-        currentLevelIndex = 0;
-    }
-    const nextLevelIndex = (currentLevelIndex + 1) % levelPresets.length;
-    const setNextLevel = () => setLevelPreset(levelPresets[nextLevelIndex]);
-
-    const isWin = useRecoilValue(isWinRecoil);
-
+    const setNextLevel = useSetNextProblem();
+    const finalState = useCraftingState().state;
+    const isWin = isSolved(finalState);
+    
     return <div {...props} className={cx(css`& {
         display: flex;
         flex: row;
@@ -55,7 +42,7 @@ export function HeaderTitle({
             font-size: 25px;
             text-transform: uppercase;
             text-align: ${isHorizontal ? "left" : "center"};
-        }`}>{useRecoilValue(levelPresetRecoil).name}</div>
+        }`}>{useRecoilValue(solutionRecoil).problem.name}</div>
         <div className={css`& { flex-grow: 1; }`}>
             <button
                 className={cx(

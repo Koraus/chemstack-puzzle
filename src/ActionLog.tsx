@@ -2,13 +2,14 @@ import { useRecoilValue } from 'recoil';
 import { useState } from "preact/hooks";
 type CSSProperties = import("preact").JSX.CSSProperties;
 import { buttonCss } from './buttonCss';
-import { craftingActionsRecoil } from './craftingActionsRecoil';
+import { solutionRecoil } from './craftingActionsRecoil';
 
 export function ActionLog({ style }: { style?: CSSProperties }) {
-    const actions = useRecoilValue(craftingActionsRecoil)
+    const actions = useRecoilValue(solutionRecoil)
+        .actions
         .map(a => {
             switch (a.action) {
-                case 'addIngredient': return `+ ${a.ingredientId}`;
+                case 'addIngredient': return `+ ${a.args![0]}`;
                 case 'addTube': return "+ tube";
                 case 'trashTube': return "x tube";
                 case 'pourFromMainIntoSecondary': return 'pour <-';
