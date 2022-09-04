@@ -6,10 +6,14 @@ import { _throw } from './_throw';
 
 export const isSolved = (state: State) => state.targets.length === 0;
 
+
 export const actions = ({
     addIngredient: (ingredientId: SubstanceId) => ({
         canAct: (state: State): boolean =>
-            !isSolved(state),
+            !isSolved(state)
+            && ingredientId >= 0
+            && ingredientId < state.problem.ingredientCount
+            && Number.isInteger(ingredientId),
         act: (state: State): Spec<State> => {
             return ({
                 tubes: { 0: { $push: [ingredientId] } },
@@ -23,17 +27,19 @@ export const actions = ({
 
     addTube: () => ({
         canAct: (state: State): boolean =>
-            !isSolved(state) 
+            !isSolved(state)
             && state.tubes.length <= 6,
         act: (state: State): Spec<State> => {
             return ({
                 tubes: { $splice: [[0, 0, []]] },
                 stats: {
                     actionCount: { $set: state.stats.actionCount + 1 },
-                    maxAddedTubeCount: { $set: Math.max(
-                        state.stats.maxAddedTubeCount,
-                        (state.tubes.length - 1) + 1,
-                    ) },
+                    maxAddedTubeCount: {
+                        $set: Math.max(
+                            state.stats.maxAddedTubeCount,
+                            (state.tubes.length - 1) + 1,
+                        )
+                    },
                 }
             });
         },
@@ -41,7 +47,7 @@ export const actions = ({
 
     trashTube: () => ({
         canAct: (state: State): boolean =>
-            !isSolved(state) 
+            !isSolved(state)
             && state.tubes.length > 1,
         act:
             (state: State): Spec<State> => {
@@ -49,9 +55,10 @@ export const actions = ({
                     tubes: { $splice: [[0, 1]] },
                     stats: {
                         actionCount: { $set: state.stats.actionCount + 1 },
-                        price: { $set: 
-                            state.stats.price 
-                            + state.tubes[0].reduce((acc, val) => acc + val, 0) 
+                        price: {
+                            $set:
+                                state.stats.price
+                                + state.tubes[0].reduce((acc, val) => acc + val, 0)
                         }
                     }
                 });
@@ -60,7 +67,7 @@ export const actions = ({
 
     pourFromMainIntoSecondary: () => ({
         canAct: (state: State): boolean =>
-            !isSolved(state) 
+            !isSolved(state)
             && state.tubes.length > 1
             && state.tubes[0].length > 0,
         act:
@@ -115,25 +122,32 @@ export const actions = ({
     }),
 });
 
+type _Action<Key extends keyof typeof actions> = { action: Key, args: Parameters<typeof actions[Key]> }
 
-export type Action<ActionKey extends keyof typeof actions = keyof typeof actions> = {
-    action: ActionKey,
-    args: Parameters<typeof actions[ActionKey]>,
-}
+export type Action =
+    _Action<"addIngredient">
+    | _Action<"addTube">
+    | _Action<"trashTube">
+    | _Action<"pourFromMainIntoSecondary">
+    | _Action<"pourFromSecondaryIntoMain">
+    | _Action<"swapTubes">;
 
-function act<T extends keyof typeof actions>(
+function act(
     state: State,
-    action: {
-        action: T,
-        args: Parameters<typeof actions[T]>,
-    },
+    action: Action,
 ) {
-    const act1 = actions[action.action];
-    const args = action.args;
-    // @ts-ignore
-    const act2 = act1(...args);
-    act2.canAct(state) || _throw("Cannot act");
-    const diff = act2.act(state);
+    const { canAct, act } = (({ action, args }: Action) => {
+        switch (action) {
+            case "addIngredient": return actions[action](...args);
+            case "addTube": return actions[action](...args);
+            case "trashTube": return actions[action](...args);
+            case "pourFromMainIntoSecondary": return actions[action](...args);
+            case "pourFromSecondaryIntoMain": return actions[action](...args);
+            case "swapTubes": return actions[action](...args);
+        }
+    })(action);
+    canAct(state) || _throw("Cannot act");
+    const diff = act(state);
     return {
         id: "act" as const,
         diffCustom: action,
@@ -225,11 +239,10 @@ function giveaway(state: State) {
     };
 }
 
-export function actRound<T extends keyof typeof actions>(
-    action: Action<T>,
+export function actRound(
+    action: Action,
     state: State,
 ) {
-    console.log("call", "actRound");
     const afterAction = act(state, action);
     const afterReactions = react(afterAction.state);
     const afterCleanups = cleanup(afterReactions.state);

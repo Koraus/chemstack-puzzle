@@ -1,7 +1,7 @@
 import { useRecoilValue } from 'recoil';
 import { JSX } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import { solutionRecoil, useCraftingState } from './craftingActionsRecoil';
+import { solutionRecoil, useCraftingTransition } from './solutionRecoil';
 import { css, cx } from '@emotion/css';
 import { StatsData, getStats, postSolution } from './statsClient';
 
@@ -59,24 +59,24 @@ export function Statistics({
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const { actions, problem } = useRecoilValue(solutionRecoil);
-    const craftingStateInTime = useCraftingState();
+    const solution = useRecoilValue(solutionRecoil);
+    const craftingStateInTime = useCraftingTransition();
     const [remoteStats, setRemoteStats] = useState<StatsData>();
     const isWin = craftingStateInTime.state.targets.length === 0;
     useEffect(() => {
         let isCancelled = false;
         (async () => {
-            const remoteStats = await getStats(problem);
+            const remoteStats = await getStats(solution.problem);
             if (isCancelled) { return; }
             setRemoteStats(remoteStats);
         })();
         () => isCancelled = true;
-    }, [problem]);
+    }, [solution.problem]);
     useEffect(() => {
         if (!isWin) { return; }
         let isCancelled = false;
         (async () => {
-            const res = await postSolution(problem, actions);
+            const res = await postSolution(solution);
             if (isCancelled) { return; }
             setRemoteStats(res.data);
         })();
@@ -95,7 +95,7 @@ export function Statistics({
         </div>
         <div>
             {remoteStats
-                ? <Chart currentValue={actions.length} data={remoteStats.actionCount} />
+                ? <Chart currentValue={solution.actions.length} data={remoteStats.actionCount} />
                 : "loading..."}
         </div>
     </div>;

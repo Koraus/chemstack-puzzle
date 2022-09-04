@@ -1,6 +1,6 @@
 import { useRecoilValue } from 'recoil';
 import update from "immutability-helper";
-import { solutionRecoil, useSetProblem } from './craftingActionsRecoil';
+import { solutionRecoil, useSetProblem } from './solutionRecoil';
 import { buttonCss } from './buttonCss';
 import { cx, css } from '@emotion/css';
 import { Add } from '@emotion-icons/material-rounded/Add';

@@ -1,6 +1,6 @@
 import { css, cx } from "@emotion/css";
 import { JSX } from "preact";
-import { useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingTransition } from "./solutionRecoil";
 import { Fireworks } from './Fireworks';
 
 
@@ -10,7 +10,7 @@ export function WinFireworks({
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const { isSolved } = useCraftingState().currentState.state;
+    const { isSolved } = useCraftingTransition().currentState.state;
     return <>{isSolved && <Fireworks {...props} className={cx(css`& {
         pointer-events: none;
     }`, className)} />}</>;

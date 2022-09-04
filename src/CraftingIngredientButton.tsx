@@ -2,7 +2,7 @@ import { css, cx } from "@emotion/css";
 import { SubstanceId } from "./puzzle/state";
 import { substanceColors } from "./substanceColors";
 import { buttonCss } from "./buttonCss";
-import { useCraftingAct, useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingAct, useCraftingTransition } from "./solutionRecoil";
 import { isSolved } from "./puzzle/actions";
 
 export function CraftingIngredientButton({ sid, mirrored = false }: {
@@ -10,7 +10,7 @@ export function CraftingIngredientButton({ sid, mirrored = false }: {
     mirrored?: boolean;
 }) {
     const act = useCraftingAct();
-    const isWin = isSolved(useCraftingState().state);
+    const isWin = isSolved(useCraftingTransition().state);
 
     function IngredintButtonWave() {
         return <svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54.87 96">

@@ -7,21 +7,28 @@ export type Problem = {
     targets: string[];
 };
 
-// Cmp stands for "comparison string" here
-// -- a string, safe to use for structural comparison
-export const getProblemCmp = ({
-    puzzleId, 
+/**
+ * Re-structs object to ensure order and drop extra entries so that it can be structurally compared by JSON.stringify output
+ */
+export const getProblemCmpObj = ({
+    puzzleId,
     seed,
     substanceMaxCount,
     substanceCount,
     ingredientCount,
     targets,
-}: Problem) => JSON.stringify({
-    // re-struct object to ensure order and drop extra entries
-    puzzleId, 
+}: Problem): Problem => ({
+    puzzleId,
     seed,
     substanceMaxCount,
     substanceCount,
     ingredientCount,
     targets,
 });
+
+
+/**
+ * Get a string, safe to use for structural comparison
+ */
+export const getProblemCmp = (problem: Problem) =>
+    JSON.stringify(getProblemCmpObj(problem));

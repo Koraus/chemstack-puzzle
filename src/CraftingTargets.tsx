@@ -4,7 +4,7 @@ import { buttonCss } from "./buttonCss";
 import * as flex from "./utils/flex";
 import { DoubleArrow } from '@emotion-icons/material-rounded/DoubleArrow';
 import { TouchAppAnimation } from "./TouchAppAnimation";
-import { useCraftingState, useSetNextProblem } from "./craftingActionsRecoil";
+import { useCraftingTransition, useSetNextProblem } from "./solutionRecoil";
 import { tutorialRecoil } from "./tutorialRecoil";
 import { JSX } from "preact";
 import { TubeSvg } from "./TubeSvg";
@@ -18,7 +18,7 @@ function Tube({ revI, ...props }: {
 }) {
     const setNextLevel = useSetNextProblem();
 
-    const craftingStateInTime = useCraftingState();
+    const craftingStateInTime = useCraftingTransition();
     const now = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
 
@@ -94,7 +94,7 @@ export function CraftingTargets({ style, className }: {
     style?: JSX.CSSProperties,
     className?: string,
 }) {
-    const craftingStateInTime = useCraftingState();
+    const craftingStateInTime = useCraftingTransition();
     const now = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
     const { start, duration } = craftingState;

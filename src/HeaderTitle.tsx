@@ -2,7 +2,7 @@ import { useRecoilValue } from 'recoil';
 import { css, cx } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { JSX } from "preact";
-import { solutionRecoil, useCraftingState, useSetNextProblem } from './craftingActionsRecoil';
+import { solutionRecoil, useCraftingTransition, useSetNextProblem } from './solutionRecoil';
 import { ArrowRight } from "@emotion-icons/material-rounded/ArrowRight";
 import { isSolved } from './puzzle/actions';
 
@@ -16,7 +16,7 @@ export function HeaderTitle({
     style?: JSX.CSSProperties;
 }) {
     const setNextLevel = useSetNextProblem();
-    const finalState = useCraftingState().state;
+    const finalState = useCraftingTransition().state;
     const isWin = isSolved(finalState);
     
     return <div {...props} className={cx(css`& {

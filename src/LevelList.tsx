@@ -9,7 +9,7 @@ import { css, cx } from "@emotion/css";
 type CSSProperties = import("preact").JSX.CSSProperties;
 import { Done } from '@emotion-icons/material-rounded/Done';
 import { RemoveDone } from '@emotion-icons/material-rounded/RemoveDone';
-import { solutionRecoil, useSetProblem } from "./craftingActionsRecoil";
+import { solutionRecoil, useSetProblem } from "./solutionRecoil";
 
 export const gameProgressState = atom({
     key: "gameProgress",

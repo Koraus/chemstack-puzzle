@@ -9,7 +9,7 @@ import { css, cx } from "@emotion/css";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
 import { Add } from '@emotion-icons/material-rounded/Add';
 import { Close } from '@emotion-icons/material-rounded/Close';
-import { useCraftingAct, useCraftingCanReset, useCraftingReset, useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingAct, useCraftingCanReset, useCraftingReset, useCraftingTransition } from "./solutionRecoil";
 import { tutorialRecoil } from './tutorialRecoil';
 import { CraftingSecondaryTubes } from './CraftingSecondaryTubes';
 import { GlobalBackground } from './GlobalBackground';
@@ -22,14 +22,14 @@ export function CraftingTable() {
     const reset = useCraftingReset();
     const act = useCraftingAct();
 
-    const { tubes, isSolved } = useCraftingState().state;
+    const { tubes, isSolved } = useCraftingTransition().state;
     const isWin = isSolved;
 
     const tutorial = useRecoilValue(tutorialRecoil);
     const hintReset = tutorial.some(t => t.kind === "reset");
     const hintAddTube = tutorial.some(t => t.kind === "addTube");
 
-    const craftingStateInTime = useCraftingState();
+    const craftingStateInTime = useCraftingTransition();
     const isCraftingIdle = craftingStateInTime.currentState.id === "idle";
 
     return <div style={{

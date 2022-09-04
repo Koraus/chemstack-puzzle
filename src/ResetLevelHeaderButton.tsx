@@ -1,7 +1,7 @@
 import { css, cx } from "@emotion/css";
 import { JSX } from "preact";
 import { Refresh } from '@emotion-icons/material-rounded/Refresh';
-import { useCraftingReset } from './craftingActionsRecoil';
+import { useCraftingReset } from './solutionRecoil';
 
 
 export function ResetLevelHeaderButton({

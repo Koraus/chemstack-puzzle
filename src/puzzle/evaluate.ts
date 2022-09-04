@@ -3,11 +3,7 @@ import { actRound, Action } from './actions';
 import { Problem } from './problem';
 import memoize from 'memoizee';
 import { _throw } from './_throw';
-
-export type Solution = {
-    problem: Problem;
-    actions: Action[];
-}
+import { Solution } from './solution';
 
 export type StateTransition = ReturnType<typeof actRound> | { state: State };
 

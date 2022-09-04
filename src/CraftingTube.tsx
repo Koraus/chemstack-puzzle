@@ -1,6 +1,6 @@
 import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
-import { useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingTransition } from "./solutionRecoil";
 import { PourFromMainIntoSecondaryButton } from "./PourFromMainIntoSecondaryButton";
 import { TubeSvg } from "./TubeSvg";
 
@@ -8,11 +8,11 @@ import { TubeSvg } from "./TubeSvg";
 export function CraftingTube({ style }: {
     style?: JSX.CSSProperties;
 }) {
-    const finalState = useCraftingState().state;
+    const finalState = useCraftingTransition().state;
     const finalTube = finalState.tubes[0];
     const isSecondaryAvailable = finalState.tubes.length > 1;
 
-    const craftingStateInTime = useCraftingState();
+    const craftingStateInTime = useCraftingTransition();
     const time = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
     

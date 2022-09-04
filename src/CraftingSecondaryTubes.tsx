@@ -1,7 +1,7 @@
 import * as flex from "./utils/flex";
 import { css, cx, keyframes } from "@emotion/css";
 import { JSX } from "preact";
-import { useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingTransition } from "./solutionRecoil";
 import { PourFromSecondaryIntoMainButton } from "./PourFromSecondaryIntoMainButton";
 import { TubeSvg } from "./TubeSvg";
 
@@ -11,10 +11,10 @@ function Tube({ revI, ...props }: {
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const finalState = useCraftingState().state;
+    const finalState = useCraftingTransition().state;
     const finalTube = [...finalState.tubes].reverse()[revI];
     
-    const craftingStateInTime = useCraftingState();
+    const craftingStateInTime = useCraftingTransition();
     const now = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
 
@@ -99,7 +99,7 @@ export function CraftingSecondaryTubes({
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    const craftingStateInTime = useCraftingState();
+    const craftingStateInTime = useCraftingTransition();
     const now = craftingStateInTime.currentTime;
     const craftingState = craftingStateInTime.currentState;
     const { start, duration } = craftingState;

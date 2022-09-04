@@ -2,7 +2,7 @@ import { JSX } from "preact";
 import { css, cx } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
 import { ArrowLeft } from "@emotion-icons/material-rounded/ArrowLeft";
-import { useCraftingAct, useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingAct, useCraftingTransition } from "./solutionRecoil";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import { tutorialRecoil } from "./tutorialRecoil";
 import { useRecoilValue } from "recoil";
@@ -17,7 +17,7 @@ export function PourFromMainIntoSecondaryButton({ style, className }: {
     const tutorial = useRecoilValue(tutorialRecoil);
     const isHinted = tutorial.some(t => t.kind === "pourFromMainIntoSecondary");
     
-    const craftingStateInTime = useCraftingState();
+    const craftingStateInTime = useCraftingTransition();
     const isCraftingIdle = craftingStateInTime.currentState.id === "idle";
     const canAct = actions.pourFromMainIntoSecondary().canAct(craftingStateInTime.state);
 

@@ -3,7 +3,7 @@ import * as flex from './utils/flex';
 import { substanceColors } from './substanceColors';
 import { KeyboardArrowUp } from '@emotion-icons/material-rounded/KeyboardArrowUp';
 import { getProblemReactions } from './puzzle/reactions';
-import { solutionRecoil, useCraftingState } from './craftingActionsRecoil';
+import { solutionRecoil, useCraftingTransition } from './solutionRecoil';
 import { tutorialRecoil } from './tutorialRecoil';
 import { css, cx, keyframes } from '@emotion/css';
 import { Reaction } from './puzzle/reactions';
@@ -14,7 +14,7 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     const problem = useRecoilValue(solutionRecoil).problem;
     const reactions =  getProblemReactions(problem);
 
-    const craftingStateInTime = useCraftingState();
+    const craftingStateInTime = useCraftingTransition();
     const { tubes } = craftingStateInTime.currentState.state;
     const mainTube = tubes[0];
     const currentSubstance = mainTube[mainTube.length - 1];

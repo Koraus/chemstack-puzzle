@@ -4,7 +4,8 @@ import { useUpdRecoilState } from "./utils/useUpdRecoilState";
 import { useRecoilValue } from "recoil";
 import { useEffect, useState } from "preact/hooks";
 import { problems } from "./puzzle/problems";
-import { evaluate, Solution } from "./puzzle/evaluate";
+import { evaluate } from "./puzzle/evaluate";
+import { Solution } from "./puzzle/solution";
 import * as amplitude from "@amplitude/analytics-browser";
 
 export const solutionRecoil = atom({
@@ -85,7 +86,7 @@ export const useSetNextProblem = () => {
 
 export const useCraftingAct = () => {
     const upd = useUpdRecoilState(solutionRecoil);
-    return <T extends keyof typeof actions>(action: Action<T>) => upd({
+    return (action: Action) => upd({
         actions: { $push: [action] },
         actionTime: { $set: performance.now() },
     });
@@ -142,7 +143,7 @@ const getCraftingState = (
     }
 }
 
-export function useCraftingState() {
+export function useCraftingTransition() {
     const { problem, actionTime, actions } = useRecoilValue(solutionRecoil);
     const transition = evaluate({ problem, actions });
 

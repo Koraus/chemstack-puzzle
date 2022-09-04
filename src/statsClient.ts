@@ -1,5 +1,6 @@
 import { Action } from './puzzle/actions';
 import { Problem } from './puzzle/problem';
+import { Solution } from './puzzle/solution';
 
 
 export type StatsData = {
@@ -9,9 +10,9 @@ export type StatsData = {
     }>;
 }
 
-const useProdBackIndev = true;
+const useProdBackInDev = false;
 const backUrl =
-    (useProdBackIndev || !import.meta.env.DEV)
+    (useProdBackInDev || !import.meta.env.DEV)
         ? "https://chems.x-pl.art/"
         : "http://127.0.0.1:8787/";
 
@@ -30,20 +31,14 @@ export const getStats = async (problem: Problem) => {
     return data as StatsData;
 }
 
-export const postSolution = async (
-    levelPreset: Problem,
-    solution: Action[]
-) => {
+export const postSolution = async (solution: Solution) => {
     const res = await fetch(backUrl, {
         method: "POST",
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            levelPreset,
-            solution,
-        })
+        body: JSON.stringify(solution),
     });
     return (await res.json()) as {
         wasRegistered: boolean,

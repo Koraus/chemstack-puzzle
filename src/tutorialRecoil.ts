@@ -1,10 +1,11 @@
 import { GetRecoilValue, selector } from "recoil";
-import { solutionRecoil, useCraftingState } from "./craftingActionsRecoil";
+import { solutionRecoil } from "./solutionRecoil";
 import { problems } from "./puzzle/problems";
+import { evaluate } from "./puzzle/evaluate";
 
 const tutorialMap = {
     [problems[0].name]: function* (get: GetRecoilValue) {
-        const { tubes, targets } = useCraftingState().state;
+        const { tubes, targets } =  evaluate(get(solutionRecoil)).state;
 
         if (targets.length === 0) {
             yield { kind: "next" as const };
@@ -28,7 +29,7 @@ const tutorialMap = {
         }];
     },
     [problems[1].name]: function* (get: GetRecoilValue) {
-        const { tubes, targets } = useCraftingState().state;
+        const { tubes, targets } =  evaluate(get(solutionRecoil)).state;
 
         if (targets.length === 0) {
             yield { kind: "next" as const };
@@ -90,7 +91,7 @@ const tutorialMap = {
         }];
     },
     [problems[3].name]: function* (get: GetRecoilValue) {
-        const { tubes, targets } = useCraftingState().state;
+        const { tubes, targets } =  evaluate(get(solutionRecoil)).state;
 
         if (targets.length === 0) {
             yield { kind: "next" as const };

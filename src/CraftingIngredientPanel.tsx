@@ -6,7 +6,7 @@ import { tutorialRecoil } from "./tutorialRecoil";
 import { TouchAppAnimation } from "./TouchAppAnimation";
 import * as flex from "./utils/flex";
 import { css, cx } from "@emotion/css";
-import { solutionRecoil, useCraftingState } from "./craftingActionsRecoil";
+import { solutionRecoil, useCraftingTransition } from "./solutionRecoil";
 
 
 export function CraftingIngredientPanel({
@@ -29,7 +29,7 @@ export function CraftingIngredientPanel({
         bottom: 10px;
     }`;
     
-    const craftingStateInTime = useCraftingState();
+    const craftingStateInTime = useCraftingTransition();
     const isCraftingIdle = craftingStateInTime.currentState.id === "idle";
 
     return <div

@@ -1,7 +1,7 @@
 import { JSX } from "preact";
 import { cx } from "@emotion/css";
 import { buttonCss } from "./buttonCss";
-import { useCraftingAct, useCraftingState } from "./craftingActionsRecoil";
+import { useCraftingAct, useCraftingTransition } from "./solutionRecoil";
 import { ArrowRight } from "@emotion-icons/material-rounded/ArrowRight";
 import { isSolved } from "./puzzle/actions";
 
@@ -11,7 +11,7 @@ export function PourFromSecondaryIntoMainButton({ style, className }: {
     style?: JSX.CSSProperties;
 }) {
     const act = useCraftingAct();
-    const finalState = useCraftingState().state;
+    const finalState = useCraftingTransition().state;
 
     return <button
         disabled={isSolved(finalState)}
