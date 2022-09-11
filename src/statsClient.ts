@@ -1,14 +1,15 @@
 import { Action } from './puzzle/actions';
 import { Problem } from './puzzle/problem';
 import { Solution } from './puzzle/solution';
+import { State } from './puzzle/state';
 
 
-export type StatsData = {
-    actionCount: Record<number, {
-        all: number,
-        unique: number,
-    }>;
-}
+type StatsKey = keyof State["stats"];
+type StatData = Record<number, {
+    all: number,
+    unique: number,
+}>;
+type StatsData = Record<StatsKey, StatData>;
 
 const useProdBackInDev = false;
 const backUrl =

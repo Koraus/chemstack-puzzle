@@ -82,6 +82,7 @@ export function Statistics({
         })();
         () => isCancelled = true;
     }, [isWin]);
+    const currentStats = craftingStateInTime.currentState.state.stats;
     return <div
         className={cx(
             css`&{ color: white; }`,
@@ -90,12 +91,16 @@ export function Statistics({
         {...props}
     >
         <div>
-            {JSON.stringify(craftingStateInTime.currentState.state.stats)}
+            {JSON.stringify(currentStats)}
 
         </div>
         <div>
             {remoteStats
-                ? <Chart currentValue={solution.actions.length} data={remoteStats.actionCount} />
+                ? <>
+                    <Chart currentValue={currentStats.actionCount} data={remoteStats.actionCount ?? {}} />
+                    <Chart currentValue={currentStats.maxAddedTubeCount} data={remoteStats.maxAddedTubeCount ?? {}} />
+                    <Chart currentValue={currentStats.price} data={remoteStats.price ?? {}} />
+                </>
                 : "loading..."}
         </div>
     </div>;

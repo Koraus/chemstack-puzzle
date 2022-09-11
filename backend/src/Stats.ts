@@ -2,13 +2,28 @@ import { Router } from 'itty-router';
 import { error, json } from 'itty-router-extras';
 import { State } from '../../src/puzzle/state';
 import { Env } from './Env';
+import * as it from '../../src/utils/it';
+import { apipe, pipe } from '../../src/utils/apipe';
+import { tuple } from '../../src/utils/tuple';
 
-type StatsData = {
-    actionCount: Record<number, {
-        all: number,
-        unique: number,
-    }>;
-}
+type StatsKey = keyof State["stats"];
+type StatData = Record<number, {
+    all: number,
+    unique: number,
+}>;
+type StatsData = Record<StatsKey, StatData>;
+
+
+export const { entries, fromEntries } = Object;
+export const entriesMap = <TKey, T, U>(f: (x: T, key: TKey) => U) =>
+    it.map<[TKey, T], [TKey, U]>(([key, value]) => [key, f(value, key)]);
+export const entriesEscalatePromises = <TKey, T>() =>
+    it.map<[TKey, Promise<T>], Promise<[TKey, T]>>(async ([key, x]) => tuple(key, await x));
+export const entriesPromisesAll = <TKey, T>() =>
+    (s: Iterable<[TKey, Promise<T>]>) => apipe(s,
+        entriesEscalatePromises(),
+        x => Promise.all([...x]),
+    );
 
 export class Stats {
     constructor(
@@ -18,51 +33,63 @@ export class Stats {
 
     isSolutionRegistered = (() => {
         const storage = () => this.state.storage;
-        const key = (solutionId: string, statKey: keyof StatsData) =>
+        const key = (solutionId: string, statKey: string) =>
             `isSolutionRegistered_${solutionId}_${statKey}`;
         return {
             get: (...args: Parameters<typeof key>) =>
                 storage().get<true>(key(...args)),
             set: (...args: Parameters<typeof key>) =>
-                (storage().put(key(...args), true), true),
+                storage().put(key(...args), true).then(() => true),
         }
     })();
 
     data = (() => {
         const storage = () => this.state.storage;
         const key = "data";
-        const def = () => ({
-            actionCount: {},
-        });
+        const def = () => ({} as StatsData);
         return {
             get: async () => ((await storage().get<StatsData>(key)) ?? def()),
-            set: (value: StatsData) => (storage().put(key, value), value),
+            set: (value: StatsData) => storage().put(key, value).then(() => value),
         }
     })();
 
     async add(solutionId: string, solutionStats: State["stats"]) {
-        const [isSolutionRegisteredForActionCount, data] = await Promise.all([
-            this.isSolutionRegistered.get(solutionId, "actionCount"),
+        const { entries, fromEntries } = Object;
+
+        const [isSolutionRegistered, data] = await Promise.all([
+            (async () => fromEntries(await apipe(
+                solutionStats,
+                entries,
+                entriesMap((_, key) => this.isSolutionRegistered.get(solutionId, key)),
+                entriesPromisesAll(),
+            )))(),
             this.data.get(),
         ] as const);
 
-        if (!data.actionCount[solutionStats.actionCount]) {
-            data.actionCount[solutionStats.actionCount] = {
-                all: 0,
-                unique: 0,
-            };
+        for (const [key, stat] of entries(solutionStats)) {
+            const _key = key as StatsKey;
+            if (!data[_key]) { data[_key] = {}; }
+            if (!data[_key][stat]) { data[_key][stat] = { all: 0, unique: 0 }; }
+            
+            data[_key][solutionStats[_key]].all++;
+            if (!isSolutionRegistered[_key]) {
+                data[_key][solutionStats[_key]].unique++;
+            }
+        
         }
 
-        data.actionCount[solutionStats.actionCount].all++;
-        if (isSolutionRegisteredForActionCount) {
-            data.actionCount[solutionStats.actionCount].unique++;
-        }
-
-        this.data.set(data);
-        this.isSolutionRegistered.set(solutionId, "actionCount");
+        await Promise.all([
+            (async () => fromEntries(await apipe(
+                solutionStats,
+                entries,
+                entriesMap((_, key) => this.isSolutionRegistered.set(solutionId, key)),
+                entriesPromisesAll(),
+            )))(),
+            this.data.set(data),
+        ]);
 
         return {
-            wasRegistered: isSolutionRegisteredForActionCount,
+            wasRegistered: isSolutionRegistered,
             data
         };
     }
