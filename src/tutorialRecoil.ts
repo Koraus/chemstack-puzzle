@@ -26,13 +26,17 @@ const tutorialMap = {
         }, {
             kind: "target" as const,
             slotIndex: tube.length,
+            delay: 0,
         }];
     },
     [problems[1].name]: function* (get: GetRecoilValue) {
         const { tubes, targets } =  evaluate(get(solutionRecoil)).state;
 
         if (targets.length === 0) {
-            yield { kind: "next" as const };
+            yield { 
+                kind: "next" as const,
+                delay: 5000,
+            };
             return;
         }
 
@@ -84,7 +88,8 @@ const tutorialMap = {
 
         yield* [{
             kind: "addIngredient" as const,
-            ingredientId: target[tube.length]
+            ingredientId: target[tube.length],
+            delay: 3000,
         }, {
             kind: "target" as const,
             slotIndex: tube.length,
@@ -162,6 +167,7 @@ const tutorialMap = {
         }, {
             kind: "target" as const,
             slotIndex: tube.length,
+            delay: 0,
         }];
     },
 }

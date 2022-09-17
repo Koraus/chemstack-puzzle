@@ -5,13 +5,27 @@ import { useEffect, useState } from "preact/hooks";
 
 
 export function TouchAppAnimation({
-    style, className,
+    style, className, startTime,
 }: {
     style?: JSX.CSSProperties;
     className?: string;
+    startTime?: number;
 }) {
     const [now, setNow] = useState(0);
-    useEffect(() => setNow(performance.now()), []);
+    useEffect(() => {
+        if (startTime !== undefined) {
+            const h = setTimeout(
+                () => setNow(performance.now()),
+                startTime - performance.now())
+            return () => clearTimeout(h);
+        } else {
+            setNow(performance.now());
+        }
+    }, [startTime]);
+
+    if (now === 0) {
+        return null;
+    }
 
     return <div
         className={cx(css`

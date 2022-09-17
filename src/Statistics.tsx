@@ -65,26 +65,6 @@ function Chart({ width, height, currentValue, data }: {
                 }]) => d[1]?.all ?? 0,
                 y2: 0,
             }),
-            // Plot.barY(data1, {
-            //     x: (d: [string, {
-            //         all: number,
-            //         unique: number,
-            //     }]) => d[0],
-            //     y: (d: [string, {
-            //         all: number,
-            //         unique: number,
-            //     }]) => d[1]?.all ?? 0,
-            // }),
-            // Plot.barY(data1, {
-            //     x: (d: [string, {
-            //         all: number,
-            //         unique: number,
-            //     }]) => +d[0],
-            //     y: (d: [string, {
-            //         all: number,
-            //         unique: number,
-            //     }]) => d[1]?.unique ?? 0,
-            // }),
             Plot.ruleX([currentValue], { stroke: "red", strokeWidth: 3, }),
         ]
     });
@@ -137,7 +117,7 @@ export function Statistics({
             {remoteStats
                 ? <>
                     <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
-                        <div className={css`&{height: 30px}`}>
+                        <div className={css`&{height: 22px;}`}>
                             <Spreadsheet className={css`&{height: 100%}`} />
                             {currentStats.actionCount} actions
                         </div>
@@ -149,7 +129,7 @@ export function Statistics({
                         />
                     </div>
                     <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
-                        <div className={css`&{height: 30px}`}>
+                        <div className={css`&{height: 22px;}`}>
                             <TestTube className={css`&{height: 100%}`} />
                             {currentStats.actionCount} add tubes
                         </div>
@@ -161,7 +141,7 @@ export function Statistics({
                         />
                     </div>
                     <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
-                        <div className={css`&{height: 30px}`}>
+                        <div className={css`&{height: 22px;}`}>
                             <CoinStack className={css`&{height: 100%}`} />
                             {currentStats.actionCount} coins
                         </div>
