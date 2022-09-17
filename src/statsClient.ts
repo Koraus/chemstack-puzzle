@@ -1,17 +1,16 @@
-import { Action } from './puzzle/actions';
 import { Problem } from './puzzle/problem';
 import { Solution } from './puzzle/solution';
 import { State } from './puzzle/state';
 
 
-type StatsKey = keyof State["stats"];
-type StatData = Record<number, {
+export type StatsKey = keyof State["stats"];
+export type StatData = Record<number, {
     all: number,
     unique: number,
 }>;
-type StatsData = Record<StatsKey, StatData>;
+export type StatsData = Record<StatsKey, StatData>;
 
-const useProdBackInDev = false;
+const useProdBackInDev = true;
 const backUrl =
     (useProdBackInDev || !import.meta.env.DEV)
         ? "https://chems.x-pl.art/"
@@ -42,7 +41,7 @@ export const postSolution = async (solution: Solution) => {
         body: JSON.stringify(solution),
     });
     return (await res.json()) as {
-        wasRegistered: boolean,
+        isNotOriginal: Record<StatsKey, true>,
         data: StatsData,
     }
 }

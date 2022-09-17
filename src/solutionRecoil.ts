@@ -1,45 +1,119 @@
-import { atom } from "recoil";
-import { Action, actions } from "./puzzle/actions";
+import { atom, useSetRecoilState, DefaultValue } from "recoil";
+import { Action, actions, isSolved } from "./puzzle/actions";
 import { useUpdRecoilState } from "./utils/useUpdRecoilState";
-import { useRecoilValue } from "recoil";
+import { useRecoilValue, AtomEffect } from "recoil";
 import { useEffect, useState } from "preact/hooks";
 import { problems } from "./puzzle/problems";
 import { evaluate } from "./puzzle/evaluate";
-import { Solution } from "./puzzle/solution";
+import { getSolutionCmp, getSolutionCmpObj, Solution } from "./puzzle/solution";
 import * as amplitude from "@amplitude/analytics-browser";
+import * as _ from "lodash";
+import update, { Spec } from "immutability-helper";
+import { getProblemCmp } from "./puzzle/problem";
+import { postSolution } from "./statsClient";
+import { _throw } from "./puzzle/_throw";
+
+const localStorageAtomEffect = <T, U>({ key, select, unselect }: {
+    key?: string | ((key: string) => string),
+    select: (x: T) => U,
+    unselect: (x: U) => T,
+}) => ({ node, setSelf, onSet }: Parameters<AtomEffect<T>>[0]) => {
+    const keyStr =
+        key === undefined ? node.key
+            : (typeof key === "string"
+                ? key
+                : key(node.key));
+    const savedValue = localStorage.getItem(keyStr)
+    if (savedValue != null) {
+        setSelf(unselect(JSON.parse(savedValue)));
+    }
+
+    onSet((newValue, _, isReset) => {
+        if (isReset) {
+            localStorage.removeItem(keyStr);
+        } else {
+            console.log("localStorage.setItem", keyStr, select(newValue));
+            localStorage.setItem(keyStr, JSON.stringify(select(newValue)));
+        }
+    });
+};
+
+const solutionRecoilDefault = {
+    problem: problems[0],
+    actions: [] as Solution['actions'],
+    actionTime: 0,
+    currentTime: 0,
+    knownSolutions: {} as Record<string, Solution>,
+    confirmedSolutions: {} as Record<string, Awaited<ReturnType<typeof postSolution>>>,
+};
 
 export const solutionRecoil = atom({
     key: "solution",
-    default: {
-        problem: problems[0],
-        actions: [] as Solution['actions'],
-        actionTime: 0,
-        currentTime: 0,
-    },
+    default: solutionRecoilDefault,
     effects: [
-        ({ onSet, setSelf }) => {
-            const handles = [] as ReturnType<typeof setTimeout>[];
-
+        localStorageAtomEffect({
+            select: (x) => _.pick(x, "knownSolutions", "confirmedSolutions"),
+            unselect: (x) => ({
+                ...solutionRecoilDefault,
+                ...x,
+            }),
+        }),
+        ({ onSet }) => { // analytics effect
             onSet(async (newValue, oldValue) => {
-                handles.map(clearTimeout);
-
-                const setTime = (currentTime: number) => setSelf({
-                    ...newValue,
-                    currentTime,
-                });
-
-                if (!("problem" in oldValue) || (newValue.problem !== oldValue.problem)) {
-
+                const oldProblem = ("problem" in oldValue) && oldValue.problem;
+                const newProblem = newValue.problem;
+                if (newProblem !== oldProblem) {
                     // legacy log
                     amplitude.track(`levelPreset.onSet`, newValue.problem);
 
                     amplitude.track(`problem changed`, newValue.problem);
                 }
+            });
+        },
+        ({ node, onSet, setSelf }) => { // stats submission effect
+            type T = typeof node.__tag[0];
+            const updSelf = (spec: Spec<T>) => setSelf(s => update(s, spec));
+
+            onSet(async (newValue, oldValue) => {
+                const oldKnownSolutions =
+                    ("knownSolutions" in oldValue) && oldValue.knownSolutions;
+                if (!oldKnownSolutions) { return; }
+                const newKnownSolutions =
+                    newValue.knownSolutions;
+
+                const addedSolutions = Object.keys(newKnownSolutions)
+                    .filter(solutionId => !(solutionId in oldKnownSolutions))
+                    .map(solutionId => newKnownSolutions[solutionId]);
+
+                console.log("addedSolutions", addedSolutions);
+                for (const solution of addedSolutions) {
+                    (async () => {
+                        const result = await postSolution(solution);
+                        updSelf({
+                            confirmedSolutions: {
+                                [getSolutionCmp(solution)]: { $set: result },
+                            }
+                        });
+                    })(); // just run, do not await
+                }
+            });
+        },
+        ({ node, onSet, setSelf }) => {
+            type T = typeof node.__tag[0];
+            const updSelf = (spec: Spec<T>) => setSelf(s => update(s, spec));
+
+            const handles = [] as ReturnType<typeof setTimeout>[];
+
+            onSet(async (newValue) => {
+                handles.map(clearTimeout);
+
+                const setTime = (t: number) => updSelf({ currentTime: { $set: t } });
 
                 setTime(performance.now());
                 const timeLocal = performance.now();
 
                 const transition = evaluate(newValue);
+
                 if (!("children" in transition)) { return; }
 
                 const levelPresetIndex = problems.findIndex(x => x.name === newValue.problem.name);
@@ -85,10 +159,21 @@ export const useSetNextProblem = () => {
 }
 
 export const useCraftingAct = () => {
-    const upd = useUpdRecoilState(solutionRecoil);
-    return (action: Action) => upd({
-        actions: { $push: [action] },
-        actionTime: { $set: performance.now() },
+    const set = useSetRecoilState(solutionRecoil);
+    return (action: Action) => set(prevState => {
+        let nextState = update(prevState, {
+            actions: { $push: [action] },
+            actionTime: { $set: performance.now() },
+        });
+        if (isSolved(evaluate(nextState).state)) {
+            const solutionId = getSolutionCmp(nextState);
+            nextState = update(nextState, {
+                knownSolutions: {
+                    [solutionId]: { $set: getSolutionCmpObj(nextState) }
+                }
+            });
+        }
+        return nextState;
     });
 }
 

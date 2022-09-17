@@ -58,13 +58,8 @@ export function LevelList({ style }: { style?: CSSProperties }) {
     const gameProgress = useRecoilValue(gameProgressState);
     const currentLevelPreset = useRecoilValue(solutionRecoil).problem;
     const setLevelPreset = useSetProblem();
-    const resetLevelProgress = useRecoilTransaction_UNSTABLE(({ get, set }) => () => {
-        set(solutionRecoil, {
-            problem: problems[0],
-            actions: [],
-            actionTime: 0,
-            currentTime: 0,
-        });
+    const resetLevelProgress = useRecoilTransaction_UNSTABLE(({ get, set, reset }) => () => {
+        reset(solutionRecoil);
         set(gameProgressState, {});
     });
 

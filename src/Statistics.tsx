@@ -3,7 +3,8 @@ import { JSX } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import { solutionRecoil, useCraftingTransition } from './solutionRecoil';
 import { css, cx } from '@emotion/css';
-import { StatsData, getStats, postSolution } from './statsClient';
+import { StatsData, getStats } from './statsClient';
+import { getSolutionCmp } from './puzzle/solution';
 
 // @ts-ignore no typings
 import * as Plot from "@observablehq/plot";
@@ -62,7 +63,7 @@ export function Statistics({
     const solution = useRecoilValue(solutionRecoil);
     const craftingStateInTime = useCraftingTransition();
     const [remoteStats, setRemoteStats] = useState<StatsData>();
-    const isWin = craftingStateInTime.state.targets.length === 0;
+    const submissionStats = solution.confirmedSolutions[getSolutionCmp(solution)];
     useEffect(() => {
         let isCancelled = false;
         (async () => {
@@ -73,15 +74,9 @@ export function Statistics({
         () => isCancelled = true;
     }, [solution.problem]);
     useEffect(() => {
-        if (!isWin) { return; }
-        let isCancelled = false;
-        (async () => {
-            const res = await postSolution(solution);
-            if (isCancelled) { return; }
-            setRemoteStats(res.data);
-        })();
-        () => isCancelled = true;
-    }, [isWin]);
+        if (!submissionStats) { return; }
+        setRemoteStats(submissionStats.data);
+    }, [submissionStats]);
     const currentStats = craftingStateInTime.currentState.state.stats;
     return <div
         className={cx(

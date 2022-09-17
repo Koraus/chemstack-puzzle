@@ -89,7 +89,7 @@ export class Stats {
         ]);
 
         return {
-            wasRegistered: isSolutionRegistered,
+            isNotOriginal: isSolutionRegistered,
             data
         };
     }
