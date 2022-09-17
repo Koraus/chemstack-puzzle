@@ -12,17 +12,12 @@ import { HeaderTitle } from './HeaderTitle';
 import { Footer } from "./Footer";
 import { useMemo } from "preact/hooks";
 import { WinFireworks } from "./WinFireworks";
-import { useMatchMedia } from "./utils/useMatchMedia";
 import { Statistics } from "./Statistics";
+import { landscapeWidth, portraitWidth, useIsLandscapeValue, useOrientationEffect } from "./orientation";
 
 export function App() {
-    const landscapeWidth = 922;
-    const portraitWidth = 414;
-
-    const isLandscape = useMatchMedia(`(orientation: landscape)`
-        + ` and (min-width: ${landscapeWidth}px)`
-        + ` and (min-height: 487px)`);
-
+    useOrientationEffect();
+    const isLandscape = useIsLandscapeValue();
     const main = useMemo(() => <>
         <ReactionsLibrary />
         <CraftingTable />
@@ -72,7 +67,7 @@ export function App() {
                         <ResetLevelHeaderButton className={css`& { flex: 1; }`} />
                         <div className={cx(css`& { flex-grow: 999; }`)}></div>
                     </div>
-                    <Statistics />
+                    <Statistics isHorizontal />
                     <div className={cx(css`& { flex-grow: 999; }`)}></div>
                     <Footer isHorizontal />
                 </div>
