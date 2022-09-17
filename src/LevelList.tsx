@@ -8,8 +8,17 @@ import * as flex from "./utils/flex";
 import { css, cx } from "@emotion/css";
 type CSSProperties = import("preact").JSX.CSSProperties;
 import { Done } from '@emotion-icons/material-rounded/Done';
+import { CoinStack } from '@emotion-icons/boxicons-solid/CoinStack';
 import { RemoveDone } from '@emotion-icons/material-rounded/RemoveDone';
+import { TestTube } from '@emotion-icons/remix-fill/TestTube';
+import { Spreadsheet } from '@emotion-icons/boxicons-solid/Spreadsheet';
 import { solutionRecoil, useSetProblem } from "./solutionRecoil";
+import { getProblemCmp } from "./puzzle/problem";
+import memoize from "memoizee";
+import { tuple } from "./utils/tuple";
+import { evaluate } from "./puzzle/evaluate";
+import { Solution } from "./puzzle/solution";
+import { StatsData, StatsKey } from "./statsClient";
 
 export const gameProgressState = atom({
     key: "gameProgress",
@@ -54,9 +63,16 @@ export function LoadHighestLevelEffect() {
     return <></>;
 }
 
+const _getProblemCmp = memoize(getProblemCmp, { max: 1000 });
+
 export function LevelList({ style }: { style?: CSSProperties }) {
     const gameProgress = useRecoilValue(gameProgressState);
-    const currentLevelPreset = useRecoilValue(solutionRecoil).problem;
+    const {
+        problem: currentProblem,
+        knownSolutions,
+        confirmedSolutions,
+    } = useRecoilValue(solutionRecoil);
+
     const setLevelPreset = useSetProblem();
     const resetLevelProgress = useRecoilTransaction_UNSTABLE(({ get, set, reset }) => () => {
         reset(solutionRecoil);
@@ -73,14 +89,40 @@ export function LevelList({ style }: { style?: CSSProperties }) {
     }: {
         levelPreset: typeof problems[0]
     }) {
-        const levelPresetIndex = problems.findIndex(x => x.name === levelPreset.name);
-        const isCurrent = levelPreset.name === currentLevelPreset.name;
-        const isComplete =
-            (levelPresetIndex >= 0)
-            && (problems[levelPresetIndex].name in gameProgress);
+        const entryProblemId = _getProblemCmp(levelPreset);
+        const currentProblemId = _getProblemCmp(currentProblem);
+
+        const levelPresetIndex = problems.findIndex(x => entryProblemId === _getProblemCmp(x));
         const isOpen =
             levelPresetIndex === 0
             || (levelPresetIndex > 0 && (problems[levelPresetIndex - 1].name in gameProgress));
+
+        const isCurrent = entryProblemId === currentProblemId;
+        const isComplete = Object.values(knownSolutions)
+            .some(s => _getProblemCmp(s.problem) === entryProblemId);
+
+        const entryConfirmedSolutions = Object.entries(confirmedSolutions)
+            .map(([solutionId, response]) => tuple(knownSolutions[solutionId], response))
+            .filter(([solution]) => _getProblemCmp(solution.problem) === entryProblemId);
+
+        const hasBadge = (solution: Solution, remoteStats: StatsData, key: StatsKey) => {
+            const localStats = evaluate(solution).state.stats;
+            const minRemoteStat = Math.min(...Object.keys(remoteStats[key]).map(Number));
+            return minRemoteStat === localStats[key];
+        }
+
+        const hasActionCountBadge =
+            entryConfirmedSolutions.some(([solution, response]) =>
+                hasBadge(solution, response.data, "actionCount"));
+
+        const hasMaxAddedTubeCountBadge =
+            entryConfirmedSolutions.some(([solution, response]) =>
+                hasBadge(solution, response.data, "maxAddedTubeCount"));
+
+        const hasPriceBadge =
+            entryConfirmedSolutions.some(([solution, response]) =>
+                hasBadge(solution, response.data, "price"));
+
         const __DEBUG_allowAnyLevel = true && import.meta.env.DEV;
         return <a
             style={{
@@ -90,7 +132,9 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                 textTransform: "uppercase",
                 color: "grey",
                 fontSize: 20,
+                lineHeight: 1.5,
                 width: 200,
+                height: 28,
 
                 ...(isOpen && {
                     color: "white"
@@ -115,10 +159,21 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                     whiteSpace: "nowrap",
                 }}
             >{levelPreset.name}</span>
-            {isComplete && <Done className={css`& {
-                color: #a8d26b;
-                height: 28px;
-            } `} />}
+            {isComplete && <>
+                <Spreadsheet className={css`& { 
+                    color: ${hasActionCountBadge ? "#a8d26b" : "#aaa"};
+                    height: 50%;
+                }`} />
+                <TestTube className={css`& { 
+                    color: ${hasMaxAddedTubeCountBadge ? "#a8d26b" : "#aaa"};
+                    height: 50%;
+                }`} />
+                <CoinStack className={css`& { 
+                    color: ${hasPriceBadge ? "#a8d26b" : "#aaa"};
+                    height: 50%;
+                }`} />
+                <Done className={css`& { color: #a8d26b; height: 100%; } `} />
+            </>}
 
         </a>;
     }
