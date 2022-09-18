@@ -17,7 +17,7 @@ function _evaluate(problem: Problem, actions: Action[]): StateTransition {
     return actRoundMem(action, prevState);
 }
 
-const _evaluateMem = memoize(_evaluate, { max: 1 });
+const _evaluateMem = memoize(_evaluate, { max: 10 });
 
 export const evaluate = ({ problem, actions }: Solution) =>
     _evaluateMem(problem, actions);

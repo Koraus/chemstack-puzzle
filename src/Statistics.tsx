@@ -14,20 +14,22 @@ import memoize from "memoizee";
 
 // @ts-ignore no typings
 import * as Plot from "@observablehq/plot";
+import { evaluate } from './puzzle/evaluate';
+import { tuple } from './utils/tuple';
 
 
-function Chart({ width, height, currentValue, data }: {
+function Chart({ width, height, currentValue, bestValue, data }: {
     width: number,
     height: number,
     currentValue: number,
+    bestValue: number | undefined,
     data: Record<number, {
         all: number,
         unique: number,
     }>
 }) {
     const max = Math.max(currentValue, ...Object.keys(data).map(Number));
-    const data1 = Array.from({ length: Math.ceil(max * 1.2) + 2 }, (_, i) => [i, data[i]]);
-    const x = Plot.plot({
+    const plot = Plot.plot({
         width,
         height,
         marginLeft: 8,
@@ -66,10 +68,11 @@ function Chart({ width, height, currentValue, data }: {
                 y2: 0,
             }),
             Plot.ruleX([currentValue], { stroke: "red", strokeWidth: 3, }),
+            Plot.ruleX([bestValue], { stroke: "#f004", strokeWidth: 3, }),
         ]
     });
 
-    return <div dangerouslySetInnerHTML={{ __html: x.outerHTML }}></div>;
+    return <div dangerouslySetInnerHTML={{ __html: plot.outerHTML }}></div>;
 }
 
 const _getProblemCmp = memoize(getProblemCmp, { max: 1000 });
@@ -101,59 +104,73 @@ export function Statistics({
     }, [submissionStats]);
     const currentStats = craftingStateInTime.currentState.state.stats;
 
+    const { confirmedSolutions, knownSolutions, problem } = solution;
+    const currentConfirmedSolutions = Object.entries(confirmedSolutions)
+            .map(([solutionId, response]) => tuple(knownSolutions[solutionId], response))
+            .filter(([solution]) => _getProblemCmp(solution.problem) === _getProblemCmp(problem));
+
+    const currentConfirmedStats = currentConfirmedSolutions
+        .map(([s]) => evaluate(s).state.stats);
+
+    const currentBestStats = {
+        actionCount: Math.min(...currentConfirmedStats.map(s => s.actionCount)),
+        maxAddedTubeCount: Math.min(...currentConfirmedStats.map(s => s.maxAddedTubeCount)),
+        price: Math.min(...currentConfirmedStats.map(s => s.price)),
+    }
+
     const isComplete = Object.values(solution.knownSolutions)
         .some(s => _getProblemCmp(s.problem) === _getProblemCmp(solution.problem));
-    if (!isComplete) { return null; }
     return <div
         className={cx(
-            css`&{ color: white; }`,
+            css`&{ 
+                color: white;
+                ${(isComplete && remoteStats) ? "" : "visibility: hidden;"}
+            }`,
             className,
         )}
         {...props}
     >
         <div className={cx(
             isHorizontal ? flex.col : flex.row,
-        )}>
-            {remoteStats
-                ? <>
-                    <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
-                        <div className={css`&{height: 22px;}`}>
-                            <Spreadsheet className={css`&{height: 100%}`} />
-                            {currentStats.actionCount} actions
-                        </div>
-                        <Chart
-                            width={isHorizontal ? 250 : 150}
-                            height={isHorizontal ? 65 : 150}
-                            currentValue={currentStats.actionCount}
-                            data={remoteStats.actionCount ?? {}}
-                        />
-                    </div>
-                    <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
-                        <div className={css`&{height: 22px;}`}>
-                            <TestTube className={css`&{height: 100%}`} />
-                            {currentStats.actionCount} add tubes
-                        </div>
-                        <Chart
-                            width={isHorizontal ? 250 : 150}
-                            height={isHorizontal ? 65 : 150}
-                            currentValue={currentStats.maxAddedTubeCount}
-                            data={remoteStats.maxAddedTubeCount ?? {}}
-                        />
-                    </div>
-                    <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
-                        <div className={css`&{height: 22px;}`}>
-                            <CoinStack className={css`&{height: 100%}`} />
-                            {currentStats.actionCount} coins
-                        </div>
-                        <Chart
-                            width={isHorizontal ? 250 : 150}
-                            height={isHorizontal ? 65 : 150}
-                            currentValue={currentStats.price}
-                            data={remoteStats.price ?? {}}
-                        />
-                    </div>
-                </>
-                : "loading..."}
+        )}>         <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
+                <div className={css`&{height: 22px;}`}>
+                    <Spreadsheet className={css`&{height: 100%}`} />
+                    {currentStats.actionCount} actions
+                </div>
+                <Chart
+                    width={isHorizontal ? 250 : 150}
+                    height={isHorizontal ? 65 : 150}
+                    currentValue={currentStats.actionCount}
+                    bestValue={currentBestStats.actionCount}
+                    data={remoteStats?.actionCount ?? {}}
+                />
+            </div>
+            <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
+                <div className={css`&{height: 22px;}`}>
+                    <TestTube className={css`&{height: 100%}`} />
+                    {currentStats.maxAddedTubeCount} add tubes
+                </div>
+                <Chart
+                    width={isHorizontal ? 250 : 150}
+                    height={isHorizontal ? 65 : 150}
+                    currentValue={currentStats.maxAddedTubeCount}
+                    bestValue={currentBestStats.maxAddedTubeCount}
+                    data={remoteStats?.maxAddedTubeCount ?? {}}
+                />
+            </div>
+            <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
+                <div className={css`&{height: 22px;}`}>
+                    <CoinStack className={css`&{height: 100%}`} />
+                    {currentStats.price} coins
+                </div>
+                <Chart
+                    width={isHorizontal ? 250 : 150}
+                    height={isHorizontal ? 65 : 150}
+                    currentValue={currentStats.price}
+                    bestValue={currentBestStats.price}
+                    data={remoteStats?.price ?? {}}
+                />
+            </div>
         </div>
     </div>;
 }

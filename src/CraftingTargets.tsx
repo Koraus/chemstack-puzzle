@@ -100,8 +100,7 @@ export function CraftingTargets({ style, className }: {
     const { start, duration } = craftingState;
 
     const tutorial = useRecoilValue(tutorialRecoil);
-    const hintNext = tutorial.some(t => t.kind === "next")
-        && craftingState.id === "idle";
+    const hintNext = tutorial.find(t => t.kind === "next");
 
     const tubes = craftingState.state.targets;
     const prevTubes = craftingState.prevState.targets;
@@ -176,10 +175,14 @@ export function CraftingTargets({ style, className }: {
                 />
             </div>;
         })}
-        {(hintNext) && <TouchAppAnimation className={css`& {
-            position: absolute;
-            transform: translate(20px, 120px);
-        }`} />}
+        {(hintNext && craftingState.id === "idle")
+            && <TouchAppAnimation
+                className={css`& {
+                    position: absolute;
+                    transform: translate(20px, 120px);
+                }`}
+                startTime={start + (hintNext.delay ?? 0)}
+            />}
         {isHinted(0) && <div className={css`& {
             z-index: 1;
             position: absolute;

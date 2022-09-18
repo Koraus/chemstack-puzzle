@@ -32,7 +32,6 @@ const localStorageAtomEffect = <T, U>({ key, select, unselect }: {
         if (isReset) {
             localStorage.removeItem(keyStr);
         } else {
-            console.log("localStorage.setItem", keyStr, select(newValue));
             localStorage.setItem(keyStr, JSON.stringify(select(newValue)));
         }
     });
@@ -85,7 +84,6 @@ export const solutionRecoil = atom({
                     .filter(solutionId => !(solutionId in oldKnownSolutions))
                     .map(solutionId => newKnownSolutions[solutionId]);
 
-                console.log("addedSolutions", addedSolutions);
                 for (const solution of addedSolutions) {
                     (async () => {
                         const result = await postSolution(solution);

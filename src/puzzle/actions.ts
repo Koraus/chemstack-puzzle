@@ -30,6 +30,9 @@ export const actions = ({
             !isSolved(state)
             && state.tubes.length <= 6,
         act: (state: State): Spec<State> => {
+            const additionalTubes = state.tubes.length - 1;
+            const newAdditionalTubes = additionalTubes + 1;
+            const isExtraTube = newAdditionalTubes > state.stats.maxAddedTubeCount;
             return ({
                 tubes: { $splice: [[0, 0, []]] },
                 stats: {
@@ -37,8 +40,13 @@ export const actions = ({
                     maxAddedTubeCount: {
                         $set: Math.max(
                             state.stats.maxAddedTubeCount,
-                            (state.tubes.length - 1) + 1,
+                            newAdditionalTubes,
                         )
+                    },
+                    price: {
+                        $set:
+                            state.stats.price
+                            + (isExtraTube ? 1 : 0),
                     },
                 }
             });
