@@ -131,8 +131,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
                 textDecoration: "none",
                 textTransform: "uppercase",
                 color: "grey",
-                fontSize: 20,
-                lineHeight: 1.5,
+                fontSize: 21,
                 width: 200,
                 height: 28,
 
