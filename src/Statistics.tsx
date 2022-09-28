@@ -18,7 +18,7 @@ import { evaluate } from './puzzle/evaluate';
 import { tuple } from './utils/tuple';
 
 
-function Chart({ width, height, currentValue, bestValue, data }: {
+function Chart({ width, height, currentValue, bestValue, data, ...props }: {
     width: number,
     height: number,
     currentValue: number,
@@ -26,7 +26,9 @@ function Chart({ width, height, currentValue, bestValue, data }: {
     data: Record<number, {
         all: number,
         unique: number,
-    }>
+    }>,
+    className?: string,
+    style?: JSX.CSSProperties,
 }) {
     const max = Math.max(currentValue, ...Object.keys(data).map(Number));
     const plot = Plot.plot({
@@ -72,7 +74,10 @@ function Chart({ width, height, currentValue, bestValue, data }: {
         ]
     });
 
-    return <div dangerouslySetInnerHTML={{ __html: plot.outerHTML }}></div>;
+    return <div
+        dangerouslySetInnerHTML={{ __html: plot.outerHTML }}
+        {...props}
+    ></div>;
 }
 
 const _getProblemCmp = memoize(getProblemCmp, { max: 1000 });
@@ -106,8 +111,8 @@ export function Statistics({
 
     const { confirmedSolutions, knownSolutions, problem } = solution;
     const currentConfirmedSolutions = Object.entries(confirmedSolutions)
-            .map(([solutionId, response]) => tuple(knownSolutions[solutionId], response))
-            .filter(([solution]) => _getProblemCmp(solution.problem) === _getProblemCmp(problem));
+        .map(([solutionId, response]) => tuple(knownSolutions[solutionId], response))
+        .filter(([solution]) => _getProblemCmp(solution.problem) === _getProblemCmp(problem));
 
     const currentConfirmedStats = currentConfirmedSolutions
         .map(([s]) => evaluate(s).state.stats);
@@ -122,22 +127,27 @@ export function Statistics({
         .some(s => _getProblemCmp(s.problem) === _getProblemCmp(solution.problem));
     return <div
         className={cx(
-            css`&{ 
-                color: white;
-                ${(isComplete && remoteStats) ? "" : "visibility: hidden;"}
-            }`,
+            css`&{ color: white; }`,
             className,
         )}
         {...props}
     >
         <div className={cx(
             isHorizontal ? flex.col : flex.row,
-        )}>         <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
+        )}>
+            <div className={css`&{ 
+                margin: 1px; 
+                padding: 2px; 
+            }`}>
                 <div className={css`&{height: 22px;}`}>
                     <Spreadsheet className={css`&{height: 100%}`} />
                     {currentStats.actionCount} actions
                 </div>
                 <Chart
+                    className={cx(css`&{ 
+                        ${(isComplete && remoteStats) ? "" : "visibility: hidden;"}
+                        border: 1px solid #fff3; 
+                    }`)}
                     width={isHorizontal ? 250 : 150}
                     height={isHorizontal ? 65 : 150}
                     currentValue={currentStats.actionCount}
@@ -145,12 +155,19 @@ export function Statistics({
                     data={remoteStats?.actionCount ?? {}}
                 />
             </div>
-            <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
+            <div className={css`&{ 
+                    margin: 1px; 
+                    padding: 2px; 
+                }`}>
                 <div className={css`&{height: 22px;}`}>
                     <TestTube className={css`&{height: 100%}`} />
-                    {currentStats.maxAddedTubeCount} add tubes
+                    {currentStats.maxAddedTubeCount} tubes
                 </div>
                 <Chart
+                    className={cx(css`&{
+                        ${(isComplete && remoteStats) ? "" : "visibility: hidden;"}
+                        border: 1px solid #fff3;
+                    }`)}
                     width={isHorizontal ? 250 : 150}
                     height={isHorizontal ? 65 : 150}
                     currentValue={currentStats.maxAddedTubeCount}
@@ -158,12 +175,19 @@ export function Statistics({
                     data={remoteStats?.maxAddedTubeCount ?? {}}
                 />
             </div>
-            <div className={css`&{ border: 1px solid #fff3; margin: 1px; padding: 2px; }`}>
+            <div className={css`&{ 
+                    margin: 1px; 
+                    padding: 2px; 
+                }`}>
                 <div className={css`&{height: 22px;}`}>
                     <CoinStack className={css`&{height: 100%}`} />
                     {currentStats.price} coins
                 </div>
                 <Chart
+                    className={cx(css`&{ 
+                        ${(isComplete && remoteStats) ? "" : "visibility: hidden;"}
+                        border: 1px solid #fff3; 
+                    }`)}
                     width={isHorizontal ? 250 : 150}
                     height={isHorizontal ? 65 : 150}
                     currentValue={currentStats.price}

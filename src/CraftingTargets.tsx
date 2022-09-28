@@ -69,7 +69,7 @@ function Tube({ revI, ...props }: {
                 border-bottom-right-radius: 9px;
             }`)}
         ><DoubleArrow style={{ margin: "0 -10px 0 -12px" }} /></button>}
-        {i > 0 && <div className={cx(css`& {
+        {(i > 1 || (i === 1 && craftingState.id !== "giveaway")) && <div className={cx(css`& {
             position: absolute;
             inset: 0;
             border-bottom-left-radius: 999px;
@@ -186,10 +186,10 @@ export function CraftingTargets({ style, className }: {
         {isHinted(0) && <div className={css`& {
             z-index: 1;
             position: absolute;
-            bottom: 12px;
-            left: 7px;
-            width: 20px;
-            height: 37px;
+            bottom: 17px;
+            left: 6px;
+            width: 21px;
+            height: 39px;
             border: 2px solid #ffffffa0;
             border-radius: 3px;
             animation: ${keyframes`
@@ -203,10 +203,10 @@ export function CraftingTargets({ style, className }: {
         {isHinted(1) && <div className={css`& {
             z-index: 1;
             position: absolute;
-            bottom: 56px;
-            left: 7px;
-            width: 20px;
-            height: 37px;
+            bottom: 62px;
+            left: 6px;
+            width: 21px;
+            height: 39px;
             border: 2px solid #ffffffa0;
             border-radius: 3px;
             animation: ${keyframes`
@@ -220,10 +220,10 @@ export function CraftingTargets({ style, className }: {
         {isHinted(2) && <div className={css`& {
             z-index: 1;
             position: absolute;
-            bottom: 101px;
-            left: 7px;
-            width: 20px;
-            height: 37px;
+            bottom: 111px;
+            left: 6px;
+            width: 21px;
+            height: 39px;
             border: 2px solid #ffffffa0;
             border-radius: 3px;
             animation: ${keyframes`

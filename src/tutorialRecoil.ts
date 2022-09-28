@@ -141,16 +141,6 @@ const tutorialMap = {
             return;
         }
 
-        if (tube.length > 0 && tubes.length === 1) {
-            yield hint.reset();
-            return;
-        }
-
-        if (tubes.length === 1) {
-            yield hint.addTube();
-            return;
-        }
-
         if (tube.length === 0) {
             yield hint.addIngredient(0);
             yield hint.reaction([0, 1]);
@@ -179,6 +169,58 @@ const tutorialMap = {
 
         if (tube.some((_, i) => tube[i] !== target[i])) {
             yield hint.reset();
+            return;
+        }
+
+        yield hint.addIngredient(target[tube.length], delay.medium);
+        yield hint.target(tube.length);
+    },
+    [problems[4].name]: function* ({ tubes, targets }: CraftingState) {
+        const tube = tubes[0];
+        const target = targets[0];
+
+        if (!target) {
+            yield hint.next(delay.long);
+            return;
+        }
+
+        if (tube.length === 0) {
+            yield hint.addIngredient(target[0], delay.medium);
+            yield hint.target(0);
+            return;
+        }
+
+        if (tube[0] !== 0) {
+            yield hint.reset();
+            return;
+        }
+
+        if (tube.length === 1) {
+            yield hint.addIngredient(0, delay.short);
+            yield hint.reaction([0, 1]);
+            yield hint.target(0);
+            return;
+        }
+        
+        if (tube[1] === 0) {
+            if (tube.length !== 2) {
+                yield hint.reset();
+                return;
+            }
+
+            yield hint.addIngredient(1, delay.short);
+            yield hint.reaction([0, 1]);
+            yield hint.target(0);
+            return;
+        }
+
+        if (tube[1] !== 3) {
+            yield hint.reset();
+            return;
+        }
+
+        if (tube.length === 3 && tube[2] === 2) {
+            yield hint.pourFromMainIntoSecondary();
             return;
         }
 

@@ -3,6 +3,7 @@ import { css, cx, keyframes } from "@emotion/css";
 import { useCraftingTransition } from "./solutionRecoil";
 import { PourFromMainIntoSecondaryButton } from "./PourFromMainIntoSecondaryButton";
 import { TubeSvg } from "./TubeSvg";
+import { actions } from "./puzzle/actions";
 
 
 export function CraftingTube({ style }: {
@@ -10,7 +11,8 @@ export function CraftingTube({ style }: {
 }) {
     const finalState = useCraftingTransition().state;
     const finalTube = finalState.tubes[0];
-    const isSecondaryAvailable = finalState.tubes.length > 1;
+
+    const canPour = actions.pourFromMainIntoSecondary().canAct(finalState);
 
     const craftingStateInTime = useCraftingTransition();
     const time = craftingStateInTime.currentTime;
@@ -45,9 +47,9 @@ export function CraftingTube({ style }: {
                     & {
                         transform-origin: bottom;
                         animation: ${keyframes`
-                            0% { transform: scale(1);  translate(0, 0)}
-                            100% { transform: scale(0.65) translate(-110px, -25px) ;}
-                        `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
+                            0% { scale: 1;  translate: 0, 0; }
+                            100% { scale: 0.65; translate: -87px -31px; }
+                        `} ${craftingState.duration}ms   ${craftingState.start - time}ms both linear;
                     }
                 `,
                 craftingState.id === 'act'
@@ -106,7 +108,7 @@ export function CraftingTube({ style }: {
             }}
             now={time}
         />
-        {isSecondaryAvailable && finalTube.length > 0 && <PourFromMainIntoSecondaryButton
+        {canPour && <PourFromMainIntoSecondaryButton
             style={{
                 position: "absolute",
                 left: "-10px",

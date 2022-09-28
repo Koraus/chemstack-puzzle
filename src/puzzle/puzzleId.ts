@@ -1,1 +1,1 @@
-export const puzzleId = "chemstack@1" as const;
+export const puzzleId = "chemstack@2" as const;

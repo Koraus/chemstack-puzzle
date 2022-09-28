@@ -46,7 +46,7 @@ export const actions = ({
                     price: {
                         $set:
                             state.stats.price
-                            + (isExtraTube ? 1 : 0),
+                            + (isExtraTube ? additionalTubes : 0),
                     },
                 }
             });
@@ -76,19 +76,31 @@ export const actions = ({
     pourFromMainIntoSecondary: () => ({
         canAct: (state: State): boolean =>
             !isSolved(state)
-            && state.tubes.length > 1
             && state.tubes[0].length > 0,
         act:
             (state: State): Spec<State> => {
-                return ({
-                    tubes: {
-                        0: { $splice: [[state.tubes[0].length - 1]] },
-                        1: { $push: [state.tubes[0][state.tubes[0].length - 1]] },
-                    },
-                    stats: {
-                        actionCount: { $set: state.stats.actionCount + 1 },
-                    }
-                });
+                const sidToPour = state.tubes[0][state.tubes[0].length - 1];
+                if (state.tubes.length > 1) {
+                    return ({
+                        tubes: {
+                            0: { $splice: [[state.tubes[0].length - 1]] },
+                            1: { $push: [sidToPour] },
+                        },
+                        stats: {
+                            actionCount: { $set: state.stats.actionCount + 1 },
+                        },
+                    });
+                } else {
+                    return ({
+                        tubes: {
+                            0: { $splice: [[state.tubes[0].length - 1]] },
+                        },
+                        stats: {
+                            actionCount: { $set: state.stats.actionCount + 1 },
+                            price: { $set: state.stats.price + sidToPour },
+                        }
+                    });
+                }
             },
     }),
 

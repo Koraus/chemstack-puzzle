@@ -51,28 +51,9 @@ export function CraftingTable() {
             <CraftingTargets style={{ flex: 1 }} />
         </div>
 
-        <div style={{ ...flex.rowS, flex: 1 }}>
+        <div style={{ ...flex.rowS, flex: 1, zIndex: 1, }}>
 
             <div style={{ flex: 3 }}>
-            </div>
-            <div style={{
-                flex: 5,
-                ...flex.rowS,
-                justifyContent: "space-between",
-            }}>
-                <button className={buttonCss}
-                    style={{
-                        ...flex.rowS,
-                        alignItems: "center",
-                        position: "absolute", left: "15%"
-                    }}
-                    disabled={tubes.length === 1}
-                    onClick={() => act({ action: "swapTubes", args: [] })}>
-                    <SwapHoriz style={{
-                        height: "33px",
-                        color: "gray",
-                    }} />
-                </button>
                 <button
                     className={buttonCss}
                     style={{
@@ -99,6 +80,24 @@ export function CraftingTable() {
                         backgroundColor: "#cccccc",
                         borderRadius: "0px 0px 999px 999px",
                     }}></div>
+                </button>
+            </div>
+            <div style={{
+                flex: 5,
+                ...flex.rowS,
+                justifyContent: "space-between",
+            }}>
+                <button className={buttonCss}
+                    style={{
+                        ...flex.rowS,
+                        width: 33,
+                    }}
+                    disabled={tubes.length === 1}
+                    onClick={() => act({ action: "swapTubes", args: [] })}>
+                    <SwapHoriz style={{
+                        height: "100%",
+                        margin: "0px -5px",
+                    }} />
                 </button>
                 <button
                     className={buttonCss}

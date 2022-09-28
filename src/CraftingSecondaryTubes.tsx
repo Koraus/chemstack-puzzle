@@ -154,9 +154,10 @@ export function CraftingSecondaryTubes({
                         }`,
                         craftingState.id === 'act'
                         && craftingState.diffCustom.action === "swapTubes"
+                        && i == 0
                         && css`& {
                         animation: ${keyframes`
-                                100% { transform: translate3d(${dx+7}px, ${dy+14}px, ${dz-15}px); }
+                                100% { transform: translate3d(${dx}px, ${dy}px, ${dz}px); }
                             `} ${duration}ms ${start - now}ms both linear;
                         }`,
                         craftingState.id === 'act'
