@@ -2,14 +2,18 @@ import { defineConfig } from "vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import BuildInfo from 'vite-plugin-info';
 import preact from "@preact/preset-vite";
-import svgr from 'vite-plugin-svgr';
-import { injectSlots, prefixIds } from "./svgr-utils";
 import { VitePWA } from 'vite-plugin-pwa';
 import { viteInlineLinkSvg } from "./vite-plugin-inlineLinkSvg";
 
 export default defineConfig({
     build: {
         // minify: false,
+    },
+    resolve: {
+        alias: {
+            'react': 'preact/compat',
+            'react-dom': 'preact/compat',
+        },
     },
     plugins: [
         preact({
@@ -19,33 +23,10 @@ export default defineConfig({
             },
         }),
         BuildInfo(),
-        svgr({
-            svgrOptions: {
-                template: (variables, { tpl }) => {
-                    const { jsx } = variables;
-                    injectSlots(jsx, tpl);
-                    prefixIds(jsx, tpl);
-
-                    // dafault template 
-                    // https://github.com/gregberge/svgr/blob/16664327ab3f039677c7651057e3538b2e1c5ae6/packages/babel-plugin-transform-svg-component/src/defaultTemplate.ts
-                    return tpl` 
-                        ${variables.imports};
-                        
-                        ${variables.interfaces};
-                        
-                        const ${variables.componentName} = (${variables.props}) => (
-                        ${variables.jsx}
-                        );
-                        
-                        ${variables.exports};
-                    `;
-                },
-            }
-        }),
         VitePWA({
             injectRegister: 'inline',
             workbox: {
-              globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+                globPatterns: ['**/*.{js,css,html,ico,png,svg}']
             },
             manifest: {
                 short_name: "ChemStack",

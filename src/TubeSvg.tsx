@@ -1,201 +1,242 @@
-import { SubstanceId } from "./puzzle/state";
-import { hexColorToRgb, rgbToHsl, substanceColors } from "./substanceColors";
-import { JSX } from "preact";
 import { css, cx, keyframes } from "@emotion/css";
-import { ReactComponent as TubeSvgRaw } from "./tube.svg";
+import { hexColorToRgb, rgbToHsl, substanceColors } from "./substanceColors";
+import svgSource from "./tube.svg?raw";
+import { JSX } from "preact";
+import { SubstanceId } from "./puzzle/state";
 import { StateTransition } from "./StateTransition";
-import { memo } from "preact/compat";
 import { Reaction } from "./puzzle/reactions";
+
+const svgEl = new DOMParser().parseFromString(svgSource, "text/html")
+    .body.firstElementChild as SVGSVGElement;
+
+const svgBox = {
+    x: svgEl.viewBox.baseVal.x,
+    y: svgEl.viewBox.baseVal.y,
+    width: svgEl.viewBox.baseVal.width,
+    height: svgEl.viewBox.baseVal.height
+};
+
+const percentStr = (x: number) => `${x * 100}%`;
+
+function select(
+    selector: string,
+    style: string = "/* _std */",
+    tap?: (svg: SVGSVGElement) => (() => unknown) | undefined | void
+) {
+    const styleEl = document.createElement("style");
+    styleEl.innerHTML = style
+        .replaceAll("/* _std */", /*css*/`* { visibility: hidden; } & * { visibility: visible; }`)
+        .replaceAll('&', selector);
+    const defs = svgEl.getElementsByTagName("defs")[0];
+    defs.appendChild(styleEl);
+    const untap = tap?.(svgEl);
+
+    document.body.appendChild(svgEl);
+    const bBox =
+        (svgEl.querySelector(selector)! as SVGGraphicsElement)
+            .getBBox();
+    document.body.removeChild(svgEl);
+    svgEl.setAttribute(
+        "viewBox",
+        `${bBox.x} ${bBox.y} ${bBox.width} ${bBox.height}`);
+
+    const s = svgEl.outerHTML;
+
+    defs.removeChild(styleEl);
+    untap?.();
+
+    return {
+        url: URL.createObjectURL(new Blob([s], { type: 'image/svg+xml' })),
+        box: {
+            x: bBox.x,
+            y: bBox.y,
+            width: bBox.width,
+            height: bBox.height,
+        },
+    }
+}
+
+const slotIndices = [0, 1, 2, 3, 4];
+const slotBoxes = slotIndices.map(i => select(`#slot${i}_content`).box);
 
 const secondaryColor = (hexColor: string) => {
     const { h, s, l } = rgbToHsl(hexColorToRgb(hexColor));
     return `hsl(${((h - 20) + 360) % 360}, ${s * 0.85}%, ${l * 0.85}%)`;
 }
 
-const slotIndices = [0, 1, 2, 3, 4];
+export const assets = {
+    box: svgBox,
+    foreground: select('#foreground'),
+    background: select('#background'),
+    backgroundSolid: select('#background', /*css*/`/* _std */& { opacity: 1; }`),
+    slots: {
+        boxes: slotBoxes,
+        empty: (() => {
+            const bottom = select(`#slot0_empty`, /*css*/ `/* _std */#slot0_add * { visibility: hidden; }`);
+            const regular = select(`#slot1_empty`, /*css*/ `/* _std */#slot1_add * { visibility: hidden; }`);
+            return Object.assign((i: number) => ({
+                url: (i === 0 ? bottom : regular).url,
+                box: slotBoxes[i],
+            }), { bottom, regular });
+        })(),
+        emptyAdd: (() => {
+            const bottom = select(`#slot0_empty`);
+            const regular = select(`#slot1_empty`);
+            return Object.assign((i: number) => ({
+                url: (i === 0 ? bottom : regular).url,
+                box: slotBoxes[i],
+            }), { bottom, regular });
+        })(),
+        content: (() => {
+            const s = (i: 0 | 1, sid: SubstanceId) => {
+                const color = substanceColors[sid];
+                return select(`#slot${i}_content`, /*css*/ `/* _std */
+                    #slot0_content_back1_gradient * {
+                        stop-color: ${color};
+                    }
+                    #slot${i}_content_back_gradient :nth-child(1) {
+                        stop-color: ${secondaryColor(color)};
+                    }
+                    #slot${i}_content_back_gradient :nth-child(2) {
+                        stop-color: ${color};
+                    }
+                    #slot${i}_number {
+                        font-family: 'Bahnschrift', sans-serif;
+                        text-anchor: middle;
+                        dominant-baseline: central;
+                        font-size: 76px;
+                        fill: white;
+                    }
+                `,
+                    svgEl => {
+                        const el = svgEl.querySelector(`#slot${i}_number`)!;
+                        const original = el.innerHTML;
+                        el.innerHTML = sid.toString();
+                        return () => el.innerHTML = original;
+                    }
+                );
+            };
+            const bottom = substanceColors.map((_, i) => s(0, i));
+            const regular = substanceColors.map((_, i) => s(1, i));
+            return Object.assign((i: number, sid: SubstanceId) => ({
+                url: (i === 0 ? bottom : regular)[sid].url,
+                box: slotBoxes[i],
+            }), { bottom, regular });
+        })(),
+    },
+};
 
-// the following bBoxes are generated by the script ran in console on live app
-// [0, 1, 2, 3, 4].map(i => {
-//     const id = `slot${i}_content_`;
-//     const rect = document.getElementById(id).getBBox();
-//     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-// })
-const bBoxes = [
-    { x: 72.625, y: 888.942, width: 62.346, height: 113.645 },
-    { x: 72.625, y: 763.060, width: 62.195, height: 113.710 },
-    { x: 72.625, y: 637.174, width: 62.195, height: 113.645 },
-    { x: 72.625, y: 511.301, width: 62.195, height: 113.645 },
-    { x: 72.625, y: 385.427, width: 62.195, height: 113.645 },
-];
+type Asset = typeof assets.background;
 
-const slotTransformOriginsCss = (svgIdPrefix: string) => slotIndices.map(i => {
-    const [x, y] = getBBoxCoords(bBoxes[i], [0.5, 1]);
-    return css`#${svgIdPrefix}_svg& .prev_slot${i}_content_, #${svgIdPrefix}_svg& .slot${i}_content_ { 
-        transform-origin: ${x}px ${y}px;
-    }`;
-});
-
-const textCss = (svgIdPrefix: string) => slotIndices.map(i => css`
-    #${svgIdPrefix}_svg& .prev_slot${i}_number, 
-    #${svgIdPrefix}_svg& .slot${i}_number {
-        font-family: 'Bahnschrift', sans-serif;
-        text-anchor: middle;
-        dominant-baseline: central;
-        font-size: 76px;
-        fill: white;
-    }
-`);
-
-function SlotGradients({ svgIdPrefix, i, prev }: {
-    svgIdPrefix: string, i: number, prev?: boolean
+function AssetImg({
+    asset: { box, url }, className, ...props
+}: JSX.IntrinsicElements["img"] & {
+    asset: Asset
 }) {
-    const _prev = prev ? "_prev" : "";
-    return <>
-        <linearGradient
-            id={`_${svgIdPrefix}${_prev}_slot${i}_content_back_gradient`}
-            href={`#${svgIdPrefix}_svg_slot${i}_content_back_gradient`}
-        >
-            <stop offset="0" stop-color="#ff4b33" />
-            <stop offset="1" stop-color="#ffab03" />
-        </linearGradient>
-        <radialGradient
-            id={`_${svgIdPrefix}${_prev}_slot${i}_content_back1_gradient`}
-            href={`#${svgIdPrefix}_svg_slot${i}_content_back1_gradient`}
-        >
-            <stop offset="0" stop-color="#ffab03" />
-            <stop offset=".08938" stop-color="#ffab03" stop-opacity=".86889" />
-            <stop offset=".28173" stop-color="#ffab03" stop-opacity=".60853" />
-            <stop offset=".46471" stop-color="#ffab03" stop-opacity=".39138" />
-            <stop offset=".63301" stop-color="#ffab03" stop-opacity=".22209" />
-            <stop offset=".78353" stop-color="#ffab03" stop-opacity=".10055" />
-            <stop offset=".91095" stop-color="#ffab03" stop-opacity=".02651" />
-            <stop offset="1" stop-color="#ffab03" stop-opacity="0" />
-        </radialGradient>
-    </>
+    return <img
+        className={cx(css({
+            position: "absolute",
+            width: percentStr(box.width / svgBox.width),
+            height: percentStr(box.height / svgBox.height),
+            left: percentStr(box.x / svgBox.width),
+            top: percentStr(box.y / svgBox.height),
+        }), className)}
+        src={url}
+        {...props}
+    ></img>
 }
 
-export function getBBoxCoords(
-    { x, y, width, height }: { x: number, y: number, width: number, height: number },
-    anchor: [number, number] = [0.5, 0.5],
-) {
-    return [x + width * anchor[0], y + height * anchor[1]] as [number, number];
-}
-
-const transparentTopCompansationCss = (svgIdPrefix: string) => css`#${svgIdPrefix}_svg& { 
-    margin-top: -562%; 
-    margin-bottom: -41%;
-    margin-left: -50%;
-    margin-right: -50%;
-}`;
-
-const prevCss = (count: number) => (svgIdPrefix: string) => slotIndices.map(i => css`
-    #${svgIdPrefix}_svg& .prev_slot${i}_content {
-        display: ${count <= i ? 'none' : 'unset'};
-    }
-    #${svgIdPrefix}_svg& .slot${i}_content {
-        display: none;
-    }
+const prevCss = slotIndices.map(i => css`
+    & .prev_slot${i}_content { visibility: unset; }
+    & .slot${i}_content { visibility: hidden; }
 `);
 
-const nextCss = (count: number) => (svgIdPrefix: string) => slotIndices.map(i => css`
-    #${svgIdPrefix}_svg& .prev_slot${i}_content {
-        display: none;
-    }
-    #${svgIdPrefix}_svg& .slot${i}_content {
-        display: ${count <= i ? 'none' : 'unset'};
-    }
+const nextCss = slotIndices.map(i => css`
+    & .prev_slot${i}_content { visibility: hidden; }
+    & .slot${i}_content { visibility: unset; }
 `);
 
-function pourDownAnimationCss({ i, now, start, duration, svgIdPrefix }: {
+function pourDownAnimationCss({ i, now, start, duration }: {
     i: number,
     now: number,
     start: number,
     duration: number,
-    svgIdPrefix: string,
 }) {
     return css`
-        #${svgIdPrefix}_svg& .slot${i}_content {
+        & .slot${i}_content {
+            transform-origin: 50% 100%;
             animation: ${keyframes`
-                0%, 30% { transform: translate(0, -400px); }
-                60% { transform: translate(0, 10px); }
-                100% { transform: translate(0, 0); }
+                0%, 30% { translate: 0 -300%; }
+                60% { translate: 0 8%; }
+                100% { translate: 0 0; }
 
                 0%, 30% { opacity: 0; }
                 45%, 100% { opacity: 1; }
-            `} ${duration}ms ${start - now}ms linear both;
-        }
-        #${svgIdPrefix}_svg& .slot${i}_content_ {
-            animation: ${keyframes`
-                0%, 60% { transform: scale(1, 1); }
-                70% { transform: scale(1.1, 0.8); }
-                88% { transform: scale(0.8, 1.3); }
-                100% { transform: scale(1, 1); }
+                
+                0%, 60% { scale: 1 1; }
+                70% { scale: 1.1 0.8; }
+                88% { scale: 0.8 1.3; }
+                100% { scale: 1 1; }
             `} ${duration}ms ${start - now}ms linear both;
         }
     `;
 }
 
-function pourUpAnimationCss({ i, now, start, duration, svgIdPrefix }: {
+function pourUpAnimationCss({ i, now, start, duration }: {
     i: number,
     now: number,
     start: number,
     duration: number,
-    svgIdPrefix: string,
 }) {
     return css`
-        #${svgIdPrefix}_svg& .prev_slot${i}_content {
+        & .prev_slot${i}_content {
+            transform-origin: 50% 100%;
             animation: ${keyframes`
-                0% { transform: translate(0, 0); }
-                50%, 100% { transform: translate(0, -400px); }
+                0% { translate: 0 0; }
+                50%, 100% { translate: 0 -300%; }
 
                 0%, 40% { opacity: 1; }
                 50%, 100% { opacity: 0; }
-            `} ${duration}ms ${start - now}ms linear both;
-        }
-        #${svgIdPrefix}_svg& .prev_slot${i}_content_ {
-            animation: ${keyframes`
-                0% { transform: scale(1, 1); }
-                10% { transform: scale(0.9, 1.05); }
-                50%, 100% { transform: scale(0.7, 1.2); }
+
+                0% { scale: 1 1; }
+                10% { scale: 0.9 1.05; }
+                50%, 100% { scale: 0.7 1.2; }
             `} ${duration}ms ${start - now}ms linear both;
         }
     `;
 }
-function cleanAnimationCss({ i, now, start, duration, svgIdPrefix }: {
+
+function cleanAnimationCss({ i, now, start, duration }: {
     i: number,
     now: number,
     start: number,
     duration: number,
-    svgIdPrefix: string,
 }) {
-    const [x, y] = getBBoxCoords(bBoxes[3], [0.5, 0.6]);
     return css`
-    #${svgIdPrefix}_svg& .prev_slot${i}_content_ {
-        transform-origin: ${x}px ${y}px;
-        animation: ${keyframes`
-            0% { transform: scale(1, 1); }
-            25% { transform: scale(1, 1); }
-            35% { transform: scale(0.5, 1); }
-            70% { transform: scale(1.5, 0.5); }
-            100% { transform: scale(2, 0); }
-        `} ${duration}ms ${start - now}ms linear both;
-    }
-    #${svgIdPrefix}_svg& .prev_slot${i}_number {
-        animation: ${keyframes`
-            0%, 22% { opacity: 1; }
-            25%, 100% { opacity: 0; }
-        `} ${duration}ms ${start - now}ms linear both;
-    }
+        & .prev_slot${i}_content {
+            transform-origin: 50% 60%;
+            animation: ${keyframes`
+                0% { scale: 1 1; }
+                25% { scale: 1 1; }
+                35% { scale: 0.5 1; }
+                70% { scale: 1.5 0.5; }
+                100% { scale: 2 0; }
+            `} ${duration}ms ${start - now}ms linear both;
+        }
+        & .prev_slot${i}_number {
+            animation: ${keyframes`
+                0%, 22% { opacity: 1; }
+                25%, 100% { opacity: 0; }
+            `} ${duration}ms ${start - now}ms linear both;
+        }
 `;
 }
-
 
 function reactAnimationCss({
     prevTube,
     tube,
     reaction,
     now, start, duration,
-    svgIdPrefix,
 }: {
     prevTube: SubstanceId[],
     tube: SubstanceId[],
@@ -203,26 +244,19 @@ function reactAnimationCss({
     now: number,
     start: number,
     duration: number,
-    svgIdPrefix: string,
 }) {
     return [
-        ...slotIndices.map(i => css`
-            #${svgIdPrefix}_svg& .prev_slot${i}_content {
-                display: ${prevTube.length <= i ? 'none' : 'unset'};
-            }
-            #${svgIdPrefix}_svg& .slot${i}_content {
-                display: ${tube.length <= i ? 'none' : 'unset'};
-            }
-        `),
+        ...prevTube.map((_, i) => css`& .prev_slot${i}_content { visibility: unset; }`),
+        ...tube.map((_, i) => css`& .slot${i}_content { visibility: unset; }`),
         ...reaction.reagents.map((_, i, arr) => css`
-            #${svgIdPrefix}_svg& .prev_slot${prevTube.length - arr.length + i}_content_ {
+            & .prev_slot${prevTube.length - arr.length + i}_content {
                 animation: ${keyframes`
                     0% { transform: scale(1); }
                     50%, 100% { transform: scale(0); }
                 `} ${duration}ms ${start - now}ms linear both;
             }`),
         ...reaction.products.map((_, i, arr) => css`
-            #${svgIdPrefix}_svg& .slot${tube.length - arr.length + i}_content_ {
+            & .slot${tube.length - arr.length + i}_content {
                 animation: ${keyframes`
                     0%, 50% { transform: scale(0); }
                     100% { transform: scale(1); }
@@ -230,108 +264,6 @@ function reactAnimationCss({
             }`),
     ]
 }
-
-function TubeSvgRawWithContent({ 
-    tube, prevTube, svgIdPrefix, noAdd, className, inactive
-}: {
-    tube: SubstanceId[];
-    prevTube: SubstanceId[];
-    svgIdPrefix: string;
-    noAdd: boolean;
-    inactive?: boolean;
-    className?: string;
-}) {
-    import.meta.env.DEV && console.log("inside TubeSvgRawWithContent", svgIdPrefix);
-    const tubeContentGradientsCss = slotIndices.map(i => {
-        const prevColor = substanceColors[prevTube[i]] ?? "#00000000";
-        const color = substanceColors[tube[i]] ?? "#00000000";
-        return css`
-            #_${svgIdPrefix}_prev_slot${i}_content_back1_gradient * {
-                stop-color: ${prevColor};
-            }
-            #_${svgIdPrefix}_prev_slot${i}_content_back_gradient :nth-child(1) {
-                stop-color: ${secondaryColor(prevColor)};
-            }
-            #_${svgIdPrefix}_prev_slot${i}_content_back_gradient :nth-child(2) {
-                stop-color: ${prevColor};
-            }
-
-            #_${svgIdPrefix}_slot${i}_content_back1_gradient * {
-                stop-color: ${color};
-            }
-            #_${svgIdPrefix}_slot${i}_content_back_gradient :nth-child(1) {
-                stop-color: ${secondaryColor(color)};
-            }
-            #_${svgIdPrefix}_slot${i}_content_back_gradient :nth-child(2) {
-                stop-color: ${color};
-            }
-        `;
-    });
-    const tubeContentCss = slotIndices.map(i => {
-        const isNext = tube.length === i;
-        return css`
-            #${svgIdPrefix}_svg& .prev_slot${i}_content_back {
-                fill: url(#_${svgIdPrefix}_prev_slot${i}_content_back_gradient);
-            }
-            #${svgIdPrefix}_svg& .prev_slot${i}_content_back1 {
-                fill: url(#_${svgIdPrefix}_prev_slot${i}_content_back1_gradient);
-            }
-
-            #${svgIdPrefix}_svg& .slot${i}_content_back {
-                fill: url(#_${svgIdPrefix}_slot${i}_content_back_gradient);
-            }
-            #${svgIdPrefix}_svg& .slot${i}_content_back1 {
-                fill: url(#_${svgIdPrefix}_slot${i}_content_back1_gradient);
-            }
-
-            #${svgIdPrefix}_svg& .slot${i}_add {
-                display: ${isNext ? "unset" : "none"};
-            }
-        `;
-    });
-    const tubeContentSlots = Object.fromEntries(slotIndices.flatMap(i => [
-        [`prev_slot${i}_number`, prevTube[i]],
-        [`slot${i}_number`, tube[i]],
-    ]));
-
-    return <>
-        <TubeSvgRaw
-            id={svgIdPrefix + "_svg"}
-            className={cx(
-                slotTransformOriginsCss(svgIdPrefix),
-                textCss(svgIdPrefix),
-                transparentTopCompansationCss(svgIdPrefix),
-                tubeContentCss,
-                noAdd && slotIndices.map(i => css`#${svgIdPrefix}_svg& .slot${i}_add { display: none; }`),
-                inactive && css`
-                    #${svgIdPrefix}_svg& .background { opacity: 1; }
-                    #${svgIdPrefix}_svg& .foreground { opacity: 0; }
-                `,
-                prevCss(prevTube.length)(svgIdPrefix),
-                className,
-            )}
-            slots={{
-                ...tubeContentSlots,
-            }} />
-        <svg className={cx(
-            tubeContentGradientsCss,
-            css`& {
-            position: absolute; 
-            height: 0;
-        }`,
-        )}>
-            <defs>
-                {slotIndices.map(i => <>
-                    <SlotGradients svgIdPrefix={svgIdPrefix} i={i} prev />
-                    <SlotGradients svgIdPrefix={svgIdPrefix} i={i} />
-                </>)}
-            </defs>
-        </svg>
-    </>
-}
-
-const MemoedTubeSvgRawWithContent = memo(TubeSvgRawWithContent);
-
 
 export function TubeSvg({
     tubeTransition: {
@@ -342,7 +274,8 @@ export function TubeSvg({
         start,
     },
     now,
-    noBorder,
+    noBorder: noAdd,
+    inactive,
     svgIdPrefix,
     ...props
 }: {
@@ -358,40 +291,68 @@ export function TubeSvg({
     className?: string;
     style?: JSX.CSSProperties;
 }) {
-    return <MemoedTubeSvgRawWithContent
-        {...props}
-        prevTube={prevTube}
-        tube={tube}
-        svgIdPrefix={svgIdPrefix}
-        noAdd={noBorder ?? false}
-        className={cx(
-            "next" === desc.id && nextCss(tube.length)(svgIdPrefix),
+    // import.meta.env.DEV && console.log("inside TubeSvg", svgIdPrefix);
+    const { width: bw, height: bh, x: bx, y: by } = assets.background.box;
+    return <div className={cx(
+        css({
+            position: "relative",
+            aspectRatio: `${bw} / ${bh}`,
+        }),
+        props.className,
+    )}>
+        <div className={cx(
+            css({
+                position: "absolute",
+                width: percentStr(svgBox.width / bw),
+                height: percentStr(svgBox.height / bh),
+                left: percentStr(-bx / bw),
+                top: percentStr(-by / bh),
+            }),
+            prevCss,
+            "next" === desc.id && nextCss,
             "pourDown" === desc.id && [
-                nextCss(tube.length)(svgIdPrefix),
+                nextCss,
                 pourDownAnimationCss({
                     i: tube.length - 1,
                     duration, start, now,
-                    svgIdPrefix,
                 })],
             "pourUp" === desc.id && [
                 pourUpAnimationCss({
                     i: prevTube.length - 1,
                     duration, start, now,
-                    svgIdPrefix,
                 })],
             "clean" === desc.id
             && prevTube.length !== tube.length
-            && [3, 4].map(i => cleanAnimationCss({ 
-                i, duration, start, now ,
-                svgIdPrefix,
+            && [3, 4].map(i => cleanAnimationCss({
+                i, duration, start, now,
             })),
             "react" === desc.id && reactAnimationCss({
                 tube,
                 prevTube,
                 reaction: desc.reaction,
                 duration, start, now,
-                svgIdPrefix,
             }),
-            props.className)}
-    />;
+        )}>
+            <AssetImg asset={assets[inactive ? "backgroundSolid" : "background"]} />
+
+            {[0, 1, 2].map(i => {
+                const _noAdd = (noAdd || (i !== tube.length));
+                return _noAdd && <AssetImg asset={assets.slots.empty(i)} />;
+            })}
+
+            {!noAdd && tube.length <= 3 && <AssetImg asset={assets.slots.emptyAdd(tube.length)} />}
+
+            {prevTube.map((sid, i) => <AssetImg
+                className={`prev_slot${i}_content`}
+                asset={assets.slots.content(i, sid)}
+            />)}
+
+            {tube.map((sid, i) => <AssetImg
+                className={`slot${i}_content`}
+                asset={assets.slots.content(i, sid)}
+            />)}
+
+            {!inactive && <AssetImg asset={assets.foreground} />}
+        </div>
+    </div>
 }

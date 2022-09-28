@@ -22,23 +22,17 @@
 	touch-action: manipulation;
 ">
 	<script type="module">
-		import { getOriginCoords } from "./src/utils/misc";
-		if (import.meta.env.DEV) {
-			Object.assign(window, {
-				getOriginCoords,
-			});
-		}
-	</script>
-	<script type="module">
 		import { render, h } from "preact";
-		import { options } from "preact";
 		import { RecoilRoot } from 'recoil';
 
 		import { App } from "./src/App";
-		const Component = App;
 
-		// const name = document.location.pathname.substring(1) || "App";
-		// const Component = (await import("./src/" + name))[name];
+		const name = document.location.pathname.substring(1) || "App";
+
+		const Component =
+			import.meta.env.DEV
+				? (await import("./src/" + name))[name]
+				: App;
 
 		render(
 			h(RecoilRoot, {},
