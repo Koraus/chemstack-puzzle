@@ -25,7 +25,7 @@ function select(
 ) {
     const styleEl = document.createElement("style");
     styleEl.innerHTML = style
-        .replaceAll("/* _std */", /*css*/`* { visibility: hidden; } & * { visibility: visible; }`)
+        .replaceAll("/* _std */", /*css*/`svg * { visibility: hidden; } & * { visibility: visible; }`)
         .replaceAll('&', selector);
     const defs = svgEl.getElementsByTagName("defs")[0];
     defs.appendChild(styleEl);
