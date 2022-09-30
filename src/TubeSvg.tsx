@@ -82,10 +82,12 @@ export const assets = {
         emptyAdd: (() => {
             const bottom = select(`#slot0_empty`);
             const regular = select(`#slot1_empty`);
-            return Object.assign((i: number) => ({
-                url: (i === 0 ? bottom : regular).url,
-                box: slotBoxes[i],
-            }), { bottom, regular });
+            const top = select(`#slot1_empty`, /*css*/ `/* _std */
+                #slot1_empty * { visibility: hidden; }
+                #slot1_add * { visibility: visible; }
+            `);
+            return [bottom, regular, regular, top, top]
+                .map(({ url }, i) => ({ url, box: slotBoxes[i] }));
         })(),
         content: (() => {
             const s = (i: 0 | 1, sid: SubstanceId) => {
@@ -265,6 +267,33 @@ function reactAnimationCss({
     ]
 }
 
+function giveawayAnimationCss({
+    prevTube,
+    tube,
+    now, start, duration,
+}: {
+    prevTube: SubstanceId[],
+    tube: SubstanceId[],
+    now: number,
+    start: number,
+    duration: number,
+}) {
+    return [
+        ...prevTube.map((_, i) => css`& .prev_slot${i}_content { 
+            animation: ${keyframes`
+                0% { visibility: visible; }
+                67%, 100% { visibility: hidden; }
+            `} ${duration}ms ${start - now}ms linear both;
+        }`),
+        ...tube.map((_, i) => css`& .slot${i}_content { 
+            animation: ${keyframes`
+                0% { visibility: hidden; }
+                67%, 100% { visibility: visible; }
+            `} ${duration}ms ${start - now}ms linear both;
+        }`),
+    ]
+}
+
 export function TubeSvg({
     tubeTransition: {
         prevState: prevTube,
@@ -281,7 +310,7 @@ export function TubeSvg({
 }: {
     tubeTransition: StateTransition<
         SubstanceId[],
-        { id: "next" | "prev" | "pourDown" | "pourUp" | "clean" }
+        { id: "next" | "prev" | "pourDown" | "pourUp" | "clean" | "giveaway" }
         | { id: "react", reaction: Reaction }
     >;
     now: number;
@@ -332,6 +361,11 @@ export function TubeSvg({
                 reaction: desc.reaction,
                 duration, start, now,
             }),
+            "giveaway" === desc.id && giveawayAnimationCss({
+                tube,
+                prevTube,
+                duration, start, now,
+            }),
         )}>
             <AssetImg asset={assets[inactive ? "backgroundSolid" : "background"]} />
 
@@ -340,7 +374,10 @@ export function TubeSvg({
                 return _noAdd && <AssetImg asset={assets.slots.empty(i)} />;
             })}
 
-            {!noAdd && tube.length <= 3 && <AssetImg asset={assets.slots.emptyAdd(tube.length)} />}
+            {!noAdd && tube.length <= 3 && <AssetImg
+                key={tube.length} // fixes flickering
+                asset={assets.slots.emptyAdd[tube.length]}
+            />}
 
             {prevTube.map((sid, i) => <AssetImg
                 className={`prev_slot${i}_content`}

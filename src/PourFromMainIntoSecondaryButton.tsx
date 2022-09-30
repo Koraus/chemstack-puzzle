@@ -38,7 +38,7 @@ export function PourFromMainIntoSecondaryButton({ style, className }: {
         <ArrowLeft style={{ height: 80, margin: -20 }} />
         {(isHinted && isCraftingIdle) && <TouchAppAnimation className={css`& {
             position: absolute;
-            transform: translate(12px, 22px);
+            transform: translate3d(12px, 22px, 0.1px);
         }`} />}
     </button>;
 }

@@ -163,12 +163,12 @@ export function CraftingTargets({ style, className }: {
                         && i === 0
                         && css`& {
                             animation: ${keyframes`
-                                0%, 3 { transform: translateY(0); }
-                                10% { transform: translateY(-12%); }
-                                15%, 58% { transform: translateY(-10%); opacity: 1; }
-                                60% { transform: translateY(-8%); }
-                                62% { transform: translateY(-10%); }
-                                100% { transform: translateY(-25%); opacity: 0; }
+                                0%, 2% { transform: translateY(0); }
+                                7% { transform: translateY(-12%); }
+                                10%, 39% { transform: translateY(-10%); opacity: 1; }
+                                40% { transform: translateY(-8%); }
+                                41% { transform: translateY(-10%); }
+                                66%, 100% { transform: translateY(-25%); opacity: 0; }
                             `} ${duration}ms ${start - now}ms both linear;
                         }`,
                     )}
@@ -183,7 +183,7 @@ export function CraftingTargets({ style, className }: {
                 }`}
                 startTime={start + (hintNext.delay ?? 0)}
             />}
-        {isHinted(0) && <div className={css`& {
+        {craftingState.id === "idle" && isHinted(0) && <div className={css`& {
             z-index: 1;
             position: absolute;
             bottom: 17px;
@@ -200,7 +200,7 @@ export function CraftingTargets({ style, className }: {
                 # ${now}
             `} 1300ms ${-now}ms infinite both linear;
         }`}></div>}
-        {isHinted(1) && <div className={css`& {
+        {craftingState.id === "idle" && isHinted(1) && <div className={css`& {
             z-index: 1;
             position: absolute;
             bottom: 62px;
@@ -217,7 +217,7 @@ export function CraftingTargets({ style, className }: {
                 # ${now}
             `} 1300ms ${-now}ms infinite both linear;
         }`}></div>}
-        {isHinted(2) && <div className={css`& {
+        {craftingState.id === "idle" && isHinted(2) && <div className={css`& {
             z-index: 1;
             position: absolute;
             bottom: 111px;

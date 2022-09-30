@@ -68,13 +68,22 @@ export function CraftingTube({ style }: {
                 && css`
                     & {
                         transform-origin: bottom;
-                        animation: ${keyframes`
-                            0%, 3 { transform: translateY(0); }
-                            10% { transform: translateY(-6%); }
-                            15%, 58% { transform: translateY(-5%); opacity: 1; }
-                            60% { transform: translateY(-4%); }
-                            62% { transform: translateY(-5%); }
-                            100% { transform: translateY(-25%); opacity: 0; }
+                        animation: ${keyframes/*css*/`
+                            0%, 2% { transform: translateY(0); }
+                            7% { transform: translateY(-6%); }
+                            10%, 39% { transform: translateY(-5%); opacity: 1; }
+                            40% { transform: translateY(-4%); }
+                            41% { transform: translateY(-5%); }
+                            66% { transform: translateY(-25%); opacity: 0; }
+                            ${craftingState.prevState.tubes.length === 1 
+                                ? /*css*/`
+                                    67% { transform: scale(0); opacity: 0; }
+                                    70% { transform: scale(0); opacity: 1; }
+                                    100% { transform: scale(1); }
+                                `: /*css*/`
+                                    100% { transform: translateY(-25%); opacity: 0; }
+                                `
+                            }
                         `} ${craftingState.duration}ms ${craftingState.start - time}ms both linear;
                         } 
                     `,
@@ -101,7 +110,7 @@ export function CraftingTube({ style }: {
                         return { id: "clean" };
                     }
                     if (craftingState.id === "giveaway") {
-                        return { id: "prev" };
+                        return { id: "giveaway" };
                     }
                     return { id: "prev" };
                 })(),

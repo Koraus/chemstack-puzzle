@@ -23,13 +23,17 @@ export function App() {
         <CraftingTable />
     </>, []);
 
-    return <div className={cx(css`& {
-        font-family: 'Bahnschrift', sans-serif;
-        display: flex;
-        position: fixed;
-        inset: 0;
-        overflow: auto;
-    }`)}>
+    return <div className={cx(
+        css`& {
+            font-family: 'Bahnschrift', sans-serif;
+            display: flex;
+            position: fixed;
+            inset: 0;
+            overflow: auto;
+        }
+        `,
+        css`&::-webkit-scrollbar { height: 0px; }`
+    )}>
         <div className={cx(css`& {
             flex-grow: 1;
             max-width: ${isLandscape ? landscapeWidth : portraitWidth}px;

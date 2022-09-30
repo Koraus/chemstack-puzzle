@@ -12,7 +12,7 @@ type CSSProperties = import("preact").JSX.CSSProperties;
 
 export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
     const problem = useRecoilValue(solutionRecoil).problem;
-    const reactions =  getProblemReactions(problem);
+    const reactions = getProblemReactions(problem);
 
     const craftingStateInTime = useCraftingTransition();
     const { tubes } = craftingStateInTime.currentState.state;
@@ -56,7 +56,7 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
                 <IngredientSlot sid={reaction.products[1]} />
                 <IngredientSlot sid={reaction.products[0]} />
                 <KeyboardArrowUp className={css`& {
-                    color: ${ isPending ? "yellow" : isApplicable ? "white" : "#ffffff30"};
+                    color: ${isPending ? "yellow" : isApplicable ? "white" : "#ffffff30"};
                     font-size: 19px;
                     height: 18px;
                 }`} />
@@ -90,17 +90,30 @@ export function ReactionsLibrary({ style }: { style?: CSSProperties }) {
         </div>;
     }
 
-    return <div style={{
-        ...flex.rowS,
-        justifyContent: "center",
-        padding: "0px 3px",
-        ...style,
-    }}><div style={{
-        ...flex.rowS,
-        padding: "24px 0px 20px",
-        overflowX: "scroll",
-        userSelect: "none",
-    }}>
+    return <div
+        style={{
+            ...flex.rowS,
+            justifyContent: "center",
+            padding: "0px 3px",
+            zIndex: 1,
+            ...style,
+        }}
+    ><div
+        className={cx(css`
+            &::-webkit-scrollbar { height: 7px; }
+            &::-webkit-scrollbar-track { background: #0005; }
+            &::-webkit-scrollbar-thumb { background: #666; }
+            &::-webkit-scrollbar-thumb:hover { background: #999; }
+            &::-webkit-scrollbar-button:single-button { background: transparent; width: 7px; }
+            &::-webkit-scrollbar-button:single-button:hover { background: #777; }
+        `)}
+        style={{
+            ...flex.rowS,
+            padding: "24px 0px 10px",
+            overflowX: "scroll",
+            userSelect: "none",
+        }}
+    >
             {reactions.map(r => <Reaction reaction={r} />)}
         </div></div>;
 }
