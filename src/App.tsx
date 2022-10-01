@@ -14,6 +14,7 @@ import { useMemo } from "preact/hooks";
 import { WinFireworks } from "./WinFireworks";
 import { Statistics } from "./Statistics";
 import { landscapeWidth, portraitWidth, useIsLandscapeValue, useOrientationEffect } from "./orientation";
+import { appVersion } from "./appVersion";
 
 export function App() {
     useOrientationEffect();
@@ -22,6 +23,15 @@ export function App() {
         <ReactionsLibrary />
         <CraftingTable />
     </>, []);
+
+    const version = <div className={css({
+        color: "#ffffff24", 
+        whiteSpace: "nowrap",
+        textAlign: isLandscape ? "left" : "center",
+    })}>
+        <span className={css({ fontSize: "16px", })} >{appVersion.split("+")[0]}</span>
+        <span className={css({ fontSize: "10px", })} >+{appVersion.split("+")[1]}</span>
+    </div>;
 
     return <div className={cx(
         css`& {
@@ -52,10 +62,11 @@ export function App() {
                     css`& { width: ${(1 - portraitWidth / landscapeWidth) / 2 * 100}%; }`,
                     flex.col,
                 )}>
-                    <div className={cx(flex.row, css`& { padding: 14px 0 10px 0; }`)} >
+                    <div className={cx(flex.row, css`& { flex-grow: 999; padding: 14px 0 10px 0; }`)} >
                         <LevelListHeaderButton className={css`& { flex: 1; }`} />
                         <HeaderTitle isHorizontal className={css`& { flex-grow: 999; }`} />
                     </div>
+                    {version}
                 </div>
 
                 <div className={cx(
@@ -89,6 +100,8 @@ export function App() {
                 <Statistics />
 
                 <Footer />
+
+                {version}
             </div>}
 
             <WinEffect />
