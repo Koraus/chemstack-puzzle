@@ -11,7 +11,7 @@ export function WinFireworks({
     style?: JSX.CSSProperties;
 }) {
     const { isSolved } = useCraftingTransition().currentState.state;
-    return <>{true && <div
+    return <>{isSolved && <div
         className={cx(css`& { pointer-events: none; }`, className)}
         {...props}
     >
