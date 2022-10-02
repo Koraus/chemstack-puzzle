@@ -281,13 +281,13 @@ function giveawayAnimationCss({
     return [
         ...prevTube.map((_, i) => css`& .prev_slot${i}_content { 
             animation: ${keyframes`
-                0% { visibility: visible; }
+                0%, 66% { visibility: visible; }
                 67%, 100% { visibility: hidden; }
             `} ${duration}ms ${start - now}ms linear both;
         }`),
         ...tube.map((_, i) => css`& .slot${i}_content { 
             animation: ${keyframes`
-                0% { visibility: hidden; }
+                0%, 66% { visibility: hidden; }
                 67%, 100% { visibility: visible; }
             `} ${duration}ms ${start - now}ms linear both;
         }`),
