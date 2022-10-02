@@ -12,6 +12,9 @@ import update, { Spec } from "immutability-helper";
 import { getProblemCmp } from "./puzzle/problem";
 import { postSolution } from "./statsClient";
 import { _throw } from "./puzzle/_throw";
+import memoize from "memoizee";
+
+const _getProblemCmp = memoize(getProblemCmp, { max: 1000 });
 
 const localStorageAtomEffect = <T, U>({ key, select, unselect }: {
     key?: string | ((key: string) => string),
@@ -55,6 +58,7 @@ export const solutionRecoil = atom({
             unselect: (x) => ({
                 ...solutionRecoilDefault,
                 ...x,
+                problem: firstNotSolvedProblem(x.knownSolutions)
             }),
         }),
         ({ onSet }) => { // analytics effect
@@ -131,7 +135,26 @@ export const solutionRecoil = atom({
             });
 
             () => handles.map(clearTimeout);
-        }
+        },
+        ({ onSet }) => { // win effect
+            onSet(async (nextValue, prevValue) => {
+                if (nextValue instanceof DefaultValue) { return; }
+
+                const prevIsSolved =
+                    !(prevValue instanceof DefaultValue)
+                    && isSolved(evaluate(prevValue).state);
+                const nextIsSolved = isSolved(evaluate(nextValue).state);
+
+                const isSolvedChanged = prevIsSolved !== nextIsSolved;
+
+                if (nextIsSolved && isSolvedChanged) {
+                    // legacy log
+                    amplitude.track("isWin", nextValue.problem);
+
+                    amplitude.track(`problem solved`, nextValue.problem);
+                }
+            });
+        },
     ]
 });
 
@@ -154,6 +177,21 @@ export const useSetNextProblem = () => {
     }
     const nextLevelIndex = (currentLevelIndex + 1) % problems.length;
     return () => setProblem(problems[nextLevelIndex]);
+}
+
+export const firstNotSolvedProblem = (knownSolutions: Record<string, Solution>) => {
+    const knownSovledProblemCmps =
+        new Set(Object.values(knownSolutions).map(s => _getProblemCmp(s.problem)));
+    const firstNotSolvedProblem =
+        problems.find(p => !knownSovledProblemCmps.has(_getProblemCmp(p)))
+        ?? problems[0];
+    return firstNotSolvedProblem;
+}
+
+export const useSetHighestProblem = () => {
+    const { knownSolutions } = useRecoilValue(solutionRecoil);
+    const setProblem = useSetProblem();
+    return () => setProblem(firstNotSolvedProblem(knownSolutions));
 }
 
 export const useCraftingAct = () => {

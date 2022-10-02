@@ -2,10 +2,8 @@ import "./initAnalytics";
 
 import { css, cx } from "@emotion/css";
 import { CraftingTable } from "./CraftingTable";
-import { WinEffect } from "./Win";
 import { ReactionsLibrary } from "./ReactionsLibrary";
 import * as flex from "./utils/flex";
-import { LoadHighestLevelEffect } from "./LevelList";
 import { LevelListHeaderButton } from './LevelListHeaderButton';
 import { ResetLevelHeaderButton } from './ResetLevelHeaderButton';
 import { HeaderTitle } from './HeaderTitle';
@@ -103,9 +101,6 @@ export function App() {
 
                 {version}
             </div>}
-
-            <WinEffect />
-            <LoadHighestLevelEffect />
         </div>
     </div>
 }

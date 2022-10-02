@@ -1,6 +1,4 @@
-import { atom, useRecoilTransaction_UNSTABLE, useRecoilValue } from "recoil";
-import { apipe } from "./utils/apipe";
-import * as it from "./utils/it";
+import { useRecoilValue, useResetRecoilState } from "recoil";
 import { useEffect, useRef } from "preact/hooks";
 import { problems } from "./puzzle/problems";
 import { buttonCss } from "./buttonCss";
@@ -20,53 +18,9 @@ import { evaluate } from "./puzzle/evaluate";
 import { Solution } from "./puzzle/solution";
 import { StatsData, StatsKey } from "./statsClient";
 
-export const gameProgressState = atom({
-    key: "gameProgress",
-    default: {} as Record<string, boolean>,
-    effects: [({ node, setSelf, onSet }) => {
-        const key = node.key;
-        const savedValue = localStorage.getItem(key)
-        if (savedValue != null) {
-            const __DEBUG_setAllLevels = false && import.meta.env.DEV;
-
-            if (__DEBUG_setAllLevels) {
-                setSelf(Object.fromEntries(apipe(problems,
-                    it.map(p => [p.name, true] as const),
-                )));
-            } else {
-                setSelf(JSON.parse(savedValue));
-            }
-        }
-
-        onSet((newValue, _, isReset) => {
-            isReset
-                ? localStorage.removeItem(key)
-                : localStorage.setItem(key, JSON.stringify(newValue));
-        });
-    }],
-});
-
-
-export function LoadHighestLevelEffect() {
-    const gameProgress = useRecoilValue(gameProgressState);
-    const setLevelPreset = useSetProblem();
-
-    useEffect(() => {
-        const highestProgressedIndex = Object.keys(gameProgress)
-            .map(name => problems.findIndex(x => x.name === name))
-            .sort((a, b) => b - a)[0] ?? -1;
-        setLevelPreset(problems[Math.min(
-            highestProgressedIndex + 1,
-            problems.length - 1)]);
-    }, []);
-
-    return <></>;
-}
-
 const _getProblemCmp = memoize(getProblemCmp, { max: 1000 });
 
 export function LevelList({ style }: { style?: CSSProperties }) {
-    const gameProgress = useRecoilValue(gameProgressState);
     const {
         problem: currentProblem,
         knownSolutions,
@@ -74,10 +28,7 @@ export function LevelList({ style }: { style?: CSSProperties }) {
     } = useRecoilValue(solutionRecoil);
 
     const setLevelPreset = useSetProblem();
-    const resetLevelProgress = useRecoilTransaction_UNSTABLE(({ get, set, reset }) => () => {
-        reset(solutionRecoil);
-        set(gameProgressState, {});
-    });
+    const resetLevelProgress = useResetRecoilState(solutionRecoil);
 
     const scrollToRef = useRef<HTMLAnchorElement>(null);
     useEffect(
@@ -92,14 +43,22 @@ export function LevelList({ style }: { style?: CSSProperties }) {
         const entryProblemId = _getProblemCmp(levelPreset);
         const currentProblemId = _getProblemCmp(currentProblem);
 
-        const levelPresetIndex = problems.findIndex(x => entryProblemId === _getProblemCmp(x));
-        const isOpen =
-            levelPresetIndex === 0
-            || (levelPresetIndex > 0 && (problems[levelPresetIndex - 1].name in gameProgress));
-
         const isCurrent = entryProblemId === currentProblemId;
         const isComplete = Object.values(knownSolutions)
             .some(s => _getProblemCmp(s.problem) === entryProblemId);
+
+        const isOpen = (() => {
+            const levelPresetIndex =
+                problems.findIndex(x => entryProblemId === _getProblemCmp(x));
+            if (levelPresetIndex === 0) { return true; }
+
+            const prevProblemId = _getProblemCmp(problems[levelPresetIndex - 1]);
+            const isPrevComplete = Object.values(knownSolutions)
+                .some(s => _getProblemCmp(s.problem) === prevProblemId);
+            return isPrevComplete;
+        })();
+
+
 
         const entryConfirmedSolutions = Object.entries(confirmedSolutions)
             .map(([solutionId, response]) => tuple(knownSolutions[solutionId], response))
