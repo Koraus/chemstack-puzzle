@@ -62,8 +62,8 @@ export function CraftingTable() {
                     disabled={tubes.length === 1}
                     onClick={() => act({ action: "swapTubes", args: [] })}>
                     <SwapHoriz style={{
-                        height: "100%",
-                        margin: "0px -5px",
+                        height: "32px",
+                        margin: "0px -4px",
                     }} />
                 </button>
             </div>
