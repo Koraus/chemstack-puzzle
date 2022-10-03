@@ -35,7 +35,7 @@ const createEffect = ({
     createParticleView = () => {
         const el = document.createElement('div');
         el.style.position = "absolute";
-        el.style.width = "0.7vmax";
+        el.style.width = "5px";
         el.style.aspectRatio = "1 / 1";
         el.style.borderRadius = "50%";
         return el;
