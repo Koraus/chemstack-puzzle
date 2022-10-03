@@ -32,6 +32,7 @@ const biuldTimeStr = ((date: Date) => {
     return relYearStr + monthStr + dayStr + fractionOfDayStr;
 })(buildTime);
 
-export const appVersion = `0.3.0-rc.1+${biuldTimeStr}-${buildGitRevSha}`
+export const appVersion = "1.0.0"
+    + `+${biuldTimeStr}-${buildGitRevSha}`
     + (import.meta.env.PROD ? "" : ("-" + import.meta.env.MODE));
 console.log("appVersion", appVersion);
