@@ -48,8 +48,14 @@ export default defineConfig({
                         src: './android-chrome-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
-                        purpose: 'any maskable'
-                    }
+                        purpose: 'any'
+                    },
+                    {
+                        src: './android-chrome-512x512-maskable.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable'
+                    },
                 ],
             }
         }),
