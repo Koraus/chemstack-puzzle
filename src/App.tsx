@@ -13,6 +13,10 @@ import { WinFireworks } from "./WinFireworks";
 import { Statistics } from "./Statistics";
 import { landscapeWidth, portraitWidth, useIsLandscapeValue, useOrientationEffect } from "./orientation";
 import { appVersion } from "./appVersion";
+import { Cursor } from "./Cursor";
+
+const searchParams = new URLSearchParams(location.search);
+const cursor = searchParams.has("cursor");
 
 export function App() {
     useOrientationEffect();
@@ -23,7 +27,7 @@ export function App() {
     </>, []);
 
     const version = <div className={css({
-        color: "#ffffff24", 
+        color: "#ffffff24",
         whiteSpace: "nowrap",
         textAlign: isLandscape ? "left" : "center",
     })}>
@@ -42,6 +46,8 @@ export function App() {
         `,
         css`&::-webkit-scrollbar { height: 0px; }`
     )}>
+        {cursor && <Cursor />}
+
         <div className={cx(css`& {
             flex-grow: 1;
             max-width: ${isLandscape ? landscapeWidth : portraitWidth}px;
